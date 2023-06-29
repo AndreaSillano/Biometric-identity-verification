@@ -37,10 +37,11 @@ def load(name):
     
     numpyArr = numpy.array(Dlist, dtype=float)
     #numpyFlowers = numpyArr.reshape((150,4))
-    #finalFlowers = numpyFlowers.transpose()
+    #finalArray = numpyArr.transpose()
     #print(numpyArr,"\n\n########\n\n")
     labelpy = numpy.array(listLabel, dtype=int)
     #print(labelpy)
+
 
     return (numpyArr, labelpy)
 
