@@ -36,7 +36,7 @@ def load(name):
         listLabel.append(label)
     
     numpyArr = numpy.array(Dlist, dtype=float)
-    #numpyFlowers = numpyArr.reshape((150,4))
+    numpyArr = numpyArr.reshape((len(Dlist),10))
     #finalArray = numpyArr.transpose()
     #print(numpyArr,"\n\n########\n\n")
     labelpy = numpy.array(listLabel, dtype=int)
