@@ -1,5 +1,6 @@
 import numpy as numpy
 import matplotlib.pyplot as plt
+import matplotlib
 import math
 
 def vcol(vett):
@@ -34,12 +35,12 @@ def load(name):
         Dlist.append(singleLine)
         listLabel.append(label)
     
-    numpyArr = numpy.array([[Dlist]], dtype=float)
+    numpyArr = numpy.array(Dlist, dtype=float)
     #numpyFlowers = numpyArr.reshape((150,4))
     #finalFlowers = numpyFlowers.transpose()
-    print(numpyArr,"\n\n########\n\n")
-    labelpy = numpy.array(listLabel)
-    print(labelpy)
+    #print(numpyArr,"\n\n########\n\n")
+    labelpy = numpy.array(listLabel, dtype=int)
+    #print(labelpy)
 
     return (numpyArr, labelpy)
 
@@ -53,3 +54,4 @@ def randomize(D, L, seed=0):
     LTR = L[idxTrain]
     
     return DTR, LTR
+
