@@ -31,17 +31,14 @@ def load(name):
         line = row.rstrip().split(",")
         singleLine = line[0:10]
         label = line[-1]
-        
         Dlist.append(singleLine)
         listLabel.append(label)
     
     numpyArr = numpy.array(Dlist, dtype=float)
-    numpyArr = numpyArr.reshape((len(Dlist),10))
+    #numpyArr = numpyArr.reshape((len(Dlist),10))
     #finalArray = numpyArr.transpose()
     #print(numpyArr,"\n\n########\n\n")
     labelpy = numpy.array(listLabel, dtype=int)
-    #print(labelpy)
-
 
     return (numpyArr, labelpy)
 
