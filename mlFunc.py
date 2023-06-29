@@ -18,3 +18,27 @@ def empirical_covariance(D, mu):
     C = 1 / n * numpy.dot(DC, numpy.transpose(DC))
     return C
 
+def load(name):
+    try:
+        file = open(name, "r")
+    except FileNotFoundError:
+        exit(-1)
+
+    Dlist = []
+    listLabel = []
+    for row in file:
+        line = row.rstrip().split(",")
+        singleLine = line[0:10]
+        label = line[-1]
+        
+        Dlist.append(singleLine)
+        listLabel.append(label)
+    
+    numpyArr = numpy.array([[Dlist]], dtype=float)
+    #numpyFlowers = numpyArr.reshape((150,4))
+    #finalFlowers = numpyFlowers.transpose()
+    print(numpyArr,"\n\n########\n\n")
+    labelpy = numpy.array(listLabel)
+    print(labelpy)
+
+    return (numpyArr, labelpy)
