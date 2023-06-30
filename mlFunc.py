@@ -100,3 +100,8 @@ def plot_correlations(DTR, title, cmap="Greys"):
     #fig = heatmap.get_figure()
     #fig.savefig("./images/" + title + ".svg")
 
+def computeCovDiag(M, muc):
+
+    cov = numpy.dot((M-muc),(M-muc).T)/M.shape[1]
+    diagCov = numpy.diag(numpy.diag(cov))
+    return (diagCov)

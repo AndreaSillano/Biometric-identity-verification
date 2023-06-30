@@ -72,13 +72,14 @@ if __name__ == "__main__":
     DPE = dimRed.LDA(DTE,LTE)
     plt.plot_LDA_scatter(DP,LTR)
 
+    plot_correlations(DTR,"heatmap")
+    plot_correlations(DTR.T[:, LTR == 0], "heatmap_spoofed_", cmap="Reds")
+    plot_correlations(DTR.T[:, LTR == 1], "heatmap_authentic_", cmap="Blues")
+
     print("---------------MVG WITHOUT LDA--------------------------")
     MVG = MultivariateGaussianClassifier()
     MVG.setup_MVG(DTR.T,LTR)
     MVG.predict_MVG(DTE.T,LTE)
-    plot_correlations(DTR,"heatmap")
-    plot_correlations(DTR.T[:, LTR == 0], "heatmap_spoofed_", cmap="Reds")
-    plot_correlations(DTR.T[:, LTR == 1], "heatmap_authentic_", cmap="Blues")
 
     print("---------------MVG WITH LDA--------------------------")
     MVG = MultivariateGaussianClassifier()
