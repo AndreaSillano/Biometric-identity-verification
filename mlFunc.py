@@ -53,3 +53,50 @@ def randomize(D, L, seed=0):
     
     return DTR, LTR
 
+def compute_correlation(X, Y):
+    x_sum = numpy.sum(X)
+    y_sum = numpy.sum(Y)
+
+    x2_sum = numpy.sum(X ** 2)
+    y2_sum = numpy.sum(Y ** 2)
+
+    sum_cross_prod = numpy.sum(X * Y.T)
+
+    n = X.shape[0]
+    numerator = n * sum_cross_prod - x_sum * y_sum
+    denominator = numpy.sqrt((n * x2_sum - x_sum ** 2) * (n * y2_sum - y_sum ** 2))
+
+    corr = numerator / denominator
+    return corr
+
+
+def plot_correlations(DTR, title, cmap="Greys"):
+    corr = numpy.zeros((10, 10))
+    for x in range(10):
+        for y in range(10):
+            X = DTR[x, :]
+            Y = DTR[y, :]
+            pearson_elem = compute_correlation(X, Y)
+            corr[x][y] = pearson_elem
+
+    plt.rcParams['axes.linewidth'] = 0.2
+
+    # Creazione della heatmap
+    fig, ax = plt.subplots()
+    heatmap = ax.imshow(numpy.abs(corr), cmap=cmap, aspect='equal')
+
+    # Personalizzazioni dell'asse x e y
+    ax.set_xticks(numpy.arange(corr.shape[1]))
+    ax.set_yticks(numpy.arange(corr.shape[0]))
+    ax.set_xticklabels(numpy.arange(corr.shape[1]))
+    ax.set_yticklabels(numpy.arange(corr.shape[0]))
+    ax.tick_params(axis='both', which='both', length=0)
+
+    # Aggiunta della barra dei colori
+    cbar = plt.colorbar(heatmap)
+
+    # Mostra il grafico
+    plt.show()
+    #fig = heatmap.get_figure()
+    #fig.savefig("./images/" + title + ".svg")
+

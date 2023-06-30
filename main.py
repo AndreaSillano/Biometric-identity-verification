@@ -17,8 +17,8 @@ def plot_histograms(embeddings, labels):
         diff_speaker_embeddings = embeddings[labels == 0, dim]
 
         # Plot histograms for same and different speaker embeddings
-        ax.hist(same_speaker_embeddings, bins=10, alpha=0.5, label='Same Speaker')
-        ax.hist(diff_speaker_embeddings, bins=10, alpha=0.5, label='Different Speaker')
+        ax.hist(same_speaker_embeddings, bins=10, alpha=0.5, label='Authentic')
+        ax.hist(diff_speaker_embeddings, bins=10, alpha=0.5, label='Spoofed')
 
         ax.set_xlabel(f"Dimension {dim+1}")
         ax.set_ylabel("Frequency")
@@ -76,6 +76,9 @@ if __name__ == "__main__":
     MVG = MultivariateGaussianClassifier()
     MVG.setup_MVG(DTR.T,LTR)
     MVG.predict_MVG(DTE.T,LTE)
+    plot_correlations(DTR,"heatmap")
+    plot_correlations(DTR.T[:, LTR == 0], "heatmap_spoofed_", cmap="Reds")
+    plot_correlations(DTR.T[:, LTR == 1], "heatmap_authentic_", cmap="Blues")
 
     print("---------------MVG WITH LDA--------------------------")
     MVG = MultivariateGaussianClassifier()
