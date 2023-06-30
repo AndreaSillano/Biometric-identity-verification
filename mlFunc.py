@@ -105,3 +105,20 @@ def computeCovDiag(M, muc):
     cov = numpy.dot((M-muc),(M-muc).T)/M.shape[1]
     diagCov = numpy.diag(numpy.diag(cov))
     return (diagCov)
+
+def evaluation(scores, labels, th, C_fn, C_fp):
+    pred_labels = int(scores > th)
+
+    confusion_matrix = numpy.zeros(2,2)
+    for i in range(len(labels)):
+        confusion_matrix[labels[i], pred_labels[i]] += 1
+
+    FN = confusion_matrix[1, 0]
+    TP = confusion_matrix[1, 1]
+    FNR = FN / (FN + TP)
+
+    FP = confusion_matrix[0, 1]
+    TN = confusion_matrix[0, 0]
+    FPR = FP / (FP + TN)
+    DFC = C_fn * FNR + C_fp * FPR
+    return DFC
