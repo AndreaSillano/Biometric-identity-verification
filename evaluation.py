@@ -8,6 +8,7 @@ class Evaluation:
     def __init__(self):
         self.MVG = MultivariateGaussianClassifier()
         self.LR = LogisticRegression()
+        self.svmLin = SupportVectorMachine()
 
     def MVG_evaluation(self, DTR, LTR, DTE, LTE, DP, DPE):
         print("---------------MVG WITHOUT LDA--------------------------")
@@ -44,16 +45,16 @@ class Evaluation:
         print("---------------MVG TIED COV WITH LDA--------------------------")
 
         self.MVG.setup_MVG_Tied_Cov(DP, LTR)
-        s5 = self.MVG.predict_MVG_Tied_Cov(DPE, LTE)
+        self.MVG.predict_MVG_Tied_Cov(DPE, LTE)
 
         print("---------------MVG TIED COV + NAIVE WITHOUT LDA--------------------------")
 
         self.MVG.setup_MVG_Tied_Cov_Naive(DTR.T, LTR)
-        s6= self.MVG.predict_MVG_Tied_Cov_Naive(DTE.T, LTE)
+        self.MVG.predict_MVG_Tied_Cov_Naive(DTE.T, LTE)
 
         print("---------------MVG TIED COV + NAIVE WITH LDA--------------------------")
         self.MVG.setup_MVG_Tied_Cov_Naive(DP, LTR)
-        s7 = self.MVG.predict_MVG_Tied_Cov_Naive(DPE, LTE)
+        self.MVG.predict_MVG_Tied_Cov_Naive(DPE, LTE)
 
         print("---------------LOGISTIC REGRESSION WITHOUT LDA--------------------------")
         self.LR.setup_Logistic_Regression(DTR.T, LTR, 0.1)
@@ -62,5 +63,4 @@ class Evaluation:
         print("---------------LOGISTIC REGRESSION WITH LDA--------------------------")
         self.LR.setup_Logistic_Regression(DP, LTR, 0.1)
         self.LR.preditc_Logistic_Regression(DPE, LTE, 0.1)
-
 
