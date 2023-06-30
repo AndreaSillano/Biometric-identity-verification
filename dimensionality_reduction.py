@@ -5,7 +5,6 @@ from mlFunc import *
 
 class DimensionalityReduction:
     # ----------PRINCIPAL COMPONENT ANALISYS---------------
-
     def PCA(self,D, m):
         D = D.transpose()
         mu = empirical_mean(D)
@@ -24,6 +23,7 @@ class DimensionalityReduction:
         # P = numpy.dot(P, [[1, 0], [0, -1]])
         DP = numpy.dot(P.T, D)
         return DP
+
     def evaluatePCA(self, DP, L):
         D0 = DP[:, L == 0]
         D1 = DP[:, L == 1]

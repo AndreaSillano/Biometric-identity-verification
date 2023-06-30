@@ -25,8 +25,7 @@ class LogisticRegression:
         return (f)
 
     def preditc_Logistic_Regression(self,DTE,LTE,l):
-        s = numpy.dot(self.w.T, DTE) + self.b
-        # print(s)
+        s = numpy.dot(numpy.array(self.w).T, DTE) + self.b
         my_pred = []
         correct = 0
         for p in s:

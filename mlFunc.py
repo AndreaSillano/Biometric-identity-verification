@@ -106,19 +106,39 @@ def computeCovDiag(M, muc):
     diagCov = numpy.diag(numpy.diag(cov))
     return (diagCov)
 
-def evaluation(scores, labels, th, C_fn, C_fp):
-    pred_labels = int(scores > th)
+def assign_labels(scores, th):
+    pred = scores>th
+    return numpy.int32(pred)
 
-    confusion_matrix = numpy.zeros(2,2)
-    for i in range(len(labels)):
-        confusion_matrix[labels[i], pred_labels[i]] += 1
+def DFC(scores, LTE,pi, C_fn, C_fp, th):
+    th = -numpy.log(pi*C_fn/((1-pi)*C_fp))
+    pred_labels = assign_labels(scores, th)
+    confusion_matrix = numpy.zeros((2, 2))
+    confusion_matrix[0, 0] = ((pred_labels == 0) * (LTE == 0)).sum()
+    confusion_matrix[0, 1] = ((pred_labels == 0) * (LTE == 1)).sum()
+    confusion_matrix[1, 0] = ((pred_labels == 1) * (LTE == 0)).sum()
+    confusion_matrix[1, 1] = ((pred_labels == 1) * (LTE == 1)).sum()
 
-    FN = confusion_matrix[1, 0]
-    TP = confusion_matrix[1, 1]
-    FNR = FN / (FN + TP)
-
-    FP = confusion_matrix[0, 1]
-    TN = confusion_matrix[0, 0]
-    FPR = FP / (FP + TN)
-    DFC = C_fn * FNR + C_fp * FPR
+    FNR = confusion_matrix[0, 1] / (confusion_matrix[0, 1] + confusion_matrix[1, 1])
+    FPR = confusion_matrix[1, 0] / (confusion_matrix[0, 0] + confusion_matrix[1, 0])
+    DFC = pi * C_fn * FNR + (1 - pi) * C_fp * FPR
     return DFC
+
+def evaluation(scores, LTE, pi,C_fn, C_fp):
+
+    ths = numpy.array(scores)
+    ths.sort()
+    print("Prima",ths)
+    DFCList =[]
+    t = numpy.concatenate([numpy.array([-numpy.inf]), ths, numpy.array([numpy.inf])])
+
+    print("Dopo",t)
+    for th in t:
+        DFCList.append(DFC(scores,LTE,pi,C_fn,C_fp, th))
+
+    return min(DFCList)
+
+
+
+
+
