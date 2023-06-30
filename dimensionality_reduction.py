@@ -1,17 +1,12 @@
+import numpy.linalg
+
 from mlFunc import *
 
 
 class DimensionalityReduction:
+    # ----------PRINCIPAL COMPONENT ANALISYS---------------
 
-    def _computePCA(self,D, m,C):
-        U, s, Vh = numpy.linalg.svd(C)
-
-        P = U[:, 0:m]
-        # P = numpy.dot(P, [[1, 0], [0, -1]])
-        DP = numpy.dot(P.T, D)
-        return DP
-
-    def PCA(self,D):
+    def PCA(self,D, m):
         D = D.transpose()
         mu = empirical_mean(D)
         # DC = D - D.mean(1).reshape((D.shape[0], 1))
@@ -19,8 +14,44 @@ class DimensionalityReduction:
         # C = C / float(DC.shape[1])
         C = empirical_covariance(D, mu)
 
-        DP = self._computePCA(D, 2, C)
+        DP = self._computePCA(D, m, C)
         return DP
+
+    def _computePCA(self, D, m, C):
+        U, s, Vh = numpy.linalg.svd(C)
+
+        P = U[:, 0:m]
+        # P = numpy.dot(P, [[1, 0], [0, -1]])
+        DP = numpy.dot(P.T, D)
+        return DP
+    def evaluatePCA(self, DP, L):
+        D0 = DP[:, L == 0]
+        D1 = DP[:, L == 1]
+        mu0 = empirical_mean(D0)
+        mu1 = empirical_mean(D1)
+        means_c = [mu0,mu1]
+        pred = []
+        print(DP)
+        for sample in DP.T:
+            distances = [numpy.linalg.norm(sample-mu_c) for mu_c in means_c ]
+            closest_class = numpy.argmin(distances)
+            pred.append(closest_class)
+
+        correct_predictions = 0
+        total_samples = len(L)
+
+        #print(pred)
+        #print(L)
+        for true_label, pred_label in zip(L, pred):
+            if true_label == pred_label:
+                correct_predictions += 1
+
+        accuracy = correct_predictions / total_samples
+
+        # Print accuracy
+        print("Accuracy:", accuracy*100)
+
+    #----------LINEAR DISCRIMINANT ANALISYS---------------
     def LDA(self,D,LTR):
         D = D.transpose()
         SW = self._computeSW(D, LTR)

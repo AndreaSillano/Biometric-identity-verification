@@ -3,7 +3,7 @@
 import matplotlib.pyplot as plt
 import numpy
 from plotter import Plotter
-from dimensionality_reduction import  DimensionalityReduction
+from dimensionality_reduction import DimensionalityReduction
 from mlFunc import *
 def plot_histograms(embeddings, labels):
     num_dimensions = embeddings.shape[1]
@@ -50,7 +50,7 @@ def plot_scatter(embeddings, labels):
 
 if __name__ == "__main__":
 
-    DTR,LTR = load("TrainFP.txt")
+    DTR,LTR = load("Train.txt")
 
     DTE, LTE = load("Test.txt")
 
@@ -61,10 +61,11 @@ if __name__ == "__main__":
     #plt.plot_histogram(DTR, LTR)
     #plt.plot_scatter(DTR, LTR)
 
-    print("PRINCIPAL COMPONENT ANALYSIS")
-    DP = dimRed.PCA(DTR)
+    print("---------------PRINCIPAL COMPONENT ANALYSIS-------------")
+    DP = dimRed.PCA(DTR, 2)
     plt.plot_PCA_scatter(DP,LTR)
-    print("LINEAR DISCRIMINANT ANALYSIS")
+    dimRed.evaluatePCA(DP,LTR)
+    print("---------------LINEAR DISCRIMINANT ANALYSIS-------------")
     DP = dimRed.LDA(DTR,LTR)
     plt.plot_LDA_scatter(DP,LTR)
 
