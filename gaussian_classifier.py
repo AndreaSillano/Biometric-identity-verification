@@ -1,5 +1,6 @@
 import numpy
 from mlFunc import *
+
 class MultivariateGaussianClassifier:
 
     def __init__(self):
@@ -53,7 +54,118 @@ class MultivariateGaussianClassifier:
         v = numpy.dot(xc.T, numpy.dot(L, xc)).ravel()
         return const - 0.5 * logdet - 0.5 * v
 
+    #NAIVE BAYES
+    def setup_MVG_Naive_Bayes(self,D, L):
+        self.classes = numpy.unique(L)
+        for c in self.classes:
+            D_c = D[:, L == c]
+            mu = empirical_mean(D_c)
+            self.means.append(mu)
+            C = computeCovDiag(D_c, mu)
+            self.covariances.append(C)
 
+    def predict_MVG_Naive_Bayes(self, D, L):
+        ll = []
+        for mu, C in zip(self.classes, self.covariances):
+            ll.append(self.logpdf_GAU_ND(D, mu, C))
 
+        Sjoint = numpy.exp(ll)*(1/2)
+        Smarginal = vrow(Sjoint.sum(0))
+        SPost = Sjoint/Smarginal
+        pred = numpy.argmax(SPost, axis=0)
 
+        common_elements = []
+        for i in range(len(pred)):
+            if pred[i] == L[i]:
+                common_elements.append(L[i])
 
+        acc = len(common_elements) / len(L) * 100
+        print("Naive Bayes predicion Post Probability")
+        print("ACCURACY: ", acc, "%")
+        err = 100 - (acc)
+        print("ERROR: ", err, "%")
+
+    #MVG TIED COV
+
+    def _computeSW(self, D, L):
+        D0 = D[:, L == 0]
+        D1 = D[:, L == 1]
+
+        DC0 = D0 - D0.mean(1).reshape((D0.shape[0], 1))
+        DC1 = D1 - D1.mean(1).reshape((D1.shape[0], 1))
+
+        C0 = numpy.dot(DC0, DC0.T)
+        C1 = numpy.dot(DC1, DC1.T)
+        return (C0 + C1) / float(D.shape[1])
+
+    def setup_MVG_Tied_Cov(self, D, L):
+        self.classes = numpy.unique(L)
+        for c in self.classes:
+            D_c = D[:, L == c]
+            mu = empirical_mean(D_c)
+            self.means.append(mu)
+            C = self._computeSW(D, L)
+            self.covariances.append(C)
+
+    def predict_MVG_Tied_Cov(self, D, L):
+        ll = []
+        for mu, C in zip(self.classes, self.covariances):
+            ll.append(self.logpdf_GAU_ND(D, mu, C))
+
+        Sjoint = numpy.exp(ll)*(1/2)
+        Smarginal = vrow(Sjoint.sum(0))
+        SPost = Sjoint/Smarginal
+        pred = numpy.argmax(SPost, axis=0)
+
+        common_elements = []
+        for i in range(len(pred)):
+            if pred[i] == L[i]:
+                common_elements.append(L[i])
+
+        acc = len(common_elements) / len(L) * 100
+        print("MVG TIED COV predicion Post Probability")
+        print("ACCURACY: ", acc, "%")
+        err = 100 - (acc)
+        print("ERROR: ", err, "%")
+    #BYES + TIED
+    def _computeSW_Diag(self, D, L):
+        D0 = D[:, L == 0]
+        D1 = D[:, L == 1]
+
+        DC0 = D0 - D0.mean(1).reshape((D0.shape[0], 1))
+        DC1 = D1 - D1.mean(1).reshape((D1.shape[0], 1))
+
+        C0 = numpy.dot(DC0, DC0.T)
+        C1 =  numpy.dot(DC1, DC1.T)
+
+        return numpy.diag(numpy.diag((C0 + C1) / float(D.shape[1])))
+
+    def setup_MVG_Tied_Cov_Naive(self, D, L):
+        self.classes = numpy.unique(L)
+        for c in self.classes:
+            D_c = D[:, L == c]
+            mu = empirical_mean(D_c)
+            self.means.append(mu)
+            C = self._computeSW_Diag(D, L)
+            self.covariances.append(C)
+
+    def predict_MVG_Tied_Cov_Naive(self, D, L):
+        ll = []
+        for mu, C in zip(self.classes, self.covariances):
+            ll.append(self.logpdf_GAU_ND(D, mu, C))
+
+        Sjoint = numpy.exp(ll)*(1/2)
+        Smarginal = vrow(Sjoint.sum(0))
+        SPost = Sjoint/Smarginal
+        pred = numpy.argmax(SPost, axis=0)
+
+        common_elements = []
+        for i in range(len(pred)):
+            if pred[i] == L[i]:
+                common_elements.append(L[i])
+
+        acc = len(common_elements) / len(L) * 100
+        print("MVG TIED COV + Bayes predicion Post Probability")
+        print("ACCURACY: ", acc, "%")
+        err = 100 - (acc)
+        print("ERROR: ", err, "%")

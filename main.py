@@ -86,7 +86,33 @@ if __name__ == "__main__":
     MVG.setup_MVG(DP,LTR)
     MVG.predict_MVG(DPE,LTE)
 
-    print("---------------MVG WITH PCA--------------------------")
+
+    print("---------------MVG NAIVE BAYES WITHOUT LDA--------------------------")
     MVG = MultivariateGaussianClassifier()
-    MVG.setup_MVG(DPA, LTR)
-    MVG.predict_MVG(DPEA, LTE)
+    MVG.setup_MVG_Naive_Bayes(DTR.T, LTR)
+    MVG.predict_MVG_Naive_Bayes(DTE.T, LTE)
+
+    print("---------------MVG NAIVE BAYES WITH LDA--------------------------")
+    MVG = MultivariateGaussianClassifier()
+    MVG.setup_MVG_Naive_Bayes(DP, LTR)
+    MVG.predict_MVG_Naive_Bayes(DPE, LTE)
+
+    print("---------------MVG TIED COV WITHOUT LDA--------------------------")
+    MVG = MultivariateGaussianClassifier()
+    MVG.setup_MVG_Tied_Cov(DTR.T, LTR)
+    MVG.predict_MVG_Tied_Cov(DTE.T, LTE)
+
+    print("---------------MVG TIED COV WITH LDA--------------------------")
+    MVG = MultivariateGaussianClassifier()
+    MVG.setup_MVG_Tied_Cov(DP, LTR)
+    MVG.predict_MVG_Tied_Cov(DPE, LTE)
+
+    print("---------------MVG TIED COV + NAIVE WITHOUT LDA--------------------------")
+    MVG = MultivariateGaussianClassifier()
+    MVG.setup_MVG_Tied_Cov_Naive(DTR.T, LTR)
+    MVG.predict_MVG_Tied_Cov_Naive(DTE.T, LTE)
+
+    print("---------------MVG TIED COV + NAIVE WITH LDA--------------------------")
+    MVG = MultivariateGaussianClassifier()
+    MVG.setup_MVG_Tied_Cov_Naive(DP, LTR)
+    MVG.predict_MVG_Tied_Cov_Naive(DPE, LTE)
