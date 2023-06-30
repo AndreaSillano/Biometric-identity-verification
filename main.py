@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy
 from plotter import Plotter
 from dimensionality_reduction import DimensionalityReduction
+from gaussian_classifier import MultivariateGaussianClassifier
 from mlFunc import *
 def plot_histograms(embeddings, labels):
     num_dimensions = embeddings.shape[1]
@@ -62,10 +63,26 @@ if __name__ == "__main__":
     #plt.plot_scatter(DTR, LTR)
 
     print("---------------PRINCIPAL COMPONENT ANALYSIS-------------")
-    DP = dimRed.PCA(DTR, 2)
-    plt.plot_PCA_scatter(DP,LTR)
-    dimRed.evaluatePCA(DP,LTR)
+    DPA = dimRed.PCA(DTR, 2)
+    DPEA = dimRed.PCA(DTR, 2)
+    plt.plot_PCA_scatter(DPA,LTR)
+    dimRed.evaluatePCA(DPA,LTR)
     print("---------------LINEAR DISCRIMINANT ANALYSIS-------------")
     DP = dimRed.LDA(DTR,LTR)
+    DPE = dimRed.LDA(DTE,LTE)
     plt.plot_LDA_scatter(DP,LTR)
 
+    print("---------------MVG WITHOUT LDA--------------------------")
+    MVG = MultivariateGaussianClassifier()
+    MVG.setup_MVG(DTR.T,LTR)
+    MVG.predict_MVG(DTE.T,LTE)
+
+    print("---------------MVG WITH LDA--------------------------")
+    MVG = MultivariateGaussianClassifier()
+    MVG.setup_MVG(DP,LTR)
+    MVG.predict_MVG(DPE,LTE)
+
+    print("---------------MVG WITH PCA--------------------------")
+    MVG = MultivariateGaussianClassifier()
+    MVG.setup_MVG(DPA, LTR)
+    MVG.predict_MVG(DPEA, LTE)

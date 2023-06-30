@@ -40,8 +40,6 @@ class DimensionalityReduction:
         correct_predictions = 0
         total_samples = len(L)
 
-        #print(pred)
-        #print(L)
         for true_label, pred_label in zip(L, pred):
             if true_label == pred_label:
                 correct_predictions += 1
