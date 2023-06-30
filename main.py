@@ -5,6 +5,7 @@ import numpy
 from plotter import Plotter
 from dimensionality_reduction import DimensionalityReduction
 from gaussian_classifier import MultivariateGaussianClassifier
+from logistic_regression import LogisticRegression
 from mlFunc import *
 def plot_histograms(embeddings, labels):
     num_dimensions = embeddings.shape[1]
@@ -57,7 +58,8 @@ if __name__ == "__main__":
 
     plt = Plotter()
     dimRed = DimensionalityReduction()
-
+    MVG = MultivariateGaussianClassifier()
+    LR = LogisticRegression()
 
     #plt.plot_histogram(DTR, LTR)
     #plt.plot_scatter(DTR, LTR)
@@ -76,43 +78,48 @@ if __name__ == "__main__":
     plot_correlations(DTR.T[:, LTR == 0], "heatmap_spoofed_", cmap="Reds")
     plot_correlations(DTR.T[:, LTR == 1], "heatmap_authentic_", cmap="Blues")
 
+
     print("---------------MVG WITHOUT LDA--------------------------")
-    MVG = MultivariateGaussianClassifier()
+
     MVG.setup_MVG(DTR.T,LTR)
     MVG.predict_MVG(DTE.T,LTE)
 
     print("---------------MVG WITH LDA--------------------------")
-    MVG = MultivariateGaussianClassifier()
     MVG.setup_MVG(DP,LTR)
     MVG.predict_MVG(DPE,LTE)
 
-
     print("---------------MVG NAIVE BAYES WITHOUT LDA--------------------------")
-    MVG = MultivariateGaussianClassifier()
     MVG.setup_MVG_Naive_Bayes(DTR.T, LTR)
     MVG.predict_MVG_Naive_Bayes(DTE.T, LTE)
 
     print("---------------MVG NAIVE BAYES WITH LDA--------------------------")
-    MVG = MultivariateGaussianClassifier()
+
     MVG.setup_MVG_Naive_Bayes(DP, LTR)
     MVG.predict_MVG_Naive_Bayes(DPE, LTE)
 
     print("---------------MVG TIED COV WITHOUT LDA--------------------------")
-    MVG = MultivariateGaussianClassifier()
+
     MVG.setup_MVG_Tied_Cov(DTR.T, LTR)
     MVG.predict_MVG_Tied_Cov(DTE.T, LTE)
 
     print("---------------MVG TIED COV WITH LDA--------------------------")
-    MVG = MultivariateGaussianClassifier()
+
     MVG.setup_MVG_Tied_Cov(DP, LTR)
     MVG.predict_MVG_Tied_Cov(DPE, LTE)
 
     print("---------------MVG TIED COV + NAIVE WITHOUT LDA--------------------------")
-    MVG = MultivariateGaussianClassifier()
+
     MVG.setup_MVG_Tied_Cov_Naive(DTR.T, LTR)
     MVG.predict_MVG_Tied_Cov_Naive(DTE.T, LTE)
 
     print("---------------MVG TIED COV + NAIVE WITH LDA--------------------------")
-    MVG = MultivariateGaussianClassifier()
     MVG.setup_MVG_Tied_Cov_Naive(DP, LTR)
     MVG.predict_MVG_Tied_Cov_Naive(DPE, LTE)
+
+    print("---------------LOGISTIC REGRESSION WITHOUT LDA--------------------------")
+    LR.setup_Logistic_Regression(DTR.T,LTR, 0.1)
+    LR.preditc_Logistic_Regression(DTE.T,LTE,0.1)
+
+    print("---------------LOGISTIC REGRESSION WITH LDA--------------------------")
+    LR.setup_Logistic_Regression(DP,LTR, 0.1)
+    LR.preditc_Logistic_Regression(DPE,LTE,0.1)

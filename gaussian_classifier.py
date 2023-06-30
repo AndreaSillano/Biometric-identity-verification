@@ -9,6 +9,8 @@ class MultivariateGaussianClassifier:
         self.covariances = []
 
     def setup_MVG(self,D, L):
+        self.means = []
+        self.covariances = []
         self.classes = numpy.unique(L)
         for c in self.classes:
             D_c = D[:, L == c]
@@ -56,6 +58,8 @@ class MultivariateGaussianClassifier:
 
     #NAIVE BAYES
     def setup_MVG_Naive_Bayes(self,D, L):
+        self.means = []
+        self.covariances = []
         self.classes = numpy.unique(L)
         for c in self.classes:
             D_c = D[:, L == c]
@@ -99,6 +103,8 @@ class MultivariateGaussianClassifier:
         return (C0 + C1) / float(D.shape[1])
 
     def setup_MVG_Tied_Cov(self, D, L):
+        self.means = []
+        self.covariances = []
         self.classes = numpy.unique(L)
         for c in self.classes:
             D_c = D[:, L == c]
@@ -141,6 +147,8 @@ class MultivariateGaussianClassifier:
         return numpy.diag(numpy.diag((C0 + C1) / float(D.shape[1])))
 
     def setup_MVG_Tied_Cov_Naive(self, D, L):
+        self.means = []
+        self.covariances = []
         self.classes = numpy.unique(L)
         for c in self.classes:
             D_c = D[:, L == c]
