@@ -16,8 +16,8 @@ def plot_histograms(embeddings, labels):
         diff_speaker_embeddings = embeddings[labels == 0, dim]
 
         # Plot histograms for same and different speaker embeddings
-        ax.hist(same_speaker_embeddings, bins=10, alpha=0.5, label='Same Speaker')
-        ax.hist(diff_speaker_embeddings, bins=10, alpha=0.5, label='Different Speaker')
+        ax.hist(same_speaker_embeddings, bins=10, alpha=0.5, label='Authentic')
+        ax.hist(diff_speaker_embeddings, bins=10, alpha=0.5, label='Spoofed')
 
         ax.set_xlabel(f"Dimension {dim+1}")
         ax.set_ylabel("Frequency")
@@ -37,8 +37,8 @@ def plot_scatter(embeddings, labels):
             diff_speaker_embeddings = embeddings[labels == 0]
 
             # Plot scatter plot for same and different speaker embeddings
-            ax.scatter(same_speaker_embeddings[:, dim1], same_speaker_embeddings[:, dim2], label='Same Speaker')
-            ax.scatter(diff_speaker_embeddings[:, dim1], diff_speaker_embeddings[:, dim2], label='Different Speaker')
+            ax.scatter(same_speaker_embeddings[:, dim1], same_speaker_embeddings[:, dim2], label='Authentic')
+            ax.scatter(diff_speaker_embeddings[:, dim1], diff_speaker_embeddings[:, dim2], label='Spoofed')
 
             ax.set_xlabel(f"Dimension {dim1 + 1}")
             ax.set_ylabel(f"Dimension {dim2 + 1}")
@@ -69,3 +69,6 @@ if __name__ == "__main__":
     DP = dimRed.LDA(DTR,LTR)
     plt.plot_LDA_scatter(DP,LTR)
 
+    plot_correlations(DTR,"heatmap")
+    plot_correlations(DTR.T[:, LTR == 0], "heatmap_spoofed_", cmap="Reds")
+    plot_correlations(DTR.T[:, LTR == 1], "heatmap_authentic_", cmap="Blues")
