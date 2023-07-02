@@ -35,6 +35,7 @@ class Validation:
         labelMVG_LDA = []
         for i in range(k):
             Dte = Dtr[i]
+            print(Dte)
             Lte = Ltr[i]
             D = []
             L = []
@@ -56,42 +57,24 @@ class Validation:
             D = numpy.hstack(D)
             L = numpy.hstack(L)
 
-            #D,Dte = znorm(D,Dte)
-
-            labelMVG = numpy.append(labelMVG, Lte, axis=0)
-            labelMVG = numpy.hstack(labelMVG)
-            llrMVG, llrNV = self._getScores(Dte,D,L,llrMVG, llrNV)
 
 
 
-            # print("---------------MVG WITHOUT LDA--------------------------")
-            # # s = self.MVG.predict_MVG(DTE.T, LTE)
-            # # DFC = evaluation(s,LTE, 0.5, 1, 10)
-            #
-            # self.MVG.setup_MVG(numpy.array(D), numpy.array(L))
-            # llrMVG = numpy.append(llrMVG,self.MVG.predict_MVG(Dte,Lte))
-            #
-            # labelMVG = numpy.append(labelMVG,Lte,axis = 0)
-            # labelMVG = numpy.hstack(labelMVG)
-            #
-            # print("---------------MVG WITH LDA--------------------------")
+
+
+            print("---------------MVG WITHOUT LDA--------------------------")
             # s = self.MVG.predict_MVG(DTE.T, LTE)
             # DFC = evaluation(s,LTE, 0.5, 1, 10)
 
-        #     self.MVG.setup_MVG(numpy.array(D_p), numpy.array(L))
-        #     llrMVG_LDA = numpy.append(llrMVG_LDA, self.MVG.predict_MVG(Dpe, Lte))
-        #
-        #     labelMVG_LDA = numpy.append(labelMVG_LDA, Lte, axis=0)
-        #     labelMVG_LDA = numpy.hstack(labelMVG_LDA)
-        #
-        # llrMVG_LDA = numpy.hstack(llrMVG_LDA)
-        # llrMVG = numpy.hstack(llrMVG)
+            self.MVG.setup_MVG(numpy.array(D), numpy.array(L))
+            llrMVG = numpy.append(llrMVG,self.MVG.predict_MVG(Dte,Lte))
+            llrMVG = numpy.hstack(llrMVG)
+            labelMVG = numpy.append(labelMVG,Lte,axis = 0)
+            labelMVG = numpy.hstack(labelMVG)
 
-        minDFC = compute_min_DCF(numpy.hstack(llrMVG), numpy.hstack(labelMVG), 0.5, 1, 10)
-        print("MIN DFC MVG", minDFC)
+        minDFC = compute_min_DCF(numpy.array(llrMVG),numpy.array(labelMVG), 0.5, 1, 10 )
+        print("MIN DFC", minDFC)
 
-        minDFC1 = compute_min_DCF(numpy.hstack(llrNV), numpy.hstack(labelMVG), 0.5, 1, 10)
-        print("MIN DFC NAIVE", minDFC1)
 
 
 
@@ -99,22 +82,9 @@ class Validation:
         #########################################################
         #                     DFC on test data
         #########################################################
-
-        s = self.MVG.predict_MVG(DTR.T, LTR, DTE.T)
-        res = compute_act_DCF(s, LTE, 0.5, 1, 10, None)
-        #res= compute_min_DCF(numpy.hstack(s), MVG_labels, 0.5, 1, 10)
-        print("ACT DFC MVG", res)
-
-        s1 = self.MVG.predict_MVG_Naive_Bayes(DTR.T, LTR, DTE.T)
-        res1 = compute_act_DCF(s1, LTE, 0.5, 1, 10, None)
-        # res= compute_min_DCF(numpy.hstack(s), MVG_labels, 0.5, 1, 10)
-        print("ACT DFC NAIVE", res1)
-
-        #########################################################
-        #                     DFC on test data LDA
-        #########################################################
-
-
+        s = self.MVG.predict_MVG(DTE.T, LTE)
+        res= compute_act_DCF(s, LTE, 0.5,1, 10, None)
+        print("ACT DFC", res)
         # print("---------------MVG WITH LDA--------------------------")
         # self.MVG.setup_MVG(DP, LTR)
         # s1 = self.MVG.predict_MVG(DPE, LTE)
@@ -162,10 +132,13 @@ class Validation:
         # self.LR.setup_Logistic_Regression(DP, LTR, 0.1)
         # self.LR.preditc_Logistic_Regression(DPE, LTE, 0.1)
 
-        #print("---------------SVM Linear REGRESSION WITHOUT LDA--------------------------")
-        #self.svmLin.setup_primal_svm(DTR.T, LTR, 0.1)
-        #self.svmLin.predict_primal_svm(DTE.T, LTE, 0.1)
+        print("---------------SVM Linear REGRESSION WITHOUT LDA--------------------------")
+        self.svmLin.setup_primal_svm(DTR.T, LTR, 0.1)
+        self.svmLin.predict_primal_svm(DTE.T, LTE, 0.1)
 
-        #print("---------------SVM Linear REGRESSION WITHOUT LDA--------------------------")
-       # self.svmLin.setup_kernelPoly_svm(DTR.T, LTR, DTE.T, LTE)
+        print("---------------SVM Kernel Poly REGRESSION WITHOUT LDA--------------------------")
+        self.svmLin.setup_kernelPoly_svm(DTR.T, LTR, DTE.T, LTE)
+
+        print("---------------SVM Kernel RBG REGRESSION WITHOUT LDA--------------------------")
+        self.svmLin.setup_kernelRBF_svm(DTR.T, LTR, DTE.T, LTE)
 
