@@ -1,5 +1,4 @@
 import numpy
-import scipy
 from scipy.optimize import fmin_l_bfgs_b
 from mlFunc import *
 from itertools import repeat
@@ -23,11 +22,13 @@ class SupportVectorMachine:
         Hij = zizj*Gij
 
         def objective_function(alpha):
-            H_alpha_c = numpy.dot(Hij, alpha)
+            #H_alpha_c = numpy.dot(Hij, alpha)
             #LbD = 0.5 * numpy.dot(alpha.T, H_alpha_c) - numpy.dot(alpha.T, numpy.ones(n_samples))
-            LbD = 0.5*numpy.dot(numpy.dot(alpha.T, Hij), alpha)-numpy.dot(alpha.T, numpy.ones(Hij.shape[1]))
-            gradient = H_alpha_c - numpy.ones(Hij.shape[1])
-            return LbD, gradient
+            #LbD = 0.5*numpy.dot(numpy.dot(alpha.T, Hij), alpha)-numpy.dot(alpha.T, numpy.ones(Hij.shape[1]))
+            #gradient = H_alpha_c - numpy.ones(Hij.shape[1])
+            #return LbD, gradient
+            grad = numpy.dot(Hij, alpha) - numpy.ones(Hij.shape[1])
+            return ((1/2)*numpy.dot(numpy.dot(alpha.T, Hij), alpha)-numpy.dot(alpha.T, numpy.ones(Hij.shape[1])), grad)
 
         bounds = list(repeat((0, C), DTR.shape[1]))
 
@@ -53,11 +54,11 @@ class SupportVectorMachine:
     def predict_primal_svm(self, DTE, LTE, C, K=1):
         row = numpy.zeros(DTE.shape[1])+K
         DTE = numpy.vstack([DTE, row])
-        print("LTE: ", LTE)
+        #print("LTE: ", LTE)
         #S = numpy.dot(self.w.T, DTE) + self.b
         S = numpy.dot(self.w.T, DTE)
 
-        print(S)
+        #print(S)
         my_pred = []
         correct = 0
         for p in S:
@@ -79,15 +80,17 @@ class SupportVectorMachine:
     
     def dualLossErrorRatePoly(self, DTR, C, Hij, LTR, LTE, DTE, K, d, c):
         def objective_function(alpha):
-            H_alpha_c = numpy.dot(Hij, alpha)
+            #H_alpha_c = numpy.dot(Hij, alpha)
             #LbD = 0.5 * numpy.dot(alpha.T, H_alpha_c) - numpy.dot(alpha.T, numpy.ones(n_samples))
-            LbD = 0.5*numpy.dot(numpy.dot(alpha.T, Hij), alpha)-numpy.dot(alpha.T, numpy.ones(Hij.shape[1]))
-            gradient = H_alpha_c - numpy.ones(Hij.shape[1])
-            return LbD, gradient
+            #LbD = 0.5*numpy.dot(numpy.dot(alpha.T, Hij), alpha)-numpy.dot(alpha.T, numpy.ones(Hij.shape[1]))
+            #gradient = H_alpha_c - numpy.ones(Hij.shape[1])
+            #return LbD, gradient
+            grad = numpy.dot(Hij, alpha) - numpy.ones(Hij.shape[1])
+            return ((1/2)*numpy.dot(numpy.dot(alpha.T, Hij), alpha)-numpy.dot(alpha.T, numpy.ones(Hij.shape[1])), grad)
         
         b = list(repeat((0, C), DTR.shape[1]))
         (x, f, data) = fmin_l_bfgs_b(objective_function,
-                                        numpy.zeros(DTR.shape[1]), bounds=b, iprint=1, factr=1.0)
+                                        numpy.zeros(DTR.shape[1]), bounds=b)
         # Compute the scores
         S = numpy.sum(
             numpy.dot((x*LTR).reshape(1, DTR.shape[1]), (numpy.dot(DTR.T, DTE)+c)**d+ K), axis=0)
@@ -114,4 +117,60 @@ class SupportVectorMachine:
         # previous lab, so we can cast the problem as minimization of LD(alpha) defined
         # as -JD(alpha)
         self.dualLossErrorRatePoly(DTR, C, Hij, LTR, LTE, DTE, K, d, c)
+        return
+
+    def dualLossErrorRateRBF(self, DTR, C, Hij, LTR, LTE, DTE, K, gamma):
+        def objective_function(alpha):
+            H_alpha_c = numpy.dot(Hij, alpha)
+            #LbD = 0.5 * numpy.dot(alpha.T, H_alpha_c) - numpy.dot(alpha.T, numpy.ones(n_samples))
+            LbD = 0.5*numpy.dot(numpy.dot(alpha.T, Hij), alpha)-numpy.dot(alpha.T, numpy.ones(Hij.shape[1]))
+            gradient = H_alpha_c - numpy.ones(Hij.shape[1])
+            return LbD, gradient
+        
+        b = list(repeat((0, C), DTR.shape[1]))
+        (x, f, data) = fmin_l_bfgs_b(objective_function,
+                                        numpy.zeros(DTR.shape[1]), bounds=b)
+        kernelFunction = numpy.zeros((DTR.shape[1], DTE.shape[1]))
+        for i in range(DTR.shape[1]):
+            for j in range(DTE.shape[1]):
+                kernelFunction[i,j]=self.RBF(DTR[:, i], DTE[:, j], gamma, K)
+        S=numpy.sum(numpy.dot((x*LTR).reshape(1, DTR.shape[1]), kernelFunction), axis=0)
+        # Compute the scores
+        # S = np.sum(
+        #     np.dot((x*LTR).reshape(1, DTR.shape[1]), (np.dot(DTR.T, DTE)+c)**d+ K), axis=0)
+        # Compute predicted labels. 1* is useful to convert True/False to 1/0
+        LP = 1*(S > 0)
+        # Replace 0 with -1 because of the transformation that we did on the labels
+        LP[LP == 0] = -1
+        numberOfCorrectPredictions = numpy.array(LP == LTE).sum()
+        accuracy = numberOfCorrectPredictions/LTE.size*100
+        errorRate = 100-accuracy
+        # Compute dual loss
+        dl = -f
+        print("K=%d, C=%f, RBF (gamma=%d), Dual loss=%e, Error rate=%.1f %%" % (K, C, gamma, dl, errorRate))
+        return
+    
+    def RBF(self, x1, x2, gamma, K):
+        #print(numpy.exp(-gamma*(numpy.linalg.norm(x1-x2)**2))+K**2)
+        return numpy.exp(-gamma * numpy.linalg.norm(x1 - x2, axis=1) ** 2) + K ** 2
+        #return numpy.exp(-gamma*(numpy.linalg.norm(x1-x2)**2))+K**2
+        
+
+    def setup_kernelRBF_svm(self, DTR, LTR, DTE, LTE, K=0, C=1, gamma=1):
+        # Compute the H matrix exploiting broadcasting
+        kernelFunction = numpy.zeros((DTR.shape[1], DTR.shape[1]))
+        #for i in range(DTR.shape[1]):
+            #for j in range(DTR.shape[1]):
+                #kernelFunction[i,j]=self.RBF(DTR[:, i], DTR[:, j], gamma, K)
+        X1, X2 = numpy.meshgrid(DTR.T, DTR.T)
+        kernelFunction = self.RBF(X1.T, X2.T, gamma, K)
+  
+        # To compute zi*zj I need to reshape LTR as a matrix with one column/row
+        # and then do the dot product
+        zizj = numpy.dot(LTR.reshape(LTR.size, 1), LTR.reshape(1, LTR.size))
+        Hij = zizj*kernelFunction
+        # We want to maximize JD(alpha), but we can't use the same algorithm of the
+        # previous lab, so we can cast the problem as minimization of LD(alpha) defined
+        # as -JD(alpha)
+        self.dualLossErrorRateRBF(DTR, C, Hij, LTR, LTE, DTE, K, gamma)
         return

@@ -69,6 +69,9 @@ class Evaluation:
         self.svmLin.setup_primal_svm(DTR.T, LTR, 0.1)
         self.svmLin.predict_primal_svm(DTE.T, LTE, 0.1)
 
-        print("---------------SVM Linear REGRESSION WITHOUT LDA--------------------------")
+        print("---------------SVM Kernel Poly REGRESSION WITHOUT LDA--------------------------")
         self.svmLin.setup_kernelPoly_svm(DTR.T, LTR, DTE.T, LTE)
+
+        print("---------------SVM Kernel RBG REGRESSION WITHOUT LDA--------------------------")
+        self.svmLin.setup_kernelRBF_svm(DTR.T, LTR, DTE.T, LTE)
 
