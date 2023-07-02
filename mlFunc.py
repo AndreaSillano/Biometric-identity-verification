@@ -18,6 +18,13 @@ def empirical_covariance(D, mu):
     DC = D - vcol(mu)
     C = 1 / n * numpy.dot(DC, numpy.transpose(DC))
     return C
+def znorm(DTR, DTE):
+    mu_DTR = vcol(DTR.mean(1))
+    std_DTR = vcol(DTR.std(1))
+
+    DTR_z = (DTR - mu_DTR) / std_DTR
+    DTE_z = (DTE - mu_DTR) / std_DTR
+    return DTR_z, DTE_z
 
 def load(name):
     try:
@@ -33,7 +40,7 @@ def load(name):
         label = line[-1]
         Dlist.append(singleLine)
         listLabel.append(label)
-    
+
     numpyArr = numpy.array(Dlist, dtype=float)
     #numpyArr = numpyArr.reshape((len(Dlist),10))
     #finalArray = numpyArr.transpose()
@@ -290,4 +297,4 @@ def compute_min_DCF(scores, labels, pi, Cfn, Cfp):
     dcfList = []
     for _th in t:
         dcfList.append(compute_act_DCF(scores, labels, pi, Cfn, Cfp, th=_th))
-    return numpy.array(dcfList).min()
+    return min(dcfList)

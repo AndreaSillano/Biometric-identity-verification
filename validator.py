@@ -5,30 +5,44 @@ from gaussian_classifier import MultivariateGaussianClassifier
 from logistic_regression import LogisticRegression
 from SVM import SupportVectorMachine
 from mlFunc import *
-class Evaluation:
+class Validation:
     def __init__(self):
         self.MVG = MultivariateGaussianClassifier()
         self.LR = LogisticRegression()
-        self.svm = SupportVectorMachine()
+        self.svmLin = SupportVectorMachine()
+
+    def _getScores(self, Dte, D, L, llrMVG, llrNV):
+        llrs = self.MVG.predict_MVG(D, L, Dte)
+        llrsNV = self.MVG.predict_MVG_Naive_Bayes(D,L,Dte)
+        llrMVG.append(llrs)
+        llrNV.append(llrsNV)
+        return llrMVG, llrNV
 
 
-
-
-    def MVG_evaluation(self, DTR, LTR, DTE, LTE, DP, DPE):
+    def MVG_validation(self, DTR, LTR, DTE, LTE):
         k =5
         Dtr = numpy.split(DTR.T, k, axis = 1)
         Ltr = numpy.split(LTR, k)
+        #Ltep = numpy.split(DPE, k)
+
         llrMVG = []
+        llrNV = []
         labelMVG =[]
 
+
+
+        llrMVG_LDA = []
+        labelMVG_LDA = []
         for i in range(k):
             Dte = Dtr[i]
             print(Dte)
             Lte = Ltr[i]
             D = []
             L = []
+
             if i == 0:
                 D.append(numpy.hstack(Dtr[i + 1:]))
+
                 L.append(numpy.hstack(Ltr[i + 1:]))
             elif i == k - 1:
                 D.append(numpy.hstack(Dtr[:i]))
@@ -36,6 +50,7 @@ class Evaluation:
             else:
                 D.append(numpy.hstack(Dtr[:i]))
                 D.append(numpy.hstack(Dtr[i + 1:]))
+
                 L.append(numpy.hstack(Ltr[:i]))
                 L.append(numpy.hstack(Ltr[i + 1:]))
 
