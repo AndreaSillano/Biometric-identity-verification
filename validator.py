@@ -33,45 +33,55 @@ class Validation:
 
         llrMVG_LDA = []
         labelMVG_LDA = []
+        # for i in range(k):
+        #     Dte = Dtr[i]
+        #     print(Dte)
+        #     Lte = Ltr[i]
+        #     D = []
+        #     L = []
+        #
+        #     if i == 0:
+        #         D.append(numpy.hstack(Dtr[i + 1:]))
+        #
+        #         L.append(numpy.hstack(Ltr[i + 1:]))
+        #     elif i == k - 1:
+        #         D.append(numpy.hstack(Dtr[:i]))
+        #         L.append(numpy.hstack(Ltr[:i]))
+        #     else:
+        #         D.append(numpy.hstack(Dtr[:i]))
+        #         D.append(numpy.hstack(Dtr[i + 1:]))
+        #
+        #         L.append(numpy.hstack(Ltr[:i]))
+        #         L.append(numpy.hstack(Ltr[i + 1:]))
+        #
+        #     D = numpy.hstack(D)
+        #     L = numpy.hstack(L)
+
         for i in range(k):
             Dte = Dtr[i]
-            print(Dte)
             Lte = Ltr[i]
             D = []
             L = []
 
-            if i == 0:
-                D.append(numpy.hstack(Dtr[i + 1:]))
-
-                L.append(numpy.hstack(Ltr[i + 1:]))
-            elif i == k - 1:
-                D.append(numpy.hstack(Dtr[:i]))
-                L.append(numpy.hstack(Ltr[:i]))
-            else:
-                D.append(numpy.hstack(Dtr[:i]))
-                D.append(numpy.hstack(Dtr[i + 1:]))
-
-                L.append(numpy.hstack(Ltr[:i]))
-                L.append(numpy.hstack(Ltr[i + 1:]))
+            for j in range(k):
+                if j != i:
+                    D.append(Dtr[j])
+                    L.append(Ltr[j])
 
             D = numpy.hstack(D)
             L = numpy.hstack(L)
-
-
-
-
-
 
             print("---------------MVG WITHOUT LDA--------------------------")
             # s = self.MVG.predict_MVG(DTE.T, LTE)
             # DFC = evaluation(s,LTE, 0.5, 1, 10)
 
-            llrMVG,llrNV = self._getScores(Dte,D,L, llrMVG,llrNV)
 
+            llrMVG,llrNV = self._getScores(Dte,D,L, llrMVG,llrNV)
             labelMVG = numpy.append(labelMVG,Lte,axis = 0)
             labelMVG = numpy.hstack(labelMVG)
 
-        minDFC = compute_min_DCF(numpy.hstack(llrMVG),numpy.hstack(labelMVG), 0.5, 1, 10 )
+
+        minDFC = compute_min_DCF(numpy.hstack(llrMVG),numpy.hstack(labelMVG), 0.5, 1, 10)
         print("MIN DFC", minDFC)
         minDFC = compute_min_DCF(numpy.hstack(llrNV), numpy.hstack(labelMVG), 0.5, 1, 10)
         print("MIN DFC", minDFC)

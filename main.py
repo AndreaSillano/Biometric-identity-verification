@@ -13,9 +13,9 @@ from mlFunc import *
 
 if __name__ == "__main__":
 
-    DTR,LTR = load("Train.txt")
+    DTR,LTR = load("Train2.txt")
 
-    DTE, LTE = load("Test.txt")
+    DTE, LTE = load("Test1.txt")
 
     #DTR_Z= DTR- DTR.mean(1).reshape((DTR.shape[0], 1))
     #DTE_Z= DTE- DTR.mean(1).reshape((DTR.shape[0], 1))

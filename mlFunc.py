@@ -2,7 +2,7 @@ import numpy as numpy
 import matplotlib.pyplot as plt
 import matplotlib
 import math
-
+import scipy
 def vcol(vett):
     return vett.reshape(vett.size, 1)
 
@@ -26,6 +26,19 @@ def znorm(DTR, DTE):
     DTE_z = (DTE - mu_DTR) / std_DTR
     return DTR_z, DTE_z
 
+def gaussianize_features(DTR, TO_GAUSS):
+    P = []
+    for dIdx in range(DTR.shape[0]):
+        DT = vcol(TO_GAUSS[dIdx, :])
+        X = DTR[dIdx, :] < DT
+        R = (X.sum(1) + 1) / (DTR.shape[1] + 2)
+        P.append(scipy.stats.norm.ppf(R))
+    return numpy.vstack(P)
+
+def shuffle_dataset(D, L):
+    numpy.random.seed(0)
+    idx = numpy.random.permutation(D.shape[1])
+    return D[:, idx], L[idx]
 def load(name):
     try:
         file = open(name, "r")
@@ -46,8 +59,10 @@ def load(name):
     #finalArray = numpyArr.transpose()
     #print(numpyArr,"\n\n########\n\n")
     labelpy = numpy.array(listLabel, dtype=int)
-
-    return (numpyArr, labelpy)
+    print(numpyArr.shape[0])
+    D, L = shuffle_dataset(numpyArr.T, labelpy)
+    print(D.T.shape[0])
+    return D.T, L
 
 def randomize(D, L, seed=0):
     nTrain = int(D.shape[1])
