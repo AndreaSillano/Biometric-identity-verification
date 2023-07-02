@@ -56,6 +56,8 @@ if __name__ == "__main__":
     DTR,LTR = load("Train.txt")
 
     DTE, LTE = load("Test.txt")
+    print("AUTHENTIC: ", DTR.T[:,LTR==1].shape[1])
+    print("SPOFFED", DTR.T[:, LTR==0].shape[1])
 
     plt = Plotter()
     dimRed = DimensionalityReduction()

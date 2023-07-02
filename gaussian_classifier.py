@@ -40,7 +40,7 @@ class MultivariateGaussianClassifier:
         err = 100 - (acc)
         print("ERROR: ", err, "%")
 
-        return (numpy.log(ll[1]/ll[0]))
+        return (numpy.log(numpy.exp(ll[1])/numpy.exp(ll[0])))
 
     def logpdf_GAU_ND(self, X, mu, C):
         Y = []
@@ -89,7 +89,7 @@ class MultivariateGaussianClassifier:
         print("ACCURACY: ", acc, "%")
         err = 100 - (acc)
         print("ERROR: ", err, "%")
-        return (ll[1]/ll[0])
+        return (numpy.log(numpy.exp(ll[1])/numpy.exp(ll[0])))
     #MVG TIED COV
 
     def _computeSW(self, D, L):
@@ -134,7 +134,7 @@ class MultivariateGaussianClassifier:
         print("ACCURACY: ", acc, "%")
         err = 100 - (acc)
         print("ERROR: ", err, "%")
-        return (ll[1]/ll[0])
+        return (numpy.log(numpy.exp(ll[0])/numpy.exp(ll[1])))
     #BYES + TIED
     def _computeSW_Diag(self, D, L):
         D0 = D[:, L == 0]
@@ -179,4 +179,6 @@ class MultivariateGaussianClassifier:
         print("ACCURACY: ", acc, "%")
         err = 100 - (acc)
         print("ERROR: ", err, "%")
-        return (ll[1]/ll[0])
+        return (numpy.log(numpy.exp(ll[1])/numpy.exp(ll[0])))
+
+
