@@ -3,6 +3,7 @@ import numpy
 from dimensionality_reduction import DimensionalityReduction
 from gaussian_classifier import MultivariateGaussianClassifier
 from logistic_regression import LogisticRegression
+from svm import SupportVectorMachine
 from mlFunc import *
 class Evaluation:
     def __init__(self):
@@ -115,4 +116,11 @@ class Evaluation:
         # print("---------------LOGISTIC REGRESSION WITH LDA--------------------------")
         # self.LR.setup_Logistic_Regression(DP, LTR, 0.1)
         # self.LR.preditc_Logistic_Regression(DPE, LTE, 0.1)
+
+        print("---------------SVM Linear REGRESSION WITHOUT LDA--------------------------")
+        self.svmLin.setup_primal_svm(DTR.T, LTR, 0.1)
+        self.svmLin.predict_primal_svm(DTE.T, LTE, 0.1)
+
+        print("---------------SVM Linear REGRESSION WITHOUT LDA--------------------------")
+        self.svmLin.setup_kernelPoly_svm(DTR.T, LTR, DTE.T, LTE)
 
