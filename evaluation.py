@@ -3,13 +3,13 @@ import numpy
 from dimensionality_reduction import DimensionalityReduction
 from gaussian_classifier import MultivariateGaussianClassifier
 from logistic_regression import LogisticRegression
-from svm import SupportVectorMachine
+from SVM import SupportVectorMachine
 from mlFunc import *
 class Evaluation:
     def __init__(self):
         self.MVG = MultivariateGaussianClassifier()
         self.LR = LogisticRegression()
-        #self.svmLin = SupportVectorMachine()
+        self.svm = SupportVectorMachine()
 
 
 
@@ -118,12 +118,19 @@ class Evaluation:
         # self.LR.preditc_Logistic_Regression(DPE, LTE, 0.1)
 
         print("---------------SVM Linear REGRESSION WITHOUT LDA--------------------------")
-        self.svmLin.setup_primal_svm(DTR.T, LTR, 0.1)
-        self.svmLin.predict_primal_svm(DTE.T, LTE, 0.1)
+        K = [1.0]
+        C = [0.01]
+        self.svm.validation_SVM(DTR.T, LTR.T, K, C, "svm")
+        self.svm.evaluation_SVM(DTR.T, LTR.T, DTE.T, LTE.T, K, C, "svm_ev")
+        #self.svmLin.setup_primal_svm(DTR.T, LTR, 0.1)
+        #self.svmLin.predict_primal_svm(DTE.T, LTE, 0.1)
+        #K_arr = [1.0]
+        #C_arr = [0.01]
+        #self.svmLin.validation_SVM(DTR, LTR, K_arr, C_arr, 'RAW_')
+        
+        #print("---------------SVM Kernel Poly REGRESSION WITHOUT LDA--------------------------")
+        #self.svmLin.setup_kernelPoly_svm(DTR.T, LTR, DTE.T, LTE)
 
-        print("---------------SVM Kernel Poly REGRESSION WITHOUT LDA--------------------------")
-        self.svmLin.setup_kernelPoly_svm(DTR.T, LTR, DTE.T, LTE)
-
-        print("---------------SVM Kernel RBG REGRESSION WITHOUT LDA--------------------------")
-        self.svmLin.setup_kernelRBF_svm(DTR.T, LTR, DTE.T, LTE)
+        #print("---------------SVM Kernel RBG REGRESSION WITHOUT LDA--------------------------")
+        #self.svmLin.setup_kernelRBF_svm(DTR.T, LTR, DTE.T, LTE)
 
