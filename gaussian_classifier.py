@@ -1,46 +1,47 @@
 import numpy
 from mlFunc import *
-
+import scipy
 class MultivariateGaussianClassifier:
 
-    def __init__(self):
-        self.classes = None
-        self.means = []
-        self.covariances = []
 
-    def setup_MVG(self,D, L):
-        self.means = []
-        self.covariances = []
-        self.classes = numpy.unique(L)
-        for c in self.classes:
+
+    def predict_MVG(self, D, L, DTE):
+
+        classes = numpy.unique(L)
+        covariances =[]
+        means = []
+        logSJoint = numpy.zeros((2, DTE.shape[1]))
+        dens = numpy.zeros((2, DTE.shape[1]))
+
+        for c in classes:
             D_c = D[:, L == c]
             mu = empirical_mean(D_c)
-            self.means.append(mu)
+            means.append(mu)
             C = empirical_covariance(D_c, mu)
-            self.covariances.append(C)
+            covariances.append(C)
 
-    def predict_MVG(self, D, L):
-        ll = []
-        for mu, C in zip(self.classes, self.covariances):
-            ll.append(self.logpdf_GAU_ND(D, mu, C))
+        for label in classes:
+            dens[label, :] = numpy.exp(self.logpdf_GAU_ND(DTE, means[label], covariances[label]).ravel())
+            logSJoint[label, :] = self.logpdf_GAU_ND(DTE, means[label], covariances[label]).ravel() + numpy.log(1/2)
 
-        Sjoint = numpy.exp(ll)*(1/2)
-        Smarginal = vrow(Sjoint.sum(0))
-        SPost = Sjoint/Smarginal
-        pred = numpy.argmax(SPost, axis=0)
+        logSMarginal = scipy.special.logsumexp(logSJoint, axis=0)
+        logPost = logSJoint - vrow(logSMarginal)
+        Post = numpy.exp(logPost)
+        pred = numpy.argmax(Post, axis=0)
 
-        common_elements = []
-        for i in range(len(pred)):
-            if pred[i] == L[i]:
-                common_elements.append(L[i])
+        # common_elements = []
+        # for i in range(len(pred)):
+        #     if pred[i] == L[i]:
+        #         common_elements.append(L[i])
+        #
+        # acc = len(common_elements) / len(L) * 100
+        # print("LOG predicion Post Probability")
+        # print("ACCURACY: ", acc, "%")
+        # err = 100 - (acc)
+        # print("ERROR: ", err, "%")
+        return numpy.log(dens[1] / dens[0])
 
-        acc = len(common_elements) / len(L) * 100
-        print("LOG predicion Post Probability")
-        print("ACCURACY: ", acc, "%")
-        err = 100 - (acc)
-        print("ERROR: ", err, "%")
 
-        return (numpy.log(numpy.exp(ll[1])/numpy.exp(ll[0])))
 
     def logpdf_GAU_ND(self, X, mu, C):
         Y = []
@@ -58,38 +59,44 @@ class MultivariateGaussianClassifier:
         return const - 0.5 * logdet - 0.5 * v
 
     #NAIVE BAYES
-    def setup_MVG_Naive_Bayes(self,D, L):
-        self.means = []
-        self.covariances = []
-        self.classes = numpy.unique(L)
-        for c in self.classes:
+
+
+    def predict_MVG_Naive_Bayes(self, D, L,DTE):
+
+        classes = numpy.unique(L)
+        covariances = []
+        means = []
+        logSJoint = numpy.zeros((2, DTE.shape[1]))
+        dens = numpy.zeros((2, DTE.shape[1]))
+
+        for c in classes:
             D_c = D[:, L == c]
             mu = empirical_mean(D_c)
-            self.means.append(mu)
+            means.append(mu)
             C = computeCovDiag(D_c, mu)
-            self.covariances.append(C)
+            covariances.append(C)
 
-    def predict_MVG_Naive_Bayes(self, D, L):
-        ll = []
-        for mu, C in zip(self.classes, self.covariances):
-            ll.append(self.logpdf_GAU_ND(D, mu, C))
+        for label in classes:
+            dens[label, :] = numpy.exp(self.logpdf_GAU_ND(DTE, means[label], covariances[label]).ravel())
+            logSJoint[label, :] = self.logpdf_GAU_ND(DTE, means[label], covariances[label]).ravel() + numpy.log(1 / 2)
 
-        Sjoint = numpy.exp(ll)*(1/2)
-        Smarginal = vrow(Sjoint.sum(0))
-        SPost = Sjoint/Smarginal
-        pred = numpy.argmax(SPost, axis=0)
+        logSMarginal = scipy.special.logsumexp(logSJoint, axis=0)
+        logPost = logSJoint - vrow(logSMarginal)
+        Post = numpy.exp(logPost)
+        pred = numpy.argmax(Post, axis=0)
 
-        common_elements = []
-        for i in range(len(pred)):
-            if pred[i] == L[i]:
-                common_elements.append(L[i])
+        # common_elements = []
+        # for i in range(len(pred)):
+        #     if pred[i] == L[i]:
+        #         common_elements.append(L[i])
+        #
+        # acc = len(common_elements) / len(L) * 100
+        # print("LOG predicion Post Probability")
+        # print("ACCURACY: ", acc, "%")
+        # err = 100 - (acc)
+        # print("ERROR: ", err, "%")
+        return numpy.log(dens[1] / dens[0])
 
-        acc = len(common_elements) / len(L) * 100
-        print("Naive Bayes predicion Post Probability")
-        print("ACCURACY: ", acc, "%")
-        err = 100 - (acc)
-        print("ERROR: ", err, "%")
-        return (numpy.log(numpy.exp(ll[1])/numpy.exp(ll[0])))
     #MVG TIED COV
 
     def _computeSW(self, D, L):
