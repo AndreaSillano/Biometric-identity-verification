@@ -224,7 +224,7 @@ def compute_min_DCF1(scores, pi,C_fn, C_fp, LTR):
         (DCFu1, _, _) = evaluationBinaryTaskV2THRESHOLD(pi, C_fn, C_fp, m1)
         DFCList.append(normalizedEvaluationBinaryTaskV2THRESHOLD(pi, C_fn, C_fp, DCFu1))
 
-    index = np.argmin(DFCList)
+    index = numpy.argmin(DFCList)
     print("Min DCF with prior pi1=%.1f and costs Cfn=%.1f, Cfp=%.1f: " %
           (0.5, 1, 1))
     print(DCFarr1[index])

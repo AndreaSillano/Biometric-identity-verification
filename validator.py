@@ -3,7 +3,7 @@ import numpy
 from dimensionality_reduction import DimensionalityReduction
 from gaussian_classifier import MultivariateGaussianClassifier
 from logistic_regression import LogisticRegression
-from svm import SupportVectorMachine
+from SVM import SupportVectorMachine
 from mlFunc import *
 class Validation:
     def __init__(self):
@@ -42,6 +42,7 @@ class Validation:
 
             if i == 0:
                 D.append(numpy.hstack(Dtr[i + 1:]))
+
                 L.append(numpy.hstack(Ltr[i + 1:]))
             elif i == k - 1:
                 D.append(numpy.hstack(Dtr[:i]))
@@ -49,6 +50,7 @@ class Validation:
             else:
                 D.append(numpy.hstack(Dtr[:i]))
                 D.append(numpy.hstack(Dtr[i + 1:]))
+
                 L.append(numpy.hstack(Ltr[:i]))
                 L.append(numpy.hstack(Ltr[i + 1:]))
 
@@ -64,30 +66,25 @@ class Validation:
             # s = self.MVG.predict_MVG(DTE.T, LTE)
             # DFC = evaluation(s,LTE, 0.5, 1, 10)
 
-#            self.MVG.setup_MVG(numpy.array(D), numpy.array(L))
-            #llrMVG = numpy.append(llrMVG,self.MVG.predict_MVG(Dte,Lte))
-            #llrMVG = numpy.hstack(llrMVG)
-            llrMVG, llrNV = self._getScores(Dte,D,L,llrMVG, llrNV)
+            self.MVG.setup_MVG(numpy.array(D), numpy.array(L))
+            llrMVG = numpy.append(llrMVG,self.MVG.predict_MVG(Dte,Lte))
+            llrMVG = numpy.hstack(llrMVG)
             labelMVG = numpy.append(labelMVG,Lte,axis = 0)
+            labelMVG = numpy.hstack(labelMVG)
 
-        minDFC = compute_min_DCF(numpy.hstack(llrMVG),numpy.array(labelMVG), 0.5, 1, 10 )
+        minDFC = compute_min_DCF(numpy.array(llrMVG),numpy.array(labelMVG), 0.5, 1, 10 )
         print("MIN DFC", minDFC)
 
-        minDFC1 = compute_min_DCF(numpy.hstack(llrNV), numpy.array(labelMVG), 0.5, 1, 10)
-        print("MIN DFC", minDFC1)
+
 
 
 
         #########################################################
         #                     DFC on test data
         #########################################################
-        s = self.MVG.predict_MVG(DTR.T, LTR, DTE.T)
+        s = self.MVG.predict_MVG(DTE.T, LTE)
         res= compute_act_DCF(s, LTE, 0.5,1, 10, None)
         print("ACT DFC", res)
-
-        s1 = self.MVG.predict_MVG_Naive_Bayes(DTR.T, LTR, DTE.T)
-        res1= compute_act_DCF(s1, LTE, 0.5,1, 10, None)
-        print("ACT DFC", res1)
         # print("---------------MVG WITH LDA--------------------------")
         # self.MVG.setup_MVG(DP, LTR)
         # s1 = self.MVG.predict_MVG(DPE, LTE)
@@ -136,9 +133,19 @@ class Validation:
         # self.LR.preditc_Logistic_Regression(DPE, LTE, 0.1)
 
         print("---------------SVM Linear REGRESSION WITHOUT LDA--------------------------")
-        self.svmLin.setup_primal_svm(DTR.T, LTR, 0.1)
-        self.svmLin.predict_primal_svm(DTE.T, LTE, 0.1)
+        K = [1.0]
+        C = [0.01]
+        self.svm.validation_SVM(DTR.T, LTR.T, K, C, "svm")
+        self.svm.evaluation_SVM(DTR.T, LTR.T, DTE.T, LTE.T, K, C, "svm_ev")
+        #self.svmLin.setup_primal_svm(DTR.T, LTR, 0.1)
+        #self.svmLin.predict_primal_svm(DTE.T, LTE, 0.1)
+        #K_arr = [1.0]
+        #C_arr = [0.01]
+        #self.svmLin.validation_SVM(DTR, LTR, K_arr, C_arr, 'RAW_')
+        
+        #print("---------------SVM Kernel Poly REGRESSION WITHOUT LDA--------------------------")
+        #self.svmLin.setup_kernelPoly_svm(DTR.T, LTR, DTE.T, LTE)
 
-        print("---------------SVM Linear REGRESSION WITHOUT LDA--------------------------")
-        self.svmLin.setup_kernelPoly_svm(DTR.T, LTR, DTE.T, LTE)
+        print("---------------SVM Kernel RBG REGRESSION WITHOUT LDA--------------------------")
+        self.svmLin.setup_kernelRBF_svm(DTR.T, LTR, DTE.T, LTE)
 
