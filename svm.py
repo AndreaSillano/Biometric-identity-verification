@@ -82,25 +82,6 @@ def calculate_lbgf(H, DTR, C):
 
     return alphaStar, JDual, LDual
 
-
-def train_SVM_linear(DTR, LTR, C, K=1):
-    DTREXT = numpy.vstack([DTR, K * numpy.ones((1, DTR.shape[1]))])
-    Z = numpy.zeros(LTR.shape)
-    Z[LTR == 1] = 1
-    Z[LTR == 0] = -1
-
-    H = numpy.dot(DTREXT.T, DTREXT)
-    H = vcol(Z) * vrow(Z) * H
-
-    def JPrimal(w):
-        S = numpy.dot(vrow(w), DTREXT)
-        loss = numpy.maximum(numpy.zeros(S.shape), 1 - Z * S).sum()
-        return 0.5 * numpy.linalg.norm(w) ** 2 + C * loss
-
-    alphaStar, JDual, LDual = calculate_lbgf(H, DTR, C)
-    wStar = numpy.dot(DTREXT, vcol(alphaStar) * vcol(Z))
-    return wStar, JPrimal(wStar)
-
 class SupportVectorMachine:
     def __init__(self):
         self.w = []
@@ -108,199 +89,50 @@ class SupportVectorMachine:
         self.dl = []
         self.dg = []
 
-    def validation_SVM(self, DTR, LTR, K_arr, C_arr, appendToTitle):
-        for K in K_arr:
-            for C in C_arr:
-                self.kfold_SVM(DTR, LTR, K, C, appendToTitle)
+    def train_SVM_linear(self, DTR, LTR, C, K):
+        DTREXT = numpy.vstack([DTR, K * numpy.ones((1, DTR.shape[1]))])
+        Z = numpy.zeros(LTR.shape)
+        Z[LTR == 1] = 1
+        Z[LTR == 0] = -1
 
-        print("codio")
-        x = numpy.logspace(-3, 2, 6)
-        y = numpy.array([])
-        y_05 = numpy.array([])
-        y_09 = numpy.array([])
-        y_01 = numpy.array([])
-        print(x,"+",len(x))
-        for xi in x:
-            print(xi)
-            scores, labels = self.kfold_SVM_calibration(DTR, LTR, 1.0, xi)
-            y_05 = numpy.hstack((y_05, bayes_error_plot_compare(0.5, scores, labels)))
-            y_09 = numpy.hstack((y_09, bayes_error_plot_compare(0.9, scores, labels)))
-            y_01 = numpy.hstack((y_01, bayes_error_plot_compare(0.1, scores, labels)))
+        H = numpy.dot(DTREXT.T, DTREXT)
+        H = vcol(Z) * vrow(Z) * H
 
-        y = numpy.hstack((y, y_05))
-        y = numpy.vstack((y, y_09))
-        y = numpy.vstack((y, y_01))
+        def JPrimal(w):
+            S = numpy.dot(vrow(w), DTREXT)
+            loss = numpy.maximum(numpy.zeros(S.shape), 1 - Z * S).sum()
+            return 0.5 * numpy.linalg.norm(w) ** 2 + C * loss
 
-        plot_DCF(x, y, 'C', appendToTitle + 'SVM_minDCF_comparison')
+        alphaStar, JDual, LDual = calculate_lbgf(H, DTR, C)
+        wStar = numpy.dot(DTREXT, vcol(alphaStar) * vcol(Z))
+        return wStar, JPrimal(wStar)
     
-    def kfold_SVM(self, DTR, LTR, K, C, appendToTitle, PCA_Flag=True, gauss_Flag=False, zscore_Flag=False):
-        k = 5
-        Dtr = numpy.split(DTR, k, axis=1)
-        Ltr = numpy.split(LTR, k)
+    def train_SVM_polynomial(self, DTR, LTR, C, K=1, constant=0, degree=2):
+        Z = numpy.zeros(LTR.shape)
+        Z[LTR == 1] = 1
+        Z[LTR == 0] = -1
 
-        scores_append = []
-        PCA_SVM_scores_append = []
-        PCA2_SVM_scores_append = []
-        SVM_labels = []
+        H = (numpy.dot(DTR.T, DTR) + constant) ** degree + K ** 2
+        # Dist = mcol((DTR**2).sum(0)) + mrow((DTR**2).sum(0)) - 2*numpy.dot(DTR.T, DTR)
+        # H = numpy.exp(-Dist)
+        H = vcol(Z) * vrow(Z) * H
 
-        for i in range(k):
-            D = []
-            L = []
-            if i == 0:
-                D.append(numpy.hstack(Dtr[i + 1:]))
-                L.append(numpy.hstack(Ltr[i + 1:]))
-            elif i == k - 1:
-                D.append(numpy.hstack(Dtr[:i]))
-                L.append(numpy.hstack(Ltr[:i]))
-            else:
-                D.append(numpy.hstack(Dtr[:i]))
-                D.append(numpy.hstack(Dtr[i + 1:]))
-                L.append(numpy.hstack(Ltr[:i]))
-                L.append(numpy.hstack(Ltr[i + 1:]))
+        alphaStar, JDual, LDual = calculate_lbgf(H, DTR, C)
 
-            D = numpy.hstack(D)
-            L = numpy.hstack(L)
-
-            Dte = Dtr[i]
-            Lte = Ltr[i]
-
-            print(i)
-            wStar, primal = train_SVM_linear(D, L, C=C, K=K)
-            DTEEXT = numpy.vstack([Dte, K * numpy.ones((1, Dte.shape[1]))])
-
-            scores = numpy.dot(wStar.T, DTEEXT).ravel()
-            scores_append.append(scores)
-
-            SVM_labels = numpy.append(SVM_labels, Lte, axis=0)
-            SVM_labels = numpy.hstack(SVM_labels)
-
-
-        scores_append = numpy.hstack(scores_append)
-        scores_tot = compute_min_DCF(scores_append, SVM_labels, 0.5, 1, 1)
-
-        # plot_ROC(scores_append, SVM_labels, appendToTitle + 'SVM, K=' + str(K) + ', C=' + str(C))
-
-        # Cfn and Ctp are set to 1
-        #bayes_error_min_act_plot(scores_append, SVM_labels, appendToTitle + 'SVM, K=' + str(K) + ', C=' + str(C), 0.4)
-
-        ###############################
-
-        # π = 0.1
-        scores_tot = compute_min_DCF(scores_append, SVM_labels, 0.1, 1, 1)
-
-        ###############################
-
-        # π = 0.9
-        scores_tot = compute_min_DCF(scores_append, SVM_labels, 0.9, 1, 1)
-
-    def kfold_SVM_calibration(self, DTR, LTR, K, C, PCA_Flag=True, gauss_Flag=False, zscore_Flag=False):
-        k = 5
-        Dtr = numpy.split(DTR, k, axis=1)
-        Ltr = numpy.split(LTR, k)
-
-        scores_append = []
-        LR_labels = []
-
-        for i in range(k):
-            D = []
-            L = []
-            if i == 0:
-                D.append(numpy.hstack(Dtr[i + 1:]))
-                L.append(numpy.hstack(Ltr[i + 1:]))
-            elif i == k - 1:
-                D.append(numpy.hstack(Dtr[:i]))
-                L.append(numpy.hstack(Ltr[:i]))
-            else:
-                D.append(numpy.hstack(Dtr[:i]))
-                D.append(numpy.hstack(Dtr[i + 1:]))
-                L.append(numpy.hstack(Ltr[:i]))
-                L.append(numpy.hstack(Ltr[i + 1:]))
-
-            D = numpy.hstack(D)
-            L = numpy.hstack(L)
-
-            Dte = Dtr[i]
-            Lte = Ltr[i]
-
-            print(i)
-            wStar, primal = train_SVM_linear(D, L, C=C, K=K)
-            DTEEXT = numpy.vstack([Dte, K * numpy.ones((1, Dte.shape[1]))])
-
-            scores = numpy.dot(wStar.T, DTEEXT).ravel()
-            scores_append.append(scores)
-
-            LR_labels = numpy.append(LR_labels, Lte, axis=0)
-            LR_labels = numpy.hstack(LR_labels)
-
-        return numpy.hstack(scores_append), LR_labels
+        return alphaStar, JDual(alphaStar)[0]
     
-    def evaluate_SVM(self, DTR, LTR, DTE, LTE, K, C, appendToTitle, PCA_Flag=True):
-        scores_append = []
-        SVM_labels = []
+    def train_SVM_RBF(self, DTR, LTR, C, K=1, gamma=1.):
+        Z = numpy.zeros(LTR.shape)
+        Z[LTR == 1] = 1
+        Z[LTR == 0] = -1
 
-        wStar, _ = train_SVM_linear(DTR, LTR, C=C, K=K)
+        # kernel function
+        kernel = numpy.zeros((DTR.shape[1], DTR.shape[1]))
+        for i in range(DTR.shape[1]):
+            for j in range(DTR.shape[1]):
+                kernel[i, j] = numpy.exp(-gamma * (numpy.linalg.norm(DTR[:, i] - DTR[:, j]) ** 2)) + K * K
+        H = vcol(Z) * vrow(Z) * kernel
 
-        DTEEXT = numpy.vstack([DTE, K * numpy.ones((1, DTE.shape[1]))])
+        alphaStar, JDual, LDual = calculate_lbgf(H, DTR, C)
 
-        scores = numpy.dot(wStar.T, DTEEXT).ravel()
-        scores_append.append(scores)
-
-        SVM_labels = numpy.append(SVM_labels, LTE, axis=0)
-        SVM_labels = numpy.hstack(SVM_labels)
-
-        scores_append = numpy.hstack(scores_append)
-        scores_tot = compute_min_DCF(scores_append, SVM_labels, 0.5, 1, 1)
-
-        # plot_ROC(scores_append, SVM_labels, appendToTitle + 'SVM, K=' + str(K) + ', C=' + str(C))
-
-        # Cfn and Ctp are set to 1
-        # bayes_error_min_act_plot(scores_append, SVM_labels, appendToTitle + 'SVM, K=' + str(K) + ', C=' + str(C), 0.4)
-
-
-        ###############################
-
-        # π = 0.1
-        scores_tot = compute_min_DCF(scores_append, SVM_labels, 0.1, 1, 1)
-
-        ###############################
-
-        # π = 0.9
-        scores_tot = compute_min_DCF(scores_append, SVM_labels, 0.9, 1, 1)
-
-
-    def svm_tuning(self, DTR, LTR,DTE, LTE, K, C):
-        scores_append = []
-        labels = []
-
-        wStar, _ = train_SVM_linear(DTR, LTR, C=C, K=K)
-        DTEEXT = numpy.vstack([DTE, K * numpy.ones((1, DTE.shape[1]))])
-
-        scores = numpy.dot(wStar.T, DTEEXT).ravel()
-        scores_append.append(scores)
-
-        labels = numpy.append(labels, LTE, axis=0)
-        labels = numpy.hstack(labels)
-
-        return numpy.hstack(scores_append), labels
-
-
-    def evaluation_SVM(self, DTR, LTR, DTE, LTE, K_arr, C_arr, appendToTitle, PCA_Flag=True):
-        for K in K_arr:
-            for C in C_arr:
-                self.evaluate_SVM(DTR, LTR, DTE, LTE, K, C, appendToTitle, PCA_Flag=False)
-        x = numpy.logspace(-3, 2, 6)
-        y = numpy.array([])
-        y_05 = numpy.array([])
-        y_09 = numpy.array([])
-        y_01 = numpy.array([])
-        for xi in x:
-            scores, labels = self.svm_tuning(DTR, LTR, DTE, LTE, 1.0, xi)
-            y_05 = numpy.hstack((y_05, bayes_error_plot_compare(0.5, scores, labels)))
-            y_09 = numpy.hstack((y_09, bayes_error_plot_compare(0.9, scores, labels)))
-            y_01 = numpy.hstack((y_01, bayes_error_plot_compare(0.1, scores, labels)))
-
-        y = numpy.hstack((y, y_05))
-        y = numpy.vstack((y, y_09))
-        y = numpy.vstack((y, y_01))
-
-        plot_DCF(x, y, 'C', appendToTitle + 'Linear_SVM_minDCF_comparison')
+        return alphaStar, JDual(alphaStar)[0]
