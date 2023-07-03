@@ -114,7 +114,7 @@ class SupportVectorMachine:
                 self.kfold_SVM(DTR, LTR, K, C, appendToTitle)
 
         print("codio")
-        x = numpy.logspace(-3, 2, 6)
+        x = numpy.logspace(-4, 1, 10)
         y = numpy.array([])
         y_05 = numpy.array([])
         y_09 = numpy.array([])
@@ -177,6 +177,7 @@ class SupportVectorMachine:
 
         scores_append = numpy.hstack(scores_append)
         scores_tot = compute_min_DCF(scores_append, SVM_labels, 0.5, 1, 1)
+        print(scores_tot)
 
         # plot_ROC(scores_append, SVM_labels, appendToTitle + 'SVM, K=' + str(K) + ', C=' + str(C))
 
@@ -187,11 +188,12 @@ class SupportVectorMachine:
 
         # π = 0.1
         scores_tot = compute_min_DCF(scores_append, SVM_labels, 0.1, 1, 1)
-
+        print(scores_tot)
         ###############################
 
         # π = 0.9
         scores_tot = compute_min_DCF(scores_append, SVM_labels, 0.9, 1, 1)
+        print(scores_tot)
 
     def kfold_SVM_calibration(self, DTR, LTR, K, C, PCA_Flag=True, gauss_Flag=False, zscore_Flag=False):
         k = 5

@@ -3,7 +3,7 @@ import numpy
 from dimensionality_reduction import DimensionalityReduction
 from gaussian_classifier import MultivariateGaussianClassifier
 from logistic_regression import LogisticRegression
-from svm import SupportVectorMachine
+from SVM import SupportVectorMachine
 from mlFunc import *
 class Validation:
     def __init__(self):
@@ -137,12 +137,13 @@ class Validation:
         # self.LR.preditc_Logistic_Regression(DPE, LTE, 0.1)
 
         print("---------------SVM Linear REGRESSION WITHOUT LDA--------------------------")
-        self.svmLin.setup_primal_svm(DTR.T, LTR, 0.1)
-        self.svmLin.predict_primal_svm(DTE.T, LTE, 0.1)
+        self.svmLin.validation_SVM(DTR.T, LTR, [0.1], [1], "validation svm")
+        self.svmLin.evaluation_SVM(DTR.T, LTR, DTE.T, LTE, [0.1], [1], "ev svm")
+        #self.svmLin.predict_primal_svm(DTE.T, LTE, 0.1)
 
-        print("---------------SVM Kernel Poly REGRESSION WITHOUT LDA--------------------------")
-        self.svmLin.setup_kernelPoly_svm(DTR.T, LTR, DTE.T, LTE)
+        #print("---------------SVM Kernel Poly REGRESSION WITHOUT LDA--------------------------")
+        #self.svmLin.setup_kernelPoly_svm(DTR.T, LTR, DTE.T, LTE)
 
-        print("---------------SVM Kernel RBG REGRESSION WITHOUT LDA--------------------------")
-        self.svmLin.setup_kernelRBF_svm(DTR.T, LTR, DTE.T, LTE)
+        #print("---------------SVM Kernel RBG REGRESSION WITHOUT LDA--------------------------")
+        #self.svmLin.setup_kernelRBF_svm(DTR.T, LTR, DTE.T, LTE)
 
