@@ -52,3 +52,4 @@ if __name__ == "__main__":
 
 
     VA.MVG_validation(DTR,LTR,DTE,LTE)
+    VA.SVM_validation(DTR,LTR,DTE,LTE)

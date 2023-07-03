@@ -9,7 +9,7 @@ class Validation:
     def __init__(self):
         self.MVG = MultivariateGaussianClassifier()
         self.LR = LogisticRegression()
-        self.svmLin = SupportVectorMachine()
+        self.svm = SupportVectorMachine()
 
     def _getScores(self, Dte, D, L, llrMVG, llrNV):
         llrs = self.MVG.predict_MVG(D, L, Dte)
@@ -28,9 +28,6 @@ class Validation:
         llrMVG = []
         llrNV = []
         labelMVG =[]
-
-
-
 
         for i in range(k):
             Dte = Dtr[i]
@@ -122,9 +119,9 @@ class Validation:
         # self.LR.setup_Logistic_Regression(DP, LTR, 0.1)
         # self.LR.preditc_Logistic_Regression(DPE, LTE, 0.1)
 
-        print("---------------SVM Linear REGRESSION WITHOUT LDA--------------------------")
-        self.svmLin.validation_SVM(DTR.T, LTR, [0.1], [1], "validation svm")
-        self.svmLin.evaluation_SVM(DTR.T, LTR, DTE.T, LTE, [0.1], [1], "ev svm")
+        #print("---------------SVM Linear REGRESSION WITHOUT LDA--------------------------")
+        #self.svmLin.validation_SVM(DTR.T, LTR, [0.1], [1], "validation svm")
+        #self.svmLin.evaluation_SVM(DTR.T, LTR, DTE.T, LTE, [0.1], [1], "ev svm")
         #self.svmLin.predict_primal_svm(DTE.T, LTE, 0.1)
 
         #print("---------------SVM Kernel Poly REGRESSION WITHOUT LDA--------------------------")
@@ -132,4 +129,134 @@ class Validation:
 
         #print("---------------SVM Kernel RBG REGRESSION WITHOUT LDA--------------------------")
         #self.svmLin.setup_kernelRBF_svm(DTR.T, LTR, DTE.T, LTE)
+    def kfold_SVM(self, DTR, LTR, K, C):
+        k = 5
+        Dtr = numpy.split(DTR, k, axis=1)
+        Ltr = numpy.split(LTR, k)
+
+        scoresLin_append = []
+        scoresPol_append = []
+        scoresRBF_append = []
+        PCA_SVM_scoresLin_append = []
+        PCA2_SVM_scoresLin_append = []
+        SVM_labels = []
+
+        for i in range(k):
+            Dte = Dtr[i]
+            Lte = Ltr[i]
+            D = []
+            L = []
+
+            for j in range(k):
+                if j != i:
+                    D.append(Dtr[j])
+                    L.append(Ltr[j])
+
+            D = numpy.hstack(D)
+            L = numpy.hstack(L)
+
+            Dte = Dtr[i]
+            Lte = Ltr[i]
+
+            wStar, primal = self.svm.train_SVM_linear(D, L, C, K)
+            DTEEXT = numpy.vstack([Dte, K * numpy.ones((1, Dte.shape[1]))])
+
+            scores = numpy.dot(wStar.T, DTEEXT).ravel()
+            scoresLin_append.append(scores)
+
+            costant = 0
+            degree = 2
+            aStar, primal = self.svm.train_SVM_polynomial(D, L, C, K, costant, degree)
+            Z = numpy.zeros(L.shape)
+            Z[L == 1] = 1
+            Z[L == 0] = -1
+            kernel = (numpy.dot(D.T, Dte) + costant) ** degree + K * K
+            scores = numpy.sum(numpy.dot(aStar * vrow(Z), kernel), axis=0)
+            scoresPol_append.append(scores)
+
+            Z = L * 2 - 1
+            gamma=1.
+            aStar, loss = self.svm.train_SVM_RBF(D, L, C, K, gamma)
+            kern = numpy.zeros((D.shape[1], Dte.shape[1]))
+            for i in range(D.shape[1]):
+                for j in range(Dte.shape[1]):
+                    kern[i, j] = numpy.exp(-gamma * (numpy.linalg.norm(D[:, i] - Dte[:, j]) ** 2)) + K * K
+            scores = numpy.sum(numpy.dot(aStar * vrow(Z), kern), axis=0)
+            scoresRBF_append.append(scores)
+
+            SVM_labels = numpy.append(SVM_labels, Lte, axis=0)
+            SVM_labels = numpy.hstack(SVM_labels)
+
+        return scoresLin_append, scoresPol_append, scoresRBF_append, SVM_labels
+
+        # plot_ROC(scoresLin_append, SVM_labels, appendToTitle + 'SVM, K=' + str(K) + ', C=' + str(C))
+
+        # Cfn and Ctp are set to 1
+        #bayes_error_min_act_plot(scoresLin_append, SVM_labels, appendToTitle + 'SVM, K=' + str(K) + ', C=' + str(C), 0.4)
+
+        ###############################
+
+        # π = 0.1
+        #scores_tot = compute_min_DCF(scoresLin_append, SVM_labels, 0.1, 1, 1)
+        #print(scores_tot)
+        ###############################
+
+        # π = 0.9
+        #scores_tot = compute_min_DCF(scoresLin_append, SVM_labels, 0.9, 1, 1)
+        #print(scores_tot)
+
+    def SVM_validation(self, DTR, LTR, DTE, LTE):
+        K = 1
+        scoresLin_append = []
+        scoresPol_append = []
+        scoresRBF_append = []
+        SVM_labels = []
+        DTR = DTR.T
+        scoresLin_append, scoresPol_append, scoresRBF_append, SVM_labels = self.kfold_SVM(DTR, LTR, K, 0.1)
+
+        scoresLin_append = numpy.hstack(scoresLin_append)
+        scores_tot = compute_min_DCF(scoresLin_append, SVM_labels, 0.5, 1, 10)
+        print("MIN DFC TRAIN SVM Linear", scores_tot)
+
+        wStar, primal = self.svm.train_SVM_linear(DTR, LTR, 0.1, K) #testerai anche su DTR
+        DTEEXT = numpy.vstack([DTR, K * numpy.ones((1, DTR.shape[1]))])
+        scores = numpy.dot(wStar.T, DTEEXT).ravel()
+        scoresLin_append = []
+        scoresLin_append.append(scores)
+        rettt = compute_act_DCF(numpy.hstack(scoresLin_append), LTR, 0.5, 1, 10, None)
+        print("ACT DFC ON TRAIN SVM Linear", rettt)
+
+        scoresPol_append = numpy.hstack(scoresPol_append)
+        scores_tot = compute_min_DCF(scoresPol_append, SVM_labels, 0.5, 1, 10)
+        print("MIN DFC TRAIN SVM Polynomial", scores_tot)
+
+        costant = 0
+        degree = 2
+        aStar, primal = self.svm.train_SVM_polynomial(DTR, LTR, 0.1, K)
+        Z = numpy.zeros(LTR.shape)
+        Z[LTR == 1] = 1
+        Z[LTR == 0] = -1
+        kernel = (numpy.dot(DTR.T, DTR) + costant) ** degree + K * K
+        scores = numpy.sum(numpy.dot(aStar * vrow(Z), kernel), axis=0)
+        scoresPol_append = []
+        scoresPol_append.append(scores)
+        rettt = compute_act_DCF(numpy.hstack(scoresPol_append), LTR, 0.5, 1, 10, None)
+        print("ACT DFC ON TRAIN SVM Polynomial", rettt)
+
+        scoresRBF_append = numpy.hstack(scoresRBF_append)
+        scores_tot = compute_min_DCF(scoresRBF_append, SVM_labels, 0.5, 1, 10)
+        print("MIN DFC TRAIN SVM RBF", scores_tot)
+
+        Z = LTR * 2 - 1
+        gamma=1.
+        aStar, loss = self.svm.train_SVM_RBF(DTR, LTR, 0.1, K, gamma)
+        kern = numpy.zeros((DTR.shape[1], DTR.shape[1]))
+        for i in range(DTR.shape[1]):
+            for j in range(DTR.shape[1]):
+                kern[i, j] = numpy.exp(-gamma * (numpy.linalg.norm(DTR[:, i] - DTR[:, j]) ** 2)) + K * K
+        scores = numpy.sum(numpy.dot(aStar * vrow(Z), kern), axis=0)
+        scoresRBF_append = []
+        scoresRBF_append.append(scores)
+        rettt = compute_act_DCF(numpy.hstack(scoresRBF_append), LTR, 0.5, 1, 10, None)
+        print("ACT DFC ON TRAIN SVM RBF", rettt)
 
