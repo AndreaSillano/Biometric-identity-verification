@@ -54,7 +54,10 @@ def load(name):
         Dlist.append(singleLine)
         listLabel.append(label)
 
+
     numpyArr = numpy.array(Dlist, dtype=float)
+    #DTR = numpy.hstack(numpy.array(dList, dtype=numpy.float32))
+    #DTR = numpy.hstack(numpy.array(dList, dtype=numpy.float32))
     #numpyArr = numpyArr.reshape((len(Dlist),10))
     #finalArray = numpyArr.transpose()
     #print(numpyArr,"\n\n########\n\n")
@@ -64,16 +67,29 @@ def load(name):
     print(D.T.shape[0])
     return D.T, L
 
-def randomize(D, L, seed=0):
-    nTrain = int(D.shape[1])
-    numpy.random.seed(seed)
-    idx = numpy.random.permutation(D.shape[1])
-    idxTrain = idx[0:nTrain]
-    
-    DTR = D[:, idxTrain]
-    LTR = L[idxTrain]
-    
-    return DTR, LTR
+def bayes_error_plot(pArray, scores, labels, minCost=False, th=None):
+    y = []
+    for p in pArray:
+        pi = 1.0 / (1.0 + numpy.exp(-p))
+        if minCost:
+            y.append(compute_min_DCF(scores, labels, pi, 1, 10))
+        else:
+            y.append(compute_act_DCF(scores, labels, pi, 1, 10, th))
+    return numpy.array(y)
+
+def bayes_error_plot_compare(pi, scores, labels):
+    y = []
+#    pi = 1.0 / (1.0 + numpy.exp(-pi)) #todo
+    y.append(compute_min_DCF(scores, labels, pi, 1, 10))
+    return numpy.array(y)
+
+
+def bayes_error_min_act_plot(D, LTE,  ylim):
+    p = numpy.linspace(-3, 3, 21)
+    plt.plot(p, bayes_error_plot(p, D, LTE, minCost=False), color='r')
+    plt.plot(p, bayes_error_plot(p, D, LTE, minCost=True), color='b')
+    plt.ylim(0, ylim)
+    plt.show()
 
 def compute_correlation(X, Y):
     x_sum = numpy.sum(X)

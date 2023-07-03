@@ -20,7 +20,7 @@ class Validation:
 
 
     def MVG_validation(self, DTR, LTR, DTE, LTE):
-        k =5
+        k = 5
         Dtr = numpy.split(DTR.T, k, axis = 1)
         Ltr = numpy.split(LTR, k)
         #Ltep = numpy.split(DPE, k)
@@ -31,31 +31,6 @@ class Validation:
 
 
 
-        llrMVG_LDA = []
-        labelMVG_LDA = []
-        # for i in range(k):
-        #     Dte = Dtr[i]
-        #     print(Dte)
-        #     Lte = Ltr[i]
-        #     D = []
-        #     L = []
-        #
-        #     if i == 0:
-        #         D.append(numpy.hstack(Dtr[i + 1:]))
-        #
-        #         L.append(numpy.hstack(Ltr[i + 1:]))
-        #     elif i == k - 1:
-        #         D.append(numpy.hstack(Dtr[:i]))
-        #         L.append(numpy.hstack(Ltr[:i]))
-        #     else:
-        #         D.append(numpy.hstack(Dtr[:i]))
-        #         D.append(numpy.hstack(Dtr[i + 1:]))
-        #
-        #         L.append(numpy.hstack(Ltr[:i]))
-        #         L.append(numpy.hstack(Ltr[i + 1:]))
-        #
-        #     D = numpy.hstack(D)
-        #     L = numpy.hstack(L)
 
         for i in range(k):
             Dte = Dtr[i]
@@ -71,15 +46,12 @@ class Validation:
             D = numpy.hstack(D)
             L = numpy.hstack(L)
 
+            # Train the model
+
             print("---------------MVG WITHOUT LDA--------------------------")
-            # s = self.MVG.predict_MVG(DTE.T, LTE)
-            # DFC = evaluation(s,LTE, 0.5, 1, 10)
 
-
-            llrMVG,llrNV = self._getScores(Dte,D,L, llrMVG,llrNV)
+            self._getScores(Dte,D,L,llrMVG,llrNV)
             labelMVG = numpy.append(labelMVG,Lte,axis = 0)
-            labelMVG = numpy.hstack(labelMVG)
-
 
         minDFC = compute_min_DCF(numpy.hstack(llrMVG),numpy.hstack(labelMVG), 0.5, 1, 10)
         print("MIN DFC", minDFC)
@@ -89,21 +61,25 @@ class Validation:
 
 
 
+
         #########################################################
         #                     DFC on test data
         #########################################################
-        s = self.MVG.predict_MVG(DTR.T, LTR, DTE.T)
-        res= compute_act_DCF(s, LTE, 0.5,1, 10, None)
-        print("ACT DFC", res)
 
-        s1 = self.MVG.predict_MVG_Naive_Bayes(DTR.T, LTR, DTE.T)
-        res1= compute_act_DCF(s1, LTE, 0.5,1, 10, None)
-        print("ACT DFC", res1)
+        stt = self.MVG.predict_MVG(DTR.T, LTR, DTR.T)
+        rettt = compute_act_DCF(numpy.hstack(stt), LTR, 0.5, 1, 10, None)
+        print("ACT DFC ON TRAIN", rettt)
+
+
+
+        s1 = self.MVG.predict_MVG_Naive_Bayes(DTR.T, LTR, DTR.T)
+        res1= compute_act_DCF(numpy.hstack(s1), LTR, 0.5,1, 10, None)
+        print("ACT DFC TRAIN BAYES", res1)
         # print("---------------MVG WITH LDA--------------------------")
         # self.MVG.setup_MVG(DP, LTR)
         # s1 = self.MVG.predict_MVG(DPE, LTE)
         # #DFC1 = evaluation(s1, LTE, 0.5, 1, 10)
-
+        #bayes_error_min_act_plot(DTE.T, LTE, 2)
 
         #
         # print("---------------MVG NAIVE BAYES WITHOUT LDA--------------------------")
@@ -147,12 +123,12 @@ class Validation:
         # self.LR.preditc_Logistic_Regression(DPE, LTE, 0.1)
 
         print("---------------SVM Linear REGRESSION WITHOUT LDA--------------------------")
-        self.svmLin.setup_primal_svm(DTR.T, LTR, 0.1)
-        self.svmLin.predict_primal_svm(DTE.T, LTE, 0.1)
+        #self.svmLin.setup_primal_svm(DTR.T, LTR, 0.1)
+        #self.svmLin.predict_primal_svm(DTE.T, LTE, 0.1)
 
         print("---------------SVM Kernel Poly REGRESSION WITHOUT LDA--------------------------")
-        self.svmLin.setup_kernelPoly_svm(DTR.T, LTR, DTE.T, LTE)
+        #self.svmLin.setup_kernelPoly_svm(DTR.T, LTR, DTE.T, LTE)
 
         print("---------------SVM Kernel RBG REGRESSION WITHOUT LDA--------------------------")
-        self.svmLin.setup_kernelRBF_svm(DTR.T, LTR, DTE.T, LTE)
+        #self.svmLin.setup_kernelRBF_svm(DTR.T, LTR, DTE.T, LTE)
 
