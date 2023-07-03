@@ -31,7 +31,6 @@ class DimensionalityReduction:
         mu1 = empirical_mean(D1)
         means_c = [mu0,mu1]
         pred = []
-        print(DP)
         for sample in DP.T:
             distances = [numpy.linalg.norm(sample-mu_c) for mu_c in means_c ]
             closest_class = numpy.argmin(distances)

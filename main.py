@@ -17,8 +17,7 @@ if __name__ == "__main__":
 
     DTE, LTE = load("Test.txt")
 
-    #DTR_Z= DTR- DTR.mean(1).reshape((DTR.shape[0], 1))
-    #DTE_Z= DTE- DTR.mean(1).reshape((DTR.shape[0], 1))
+
 
     print("TRAINING AUTHENTIC: ", DTR.T[:,LTR==1].shape[1])
     print("TRAINING SPOFFED", DTR.T[:, LTR==0].shape[1])
@@ -51,4 +50,4 @@ if __name__ == "__main__":
     plot_correlations(DTR.T[:, LTR == 1], "heatmap_authentic_", cmap="Blues")
 
 
-    VA.MVG_validation(DTR,LTR,DTE,LTE)
+    VA.MVG_validation(DTR,LTR, 0.5, 1,10)

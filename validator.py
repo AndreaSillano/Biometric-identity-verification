@@ -10,27 +10,15 @@ class Validation:
         self.MVG = MultivariateGaussianClassifier()
         self.LR = LogisticRegression()
         self.svmLin = SupportVectorMachine()
-
-    def _getScores(self, Dte, D, L, llrMVG, llrNV):
-        llrs = self.MVG.predict_MVG(D, L, Dte)
-        llrsNV = self.MVG.predict_MVG_Naive_Bayes(D,L,Dte)
-        llrMVG.append(llrs)
-        llrNV.append(llrsNV)
-        return llrMVG, llrNV
-
-
-    def MVG_validation(self, DTR, LTR, DTE, LTE):
-        k = 5
-        Dtr = numpy.split(DTR.T, k, axis = 1)
-        Ltr = numpy.split(LTR, k)
-        #Ltep = numpy.split(DPE, k)
-
+    def k_fold_MVG(self, k,DTR, LTR):
         llrMVG = []
         llrNV = []
-        labelMVG =[]
+        llrTCV =[]
+        llrTNV =[]
+        labelMVG = []
 
-
-
+        Dtr = numpy.split(DTR.T, k, axis=1)
+        Ltr = numpy.split(LTR, k)
 
         for i in range(k):
             Dte = Dtr[i]
@@ -47,34 +35,66 @@ class Validation:
             L = numpy.hstack(L)
 
             # Train the model
+            self._getScoresMVG(Dte, D, L, llrMVG, llrNV, llrTCV, llrTNV)
+            labelMVG = numpy.append(labelMVG, Lte, axis=0)
 
-            print("---------------MVG WITHOUT LDA--------------------------")
+        return llrMVG,llrNV,llrTCV,llrTNV,labelMVG
 
-            self._getScores(Dte,D,L,llrMVG,llrNV)
-            labelMVG = numpy.append(labelMVG,Lte,axis = 0)
+    def _getScoresMVG(self, Dte, D, L, llrMVG, llrNV,llrTCV, llrTNV):
+        llrs = self.MVG.predict_MVG(D, L, Dte)
+        llrsNV = self.MVG.predict_MVG_Naive_Bayes(D,L,Dte)
+        llrsTCV  = self.MVG.predict_MVG_Tied_Cov(D,L,Dte)
+        llrsTNV = self.MVG.predict_MVG_Tied_Cov_Naive(D,L,Dte)
+        llrMVG.append(llrs)
+        llrNV.append(llrsNV)
+        llrTCV.append(llrsTCV)
+        llrTNV.append(llrsTNV)
 
-        minDFC = compute_min_DCF(numpy.hstack(llrMVG),numpy.hstack(labelMVG), 0.5, 1, 10)
-        print("MIN DFC", minDFC)
-        minDFC = compute_min_DCF(numpy.hstack(llrNV), numpy.hstack(labelMVG), 0.5, 1, 10)
-        print("MIN DFC", minDFC)
+
+    def MVG_validation(self, DTR, LTR, pi, C_fn, C_fp):
+
+        llrMVG, llrNV, llrTCV,llrTNV, labelMVG = self.k_fold_MVG(5,DTR,LTR)
+
+        minDCF_MVG = compute_min_DCF(numpy.hstack(llrMVG),numpy.hstack(labelMVG), pi, C_fn, C_fp)
+        s_MVG = self.MVG.predict_MVG_Naive_Bayes(DTR.T, LTR, DTR.T)
+        actDCF_MVG = compute_act_DCF(s_MVG, LTR, pi, C_fn, C_fp)
+        print("############MVG###############")
+        print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_MVG)
+        print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_MVG)
+        bayes_error_min_act_plot(s_MVG,LTR, 1)
+
+        print("############NAIVE BAYES#############")
+        minDCF_NV = compute_min_DCF(numpy.hstack(llrNV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
+        s_NV = self.MVG.predict_MVG_Naive_Bayes(DTR.T, LTR, DTR.T)
+        actDCF_NV = compute_act_DCF(s_NV, LTR, pi, C_fn, C_fp)
+        print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_NV)
+        print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_NV)
+        bayes_error_min_act_plot(s_NV, LTR, 1)
+
+        print("############TIED COV#############")
+        minDCF_TCV = compute_min_DCF(numpy.hstack(llrTCV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
+        s_TCV = self.MVG.predict_MVG_Tied_Cov(DTR.T, LTR, DTR.T)
+        actDCF_TCV = compute_act_DCF(s_TCV, LTR, pi, C_fn, C_fp)
+        print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_TCV)
+        print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_TCV)
+
+        print("############TIED COV BAYES#############")
+        minDCF_TNV = compute_min_DCF(numpy.hstack(llrTNV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
+        s_TNV = self.MVG.predict_MVG_Tied_Cov_Naive(DTR.T, LTR, DTR.T)
+        actDCF_TNV = compute_act_DCF(s_TNV, LTR, pi, C_fn, C_fp)
+        print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_TNV)
+        print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_TNV)
+
+    def LR_validation(self, k, DTR, LTR):
 
 
 
-
-
+        return 0
         #########################################################
-        #                     DFC on test data
+        #                     BOH
         #########################################################
 
-        stt = self.MVG.predict_MVG(DTR.T, LTR, DTR.T)
-        rettt = compute_act_DCF(numpy.hstack(stt), LTR, 0.5, 1, 10, None)
-        print("ACT DFC ON TRAIN", rettt)
 
-
-
-        s1 = self.MVG.predict_MVG_Naive_Bayes(DTR.T, LTR, DTR.T)
-        res1= compute_act_DCF(numpy.hstack(s1), LTR, 0.5,1, 10, None)
-        print("ACT DFC TRAIN BAYES", res1)
         # print("---------------MVG WITH LDA--------------------------")
         # self.MVG.setup_MVG(DP, LTR)
         # s1 = self.MVG.predict_MVG(DPE, LTE)

@@ -62,9 +62,7 @@ def load(name):
     #finalArray = numpyArr.transpose()
     #print(numpyArr,"\n\n########\n\n")
     labelpy = numpy.array(listLabel, dtype=int)
-    print(numpyArr.shape[0])
     D, L = shuffle_dataset(numpyArr.T, labelpy)
-    print(D.T.shape[0])
     return D.T, L
 
 def bayes_error_plot(pArray, scores, labels, minCost=False, th=None):
@@ -72,9 +70,9 @@ def bayes_error_plot(pArray, scores, labels, minCost=False, th=None):
     for p in pArray:
         pi = 1.0 / (1.0 + numpy.exp(-p))
         if minCost:
-            y.append(compute_min_DCF(scores, labels, pi, 1, 10))
+            y.append(compute_min_DCF(scores, labels, pi, 1, 1))
         else:
-            y.append(compute_act_DCF(scores, labels, pi, 1, 10, th))
+            y.append(compute_act_DCF(scores, labels, pi, 1, 1, th))
     return numpy.array(y)
 
 def bayes_error_plot_compare(pi, scores, labels):
@@ -141,7 +139,7 @@ def plot_correlations(DTR, title, cmap="Greys"):
 def computeCovDiag(M, muc):
 
     cov = numpy.dot((M-muc),(M-muc).T)/M.shape[1]
-    diagCov = numpy.diag(numpy.diag(cov))
+    diagCov = cov*numpy.identity(cov.shape[0])
     return (diagCov)
 
 
