@@ -30,7 +30,7 @@ if __name__ == "__main__":
     dimRed = DimensionalityReduction()
     MVG = MultivariateGaussianClassifier()
     LR = LogisticRegression()
-
+    
     VA = Validation()
     #plt.plot_histogram(DTE,LTE)
     #plt.plot_histogram(DTR, LTR)
