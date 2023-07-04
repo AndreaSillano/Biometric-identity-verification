@@ -63,7 +63,7 @@ class LogisticRegression:
         STE = numpy.dot(_w.T, DTE) + _b - calibration
         return STE, _w, _b
 
-    def compute_scores_param(self,scores, labels, l,pi):
+    def compute_scores_param(self,scores, labels, l, pi):
         scores = vrow(scores)
         _, _w,_b = self.calibration_score_weighted_LR(scores, labels, scores, l, pi)
         return _w, _b

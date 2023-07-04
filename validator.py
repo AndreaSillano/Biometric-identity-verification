@@ -3,7 +3,7 @@ import numpy
 from dimensionality_reduction import DimensionalityReduction
 from gaussian_classifier import MultivariateGaussianClassifier
 from logistic_regression import LogisticRegression
-from SVM import SupportVectorMachine
+from svm import SupportVectorMachine
 from mlFunc import *
 class Validation:
     def __init__(self):

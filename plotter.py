@@ -10,13 +10,13 @@ class Plotter:
             D0 = (D[:, L == 0])[i]
             D1 = (D[:, L == 1])[i]
 
-            plt.hist(D0, bins=100, density=True, ec='black', color="#E23A2E", alpha=0.5, label="Different Speaker")
-            plt.hist(D1, bins=100, density=True, ec='black', color="#279847", alpha=0.5, label="Same Speaker")
+            plt.hist(D0, bins=100, density=True, ec='black', color="#E23A2E", alpha=0.5, label="Spoofed Fingerprint")
+            plt.hist(D1, bins=100, density=True, ec='black', color="#279847", alpha=0.5, label="Autenthic Fingerprint")
 
             plt.legend(loc='upper right')
-            # plt.savefig("./images/hist/hist_" + str(i) + ".png")
-            plt.show()
-
+            plt.savefig("./images/hist/hist_" + str(i) + ".png")
+            plt.close()
+            
     def plot_scatter(self, D, L):
         D = D.transpose()
 
@@ -25,13 +25,13 @@ class Plotter:
                 if j != i:
                     Dx0 = (D[i, L == 0])
                     Dy0 = (D[j, L == 0])
-                    plt.scatter(Dx0, Dy0, color="#E23A2E", label="Different Speaker")
+                    plt.scatter(Dx0, Dy0, color="#E23A2E",  label="Spoofed Fingerprint")
                     Dx1 = (D[i, L == 1])
                     Dy1 = (D[j, L == 1])
-                    plt.scatter(Dx1, Dy1, color="#279847", label="Same Speaker")
+                    plt.scatter(Dx1, Dy1, color="#279847",label="Autenthic Fingerprint")
                     plt.legend(loc='upper right')
-                    # plt.savefig("./images/scatter/scatter"+str(i)+"_"+str(j)+".png")
-                    plt.show()
+                    plt.savefig("./images/scatter/scatter"+str(i)+"_"+str(j)+".png")
+                    plt.close()
 
                     # plt.show()
     def plot_PCA_scatter(self, D, L):
