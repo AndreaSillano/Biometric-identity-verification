@@ -136,3 +136,41 @@ class SupportVectorMachine:
         alphaStar, JDual, LDual = calculate_lbgf(H, DTR, C)
 
         return alphaStar, JDual(alphaStar)[0]
+
+    def predict_SVM_Linear(self, D, L, C, K, Dte):
+        scoresLin_append = []
+        wStar, primal = self.train_SVM_linear(D, L, C, K)
+        DTEEXT = numpy.vstack([Dte, K * numpy.ones((1, Dte.shape[1]))])
+
+        scores = numpy.dot(wStar.T, DTEEXT).ravel()
+        scoresLin_append.append(scores)
+        return scoresLin_append
+    
+    def predict_SVM_Pol(self, D, L, C, K, Dte, costant, degree):
+        scoresPol_append = []
+        #costant = 0
+        #degree = 2
+        aStar, primal = self.train_SVM_polynomial(D, L, C, K, costant, degree)
+        Z = numpy.zeros(L.shape)
+        Z[L == 1] = 1
+        Z[L == 0] = -1
+        kernel = (numpy.dot(D.T, Dte) + costant) ** degree + K * K
+        scores = numpy.sum(numpy.dot(aStar * vrow(Z), kernel), axis=0)
+        scoresPol_append.append(scores)
+        return scoresPol_append
+    
+    def predict_SVM_RBF(self, D, L, C, K, Dte, gamma):
+        scoresRBF_append = []
+        Z = L * 2 - 1
+        #gamma=0.001
+
+        aStar, loss = self.train_SVM_RBF(D, L, C, K, gamma)
+        kern = numpy.zeros((D.shape[1], Dte.shape[1]))
+        for i in range(D.shape[1]):
+            for j in range(Dte.shape[1]):
+                kern[i, j] = numpy.exp(-gamma * (numpy.linalg.norm(D[:, i] - Dte[:, j]) ** 2)) + K * K
+        scores = numpy.sum(numpy.dot(aStar * vrow(Z), kern), axis=0)
+        scoresRBF_append.append(scores)
+        return scoresRBF_append
+
+        
