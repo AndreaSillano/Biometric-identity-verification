@@ -50,5 +50,5 @@ if __name__ == "__main__":
     plot_correlations(DTR.T[:, LTR == 1], "heatmap_authentic_", cmap="Blues")
 
 
-    VA.MVG_validation(DTR,LTR, 0.5, 1,10)
-    VA.SVM_validation(DTR, LTR, DTE, LTE)
+    VA.MVG_validation(DTR,LTR, 0.5, 1, 10)
+    VA.SVM_validation(DTR, LTR, 0.5, 1, 10)

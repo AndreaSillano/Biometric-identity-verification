@@ -256,7 +256,7 @@ def compute_min_DCF1(scores, pi,C_fn, C_fp, LTR):
     index = numpy.argmin(DFCList)
     print("Min DCF with prior pi1=%.1f and costs Cfn=%.1f, Cfp=%.1f: " %
           (0.5, 1, 1))
-    print(DCFarr1[index])
+    #print(DCFarr1[index])
 
 
 
