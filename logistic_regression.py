@@ -1,6 +1,7 @@
 import numpy
 import scipy
 from scipy import optimize
+from mlFunc import *
 
 class LogisticRegression:
 
@@ -38,12 +39,12 @@ class LogisticRegression:
         # print("ERROR: ", err, "%")
         return s
 
-    def logreg_obj_weighted(self, DTR, LTR, l, pi):
+    def logreg_obj_weighted(self, v, DTR, LTR, l, pi):
         M = DTR.shape[0]
         Z = LTR * 2.0 - 1.0
 
         def logreg_obj(v):
-            w = mcol(v[0:M])
+            w = vcol(v[0:M])
             b = v[-1]
             reg = 0.5 * l * numpy.linalg.norm(w) ** 2
             s = (numpy.dot(w.T, DTR) + b).ravel()
@@ -52,11 +53,11 @@ class LogisticRegression:
             avg_risk_1 = (numpy.logaddexp(0, -s[LTR == 1] * Z[LTR == 1])).sum()
             return reg + (pi / nt) * avg_risk_1 + (1 - pi) / (DTR.shape[1] - nt) * avg_risk_0
 
-        return logreg_obj
+        return logreg_obj(v)
 
-    def calibration_score_weighted_LR(self, D, L, DTE,l, pi):
-        _v, _J, _d = opt.fmin_l_bfgs_b(self.logreg_obj_weighted, numpy.zeros(DTR.shape[0] + 1), approx_grad=True, args=(D,L,l,pi))
-        _w = _v[0:DTR.shape[0]]
+    def calibration_score_weighted_LR(self, D, L, DTE, l, pi):
+        _v, _J, _d = scipy.optimize.fmin_l_bfgs_b(self.logreg_obj_weighted, numpy.zeros(D.shape[0] + 1), approx_grad=True, args=(D,L,l,pi))
+        _w = _v[0:D.shape[0]]
         _b = _v[-1]
         calibration = 0 if pi is None else numpy.log(pi / (1 - pi))
         STE = numpy.dot(_w.T, DTE) + _b - calibration
@@ -64,5 +65,5 @@ class LogisticRegression:
 
     def compute_scores_param(self,scores, labels, l,pi):
         scores = vrow(scores)
-        _, _w,_b = calibration_score_weighted_LR(scores, labels, l, pi)
+        _, _w,_b = self.calibration_score_weighted_LR(scores, labels, scores, l, pi)
         return _w, _b
