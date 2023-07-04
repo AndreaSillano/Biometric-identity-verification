@@ -4,9 +4,7 @@ import matplotlib.pyplot as plt
 import numpy
 from plotter import Plotter
 from dimensionality_reduction import DimensionalityReduction
-from validator import  Validation
-from gaussian_classifier import MultivariateGaussianClassifier
-from logistic_regression import LogisticRegression
+from validator import Validation
 from mlFunc import *
 
 
@@ -27,10 +25,8 @@ if __name__ == "__main__":
 
     plt = Plotter()
     dimRed = DimensionalityReduction()
-    MVG = MultivariateGaussianClassifier()
-    LR = LogisticRegression()
-    
     VA = Validation()
+
     #plt.plot_histogram(DTE,LTE)
     #plt.plot_histogram(DTR, LTR)
     #plt.plot_scatter(DTR, LTR)
@@ -50,5 +46,9 @@ if __name__ == "__main__":
     plot_correlations(DTR.T[:, LTR == 1], "heatmap_authentic_", cmap="Blues")
 
 
-    VA.MVG_validation(DTR,LTR, 0.5, 1,10)
+
+
+
+    VA.MVG_validation(DTR,LTR, 0.5, 1,10,DTE,LTE)
+    VA.LR_validation(DTR,LTR, 0.5,1,10)
     VA.SVM_validation(DTR, LTR, DTE, LTE)

@@ -82,12 +82,15 @@ def bayes_error_plot_compare(pi, scores, labels):
     return numpy.array(y)
 
 
+
 def bayes_error_min_act_plot(D, LTE,  ylim):
     p = numpy.linspace(-3, 3, 21)
     plt.plot(p, bayes_error_plot(p, D, LTE, minCost=False), color='r')
     plt.plot(p, bayes_error_plot(p, D, LTE, minCost=True), color='b')
     plt.ylim(0, ylim)
     plt.show()
+
+
 
 def compute_correlation(X, Y):
     x_sum = numpy.sum(X)
