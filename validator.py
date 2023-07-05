@@ -4,12 +4,14 @@ from dimensionality_reduction import DimensionalityReduction
 from gaussian_classifier import MultivariateGaussianClassifier
 from logistic_regression import LogisticRegression
 from svm import SupportVectorMachine
+from GMM import GMM
 from mlFunc import *
 class Validation:
     def __init__(self):
         self.MVG = MultivariateGaussianClassifier()
         self.LR = LogisticRegression()
         self.svm = SupportVectorMachine()
+        self.GMM = GMM()
     def k_fold_MVG(self, k,DTR, LTR):
         llrMVG = []
         llrNV = []
@@ -389,3 +391,44 @@ class Validation:
         C_arr = [0.01, 0.1, 1.0, 10.0]
         #C_arr = [0.1, 1.0, 10.0]
         #self.SVM_score_calibration(DTR, LTR, K_arr, C_arr, pi, Cfn, Cfp)
+    def _getScoreGMM(self, D,L,Dte,components, a,p, llrGMM_full):
+        llrGMM_f = self.GMM.predict_GMM_full(D,L,Dte, components, a,p)
+        llrGMM_full.append(llrGMM_f)
+
+    def kfold_GMM(self,k, DTR, LTR, components, a,p,):
+
+        llr_GMM_full = []
+        labelGMM = []
+        Dtr = numpy.split(DTR.T, k, axis=1)
+        Ltr = numpy.split(LTR, k)
+
+        for i in range(k):
+            Dte = Dtr[i]
+            Lte = Ltr[i]
+            D = []
+            L = []
+
+            for j in range(k):
+                if j != i:
+                    D.append(Dtr[j])
+                    L.append(Ltr[j])
+
+            D = numpy.hstack(D)
+            L = numpy.hstack(L)
+
+            # Train the model
+            labelGMM = numpy.append(labelGMM, Lte, axis=0)
+            self._getScoreGMM(D,L,Dte,components, a,p, llr_GMM_full)
+
+        return llr_GMM_full, labelGMM
+
+
+            #llr_GMM_full.append(self.LR.preditc_Logistic_Regression(D, L, Dte, 0.00001))
+
+    def GMM_validation(self,DTR,LTR, pi, Cfn, Cfp,comp, a,p ):
+
+        llr_GMM_Full, llr_GMM_labels= self.kfold_GMM(5, DTR, LTR, comp, a, p)
+        print("##########GMM FULL##########")
+        llr = numpy.hstack(llr_GMM_Full)
+        scores_tot = compute_min_DCF(llr, llr_GMM_labels, pi, Cfn, Cfp)
+        print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp,scores_tot, ))
