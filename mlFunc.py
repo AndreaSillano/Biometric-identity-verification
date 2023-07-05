@@ -17,6 +17,7 @@ def empirical_covariance(D, mu):
     n = numpy.shape(D)[1]
     DC = D - vcol(mu)
     C = 1 / n * numpy.dot(DC, numpy.transpose(DC))
+   # C = computeCovDiag(D,mu)
     return C
 def znorm(DTR, DTE):
     mu_DTR = vcol(DTR.mean(1))
