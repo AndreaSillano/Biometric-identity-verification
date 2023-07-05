@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
-
+from mlFunc import *
+import numpy as numpy
 
 class Plotter:
 
@@ -55,3 +56,33 @@ class Plotter:
         plt.legend(loc='upper right')
 
         plt.show()
+
+    def plot_correlations(self, DTR, title, cmap="Greys"):
+        corr = numpy.zeros((10, 10))
+        for x in range(10):
+            for y in range(10):
+                X = DTR[x, :]
+                Y = DTR[y, :]
+                pearson_elem = compute_correlation(X, Y)
+                corr[x][y] = pearson_elem
+
+        plt.rcParams['axes.linewidth'] = 0.2
+
+        # Creazione della heatmap
+        fig, ax = plt.subplots()
+        heatmap = ax.imshow(numpy.abs(corr), cmap=cmap, aspect='equal')
+
+        # Personalizzazioni dell'asse x e y
+        ax.set_xticks(numpy.arange(corr.shape[1]))
+        ax.set_yticks(numpy.arange(corr.shape[0]))
+        ax.set_xticklabels(numpy.arange(corr.shape[1]))
+        ax.set_yticklabels(numpy.arange(corr.shape[0]))
+        ax.tick_params(axis='both', which='both', length=0)
+
+        # Aggiunta della barra dei colori
+        cbar = plt.colorbar(heatmap)
+
+        # Mostra il grafico
+        plt.show()
+        fig = heatmap.get_figure()
+        fig.savefig("./images/" + title + ".png")

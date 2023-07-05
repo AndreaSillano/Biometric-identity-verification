@@ -283,53 +283,35 @@ class Validation:
             Dte = Dtr[i]
             Lte = Ltr[i]
 
-
-            #
-            # wStar, primal = self.svm.train_SVM_linear(D, L, C, K)
-            # DTEEXT = numpy.vstack([Dte, K * numpy.ones((1, Dte.shape[1]))])
-            #
-            # scores = numpy.dot(wStar.T, DTEEXT).ravel()
-            # scoresLin_append.append(scores)
-            #
-            # costant = 0
-            # degree = 2
-            # aStar, primal = self.svm.train_SVM_polynomial(D, L, C, K, costant, degree)
-            # Z = numpy.zeros(L.shape)
-            # Z[L == 1] = 1
-            # Z[L == 0] = -1
-            # kernel = (numpy.dot(D.T, Dte) + costant) ** degree + K * K
-            # scores = numpy.sum(numpy.dot(aStar * vrow(Z), kernel), axis=0)
-            # scoresPol_append.append(scores)
-
-            Z = L * 2 - 1
-            gamma = 0.001
-            aStar, loss = self.svm.train_SVM_RBF(D, L, C, K, gamma)
-            kern = numpy.zeros((D.shape[1], D.shape[1]))
-            for i in range(D.shape[1]):
-                for j in range(D.shape[1]):
-                    kern[i, j] = numpy.exp(-gamma * (numpy.linalg.norm(D[:, i] - D[:, j]) ** 2)) + K * K
-            scoresT = numpy.sum(numpy.dot(aStar * vrow(Z), kern), axis=0)
-
-            a,b = self.LR.compute_scores_param(scoresT, L, 1e-4 ,0.5)
-
-            Z = L * 2 - 1
-            gamma = 0.001
-            aStar, loss = self.svm.train_SVM_RBF(D, L, C, K, gamma)
-            kern = numpy.zeros((D.shape[1], Dte.shape[1]))
-            for i in range(D.shape[1]):
-                for j in range(Dte.shape[1]):
-                    kern[i, j] = numpy.exp(-gamma * (numpy.linalg.norm(D[:, i] - Dte[:, j]) ** 2)) + K * K
-            scoresV = numpy.sum(numpy.dot(aStar * vrow(Z), kern), axis=0)
-            computeLLR = a * scoresV + b - numpy.log(0.5 / (1 - 0.5))
-
+            costant = 0
+            degree = 2
+            gamma=0.001
             SVM_labels = numpy.append(SVM_labels, Lte, axis=0)
             SVM_labels = numpy.hstack(SVM_labels)
 
+            scoresT_Lin = self.svm.predict_SVM_Linear(D, L, C, K, D)
+            a,b = self.LR.compute_scores_param(scoresT_Lin, L, 1e-4 ,0.5)
+            scoresV_Lin = self.svm.predict_SVM_Linear(D, L, C, K, Dte)
+            computeLLR = a * scoresV_Lin + b - numpy.log(0.5 / (1 - 0.5))
 
-            scoresRBF_append.append(computeLLR)
+            scoresLin_append.append(computeLLR)
+
+            scoresT_Pol = self.svm.predict_SVM_Pol(D, L, C, K, D, costant, degree)
+            a,b = self.LR.compute_scores_param(scoresT_Pol, L, 1e-4 ,0.5)
+            scoresV_Pol = self.svm.predict_SVM_Pol(D, L, C, K, Dte, costant, degree)
+            computeLLR = a * scoresV_Pol + b - numpy.log(0.5 / (1 - 0.5))
+
+            scoresPol_append.append(computeLLR)
+
+            scoresT_RBF = self.svm.predict_SVM_RBF(D, L, C, K, D, gamma)
+            a,b = self.LR.compute_scores_param(scoresT_RBF, L, 1e-4 ,0.5)
+            scoresV_RBF = self.svm.predict_SVM_RBF(D, L, C, K, Dte, gamma)
+            computeLLR = a * scoresV_RBF + b - numpy.log(0.5 / (1 - 0.5))
+
+            scoresRBF_append.append(computeLLR)           
 
 
-        return scoresRBF_append, SVM_labels
+        return scoresLin_append, scoresPol_append, scoresRBF_append, SVM_labels
 
     def SVM_score_calibration(self, DTR, LTR, K_arr, C_arr, pi, Cfn, Cfp):
         actDFCLin = []
@@ -383,14 +365,19 @@ class Validation:
         rettt = compute_act_DCF(numpy.hstack(scoresRBF_append), SVM_labels, pi, Cfn, Cfp, None)
         print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
 
-        #cal_score, cal_label = self.kfold_calibration_SVM(DTR, LTR, K, 0.1)
-        #rettt = compute_act_DCF(numpy.hstack(cal_score), cal_label, 0.5, 1, 10, None)
-        #print("ACT DFC ON TRAIN SVM RBF - CAL", rettt)
+        cal_score_Lin, cal_score_Pol, cal_score_RBF, cal_label = self.kfold_calibration_SVM(DTR, LTR, K, C)
+        rettt = compute_act_DCF(numpy.hstack(cal_score_Lin), cal_label, 0.5, 1, 10, None)
+        print("ACT DFC ON TRAIN SVM Lin - CAL", rettt)
+        rettt = compute_act_DCF(numpy.hstack(cal_score_Pol), cal_label, 0.5, 1, 10, None)
+        print("ACT DFC ON TRAIN SVM Pol - CAL", rettt)
+        rettt = compute_act_DCF(numpy.hstack(cal_score_RBF), cal_label, 0.5, 1, 10, None)
+        print("ACT DFC ON TRAIN SVM RBF - CAL", rettt)
 
         K_arr = [0.1, 1.0, 10.0]
         C_arr = [0.01, 0.1, 1.0, 10.0]
         #C_arr = [0.1, 1.0, 10.0]
         #self.SVM_score_calibration(DTR, LTR, K_arr, C_arr, pi, Cfn, Cfp)
+
     def _getScoreGMM(self, D,L,Dte,components, a,p, llrGMM_full):
         llrGMM_f = self.GMM.predict_GMM_full(D,L,Dte, components, a,p)
         llrGMM_full.append(llrGMM_f)
