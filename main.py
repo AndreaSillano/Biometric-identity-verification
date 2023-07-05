@@ -51,4 +51,4 @@ if __name__ == "__main__":
 
     #VA.MVG_validation(DTR,LTR, 0.5, 1,10,DTE,LTE)
     #VA.LR_validation(DTR,LTR, 0.5,1,10)
-    VA.SVM_validation(DTR, LTR, 0.5, 1, 10, 1, 0.1)
+    VA.SVM_validation(DTR, LTR, 0.5, 1, 10, 0.1, 1)
