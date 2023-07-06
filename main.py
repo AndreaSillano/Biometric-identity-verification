@@ -44,15 +44,21 @@ if __name__ == "__main__":
     DPE = dimRed.LDA(DTE,LTE)
     plt.plot_LDA_scatter(DP,LTR)
 
-    plot_correlations(DTR.T,"heatmap")
-    plot_correlations(DTR.T[:, LTR == 0], "heatmap_spoofed_", cmap="Reds")
-    plot_correlations(DTR.T[:, LTR == 1], "heatmap_authentic_", cmap="Blues")
+    #plt.plot_correlations(DTR.T,"heatmap")
+    #plt.plot_correlations(DTR.T[:, LTR == 0], "heatmap_spoofed_", cmap="Reds")
+    #plt.plot_correlations(DTR.T[:, LTR == 1], "heatmap_authentic_", cmap="Blues")
 
 
 
 
 
-    VA.MVG_validation(DTR,LTR, 0.9, 1,10,DTE,LTE)
+    # VA.MVG_validation(DTR,LTR, 0.9, 1,1,DTE,LTE)
+    # for i in range (7,10):
+    #     print("PCA con", i)
+    #     DPA = dimRed.PCA(DTR, i)
+    #     VA.MVG_validation(DPA.T, LTR, 0.9, 1, 1, DTE, LTE)
+
+
     #VA.LR_validation(DTR,LTR, 0.5,1,10)
-   # VA.SVM_validation(DTR, LTR, 0.5, 1, 10, 1, 0.1)
+    #VA.SVM_validation(DTR, LTR, 0.5, 1, 10, 1, 1)
     #VA.GMM_validation(DTR,LTR, 0.5,1,10, 2,8, 0.1, 0.01)

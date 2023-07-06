@@ -74,21 +74,21 @@ class Validation:
         print("############MVG###############")
         print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_MVG)
         print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_MVG)
-        bayes_error_min_act_plot(numpy.hstack(llrMVG),numpy.hstack(labelMVG), 1)
+        #bayes_error_min_act_plot(numpy.hstack(llrMVG),numpy.hstack(labelMVG), 1)
 
         print("############NAIVE BAYES#############")
         minDCF_NV = compute_min_DCF(numpy.hstack(llrNV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
         actDCF_NV = compute_act_DCF(numpy.hstack(llrNV), numpy.hstack(labelMVG),pi, C_fn, C_fp)
         print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_NV)
         print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_NV)
-        bayes_error_min_act_plot(numpy.hstack(llrNV),LTR, 1)
+        #bayes_error_min_act_plot(numpy.hstack(llrNV),LTR, 1)
 
         print("############TIED COV#############")
         minDCF_TCV = compute_min_DCF(numpy.hstack(llrTCV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
         actDCF_TCV = compute_act_DCF(numpy.hstack(llrTCV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
         print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_TCV)
         print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_TCV)
-        bayes_error_min_act_plot(numpy.hstack(llrTCV), numpy.hstack(labelMVG), 1)
+       # bayes_error_min_act_plot(numpy.hstack(llrTCV), numpy.hstack(labelMVG), 1)
 
         print("############TIED COV BAYES#############")
         minDCF_TNV = compute_min_DCF(numpy.hstack(llrTNV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
@@ -96,7 +96,7 @@ class Validation:
         actDCF_TNV = compute_act_DCF(numpy.hstack(llrTNV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
         print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_TNV)
         print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_TNV)
-        bayes_error_min_act_plot(numpy.hstack(llrTNV), LTR, 1)
+       # bayes_error_min_act_plot(numpy.hstack(llrTNV), LTR, 1)
 
     def k_fold_LR(self,k,DTR,LTR):
         lr_score = []
@@ -450,7 +450,7 @@ class Validation:
         rettt = compute_act_DCF(llrT, llr_GMM_labels, pi, Cfn, Cfp, None)
         print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
 
-        print("##########GMM TIED##########")
+        print("##########GMM TIED NAIVE##########")
         llrTN = numpy.hstack(llr_GMM_TiedNaive)
         scores_totTN = compute_min_DCF(llrTN, llr_GMM_labels, pi, Cfn, Cfp)
         print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_totTN))
