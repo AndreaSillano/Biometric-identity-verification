@@ -54,15 +54,15 @@ class Validation:
 
 
     def MVG_validation(self, DTR, LTR, pi, C_fn, C_fp, DTE, LTE):
-
-        llrs = self.MVG.predict_MVG(DTR.T, LTR, DTE.T)
-        minDCF_MVG_test = compute_min_DCF(llrs,LTE, pi, C_fn, C_fp)
-        #s_MVG = self.MVG.predict_MVG(DTR.T,LTR , DTR.T)
-        actDCF_MVG_test = compute_act_DCF(llrs,LTE, pi, C_fn, C_fp)
-        #actDCF_MVG = compute_act_DCF(s_MVG, LTR, pi, C_fn, C_fp)
-        print("############MVG###############")
-        print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_MVG_test)
-        print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_MVG_test)
+        #SU DTE
+        # llrs = self.MVG.predict_MVG(DTR.T, LTR, DTE.T)
+        # minDCF_MVG_test = compute_min_DCF(llrs,LTE, pi, C_fn, C_fp)
+        # #s_MVG = self.MVG.predict_MVG(DTR.T,LTR , DTR.T)
+        # actDCF_MVG_test = compute_act_DCF(llrs,LTE, pi, C_fn, C_fp)
+        # #actDCF_MVG = compute_act_DCF(s_MVG, LTR, pi, C_fn, C_fp)
+        # print("############MVG###############")
+        # print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_MVG_test)
+        # print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_MVG_test)
 
 
         llrMVG, llrNV, llrTCV,llrTNV, labelMVG = self.k_fold_MVG(5,DTR,LTR)
@@ -74,21 +74,21 @@ class Validation:
         print("############MVG###############")
         print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_MVG)
         print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_MVG)
-        bayes_error_min_act_plot(numpy.hstack(llrMVG),numpy.hstack(labelMVG), 1)
+        #bayes_error_min_act_plot(numpy.hstack(llrMVG),numpy.hstack(labelMVG), 1)
 
         print("############NAIVE BAYES#############")
         minDCF_NV = compute_min_DCF(numpy.hstack(llrNV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
         actDCF_NV = compute_act_DCF(numpy.hstack(llrNV), numpy.hstack(labelMVG),pi, C_fn, C_fp)
         print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_NV)
         print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_NV)
-        bayes_error_min_act_plot(numpy.hstack(llrNV),LTR, 1)
+        #bayes_error_min_act_plot(numpy.hstack(llrNV),LTR, 1)
 
         print("############TIED COV#############")
         minDCF_TCV = compute_min_DCF(numpy.hstack(llrTCV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
         actDCF_TCV = compute_act_DCF(numpy.hstack(llrTCV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
         print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_TCV)
         print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_TCV)
-        bayes_error_min_act_plot(numpy.hstack(llrTCV), numpy.hstack(labelMVG), 1)
+       # bayes_error_min_act_plot(numpy.hstack(llrTCV), numpy.hstack(labelMVG), 1)
 
         print("############TIED COV BAYES#############")
         minDCF_TNV = compute_min_DCF(numpy.hstack(llrTNV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
@@ -96,7 +96,7 @@ class Validation:
         actDCF_TNV = compute_act_DCF(numpy.hstack(llrTNV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
         print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_TNV)
         print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_TNV)
-        bayes_error_min_act_plot(numpy.hstack(llrTNV), LTR, 1)
+       # bayes_error_min_act_plot(numpy.hstack(llrTNV), LTR, 1)
 
     def k_fold_LR(self,k,DTR,LTR):
         lr_score = []
@@ -339,6 +339,10 @@ class Validation:
 
 
     def SVM_validation(self, DTR, LTR, pi, Cfn, Cfp, K, C):
+        scoresLin_append = []
+        scoresPol_append = []
+        scoresRBF_append = []
+        SVM_labels = []
         DTR = DTR.T
 
         scoresLin_append, scoresPol_append, scoresRBF_append, SVM_labels = self.kfold_SVM(DTR, LTR, K, C)
@@ -378,13 +382,23 @@ class Validation:
         #C_arr = [0.1, 1.0, 10.0]
         #self.SVM_score_calibration(DTR, LTR, K_arr, C_arr, pi, Cfn, Cfp)
 
-    def _getScoreGMM(self, D,L,Dte,components, a,p, llrGMM_full):
-        llrGMM_f = self.GMM.predict_GMM_full(D,L,Dte, components, a,p)
+    def _getScoreGMM(self, D, L, Dte, components, componentsNT, a, p, llrGMM_full, llr_GMM_naive, llr_GMM_Tied, llr_GMM_TiedNaive):
+        llrGMM_f = self.GMM.predict_GMM_full(D, L, Dte, components, componentsNT, a, p)
+        llrGMM_n = self.GMM.predict_GMM_naive(D, L, Dte, components, componentsNT, a, p)
+        llrGMM_t = self.GMM.predict_GMM_TiedCov(D, L, Dte, components, componentsNT, a, p)
+        llrGMM_tn = self.GMM.predict_GMM_TiedNaive(D, L, Dte, components, componentsNT, a, p)
         llrGMM_full.append(llrGMM_f)
+        llr_GMM_naive.append(llrGMM_n)
+        llr_GMM_Tied.append(llrGMM_t)
+        llr_GMM_TiedNaive.append(llrGMM_tn)
+        
 
-    def kfold_GMM(self,k, DTR, LTR, components, a,p,):
+    def kfold_GMM(self,k, DTR, LTR, components, componentsNT,a,p,):
 
         llr_GMM_full = []
+        llr_GMM_naive = []
+        llr_GMM_Tied = []
+        llr_GMM_TiedNaive = []
         labelGMM = []
         Dtr = numpy.split(DTR.T, k, axis=1)
         Ltr = numpy.split(LTR, k)
@@ -405,17 +419,40 @@ class Validation:
 
             # Train the model
             labelGMM = numpy.append(labelGMM, Lte, axis=0)
-            self._getScoreGMM(D,L,Dte,components, a,p, llr_GMM_full)
+            self._getScoreGMM(D,L,Dte,components,componentsNT, a,p, llr_GMM_full, llr_GMM_naive, llr_GMM_Tied,llr_GMM_TiedNaive)
 
-        return llr_GMM_full, labelGMM
+        return llr_GMM_full, llr_GMM_naive,llr_GMM_Tied, llr_GMM_TiedNaive, labelGMM
 
 
             #llr_GMM_full.append(self.LR.preditc_Logistic_Regression(D, L, Dte, 0.00001))
 
-    def GMM_validation(self,DTR,LTR, pi, Cfn, Cfp,comp, a,p ):
+    def GMM_validation(self,DTR,LTR, pi, Cfn, Cfp,comp, compNT,a,p ):
 
-        llr_GMM_Full, llr_GMM_labels= self.kfold_GMM(5, DTR, LTR, comp, a, p)
+        llr_GMM_Full, llr_GMM_Naive, llr_GMM_Tied,llr_GMM_TiedNaive,llr_GMM_labels= self.kfold_GMM(5, DTR, LTR, comp,compNT, a, p)
         print("##########GMM FULL##########")
         llr = numpy.hstack(llr_GMM_Full)
         scores_tot = compute_min_DCF(llr, llr_GMM_labels, pi, Cfn, Cfp)
-        print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp,scores_tot, ))
+        print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp,scores_tot))
+        rettt = compute_act_DCF(llr, llr_GMM_labels, pi, Cfn, Cfp, None)
+        print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
+
+        print("##########GMM NAIVE##########")
+        llrN = numpy.hstack(llr_GMM_Naive)
+        scores_totN = compute_min_DCF(llrN, llr_GMM_labels, pi, Cfn, Cfp)
+        print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_totN))
+        rettt = compute_act_DCF(llrN, llr_GMM_labels, pi, Cfn, Cfp, None)
+        print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
+
+        print("##########GMM TIED##########")
+        llrT = numpy.hstack(llr_GMM_Tied)
+        scores_totT = compute_min_DCF(llrT, llr_GMM_labels, pi, Cfn, Cfp)
+        print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_totT))
+        rettt = compute_act_DCF(llrT, llr_GMM_labels, pi, Cfn, Cfp, None)
+        print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
+
+        print("##########GMM TIED NAIVE##########")
+        llrTN = numpy.hstack(llr_GMM_TiedNaive)
+        scores_totTN = compute_min_DCF(llrTN, llr_GMM_labels, pi, Cfn, Cfp)
+        print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_totTN))
+        rettt = compute_act_DCF(llrTN, llr_GMM_labels, pi, Cfn, Cfp, None)
+        print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)

@@ -16,6 +16,9 @@ if __name__ == "__main__":
     DTE, LTE = load("Test.txt")
 
 
+    #print(empirical_covariance(DTR.T[:,LTR==0], empirical_mean(DTR.T)))
+    #print("TARGET\n")
+    #print(empirical_covariance(DTR.T[:, LTR == 1], empirical_mean(DTR.T)))
 
     print("TRAINING AUTHENTIC: ", DTR.T[:,LTR==1].shape[1])
     print("TRAINING SPOFFED", DTR.T[:, LTR==0].shape[1])
@@ -32,7 +35,7 @@ if __name__ == "__main__":
     #plt.plot_scatter(DTR, LTR)
 
     print("---------------PRINCIPAL COMPONENT ANALYSIS-------------")
-    DPA = dimRed.PCA(DTR, 2)
+    DPA = dimRed.PCA(DTR, 8)
     DPEA = dimRed.PCA(DTR, 2)
     plt.plot_PCA_scatter(DPA,LTR)
     dimRed.evaluatePCA(DPA,LTR)
@@ -58,3 +61,13 @@ if __name__ == "__main__":
             print("SVM, K: ",k," C: ", c)
             VA.SVM_validation(DTR, LTR, 0.5, 1, 10, k, c)
     #VA.GMM_validation(DTR,LTR, 0.5, 1, 10, 2, 0.1, 0.01)
+    # VA.MVG_validation(DTR,LTR, 0.9, 1,1,DTE,LTE)
+    # for i in range (7,10):
+    #     print("PCA con", i)
+    #     DPA = dimRed.PCA(DTR, i)
+    #     VA.MVG_validation(DPA.T, LTR, 0.9, 1, 1, DTE, LTE)
+
+
+    #VA.LR_validation(DTR,LTR, 0.5,1,10)
+    #VA.SVM_validation(DTR, LTR, 0.5, 1, 10, 1, 1)
+    #VA.GMM_validation(DTR,LTR, 0.5,1,10, 2,8, 0.1, 0.01)
