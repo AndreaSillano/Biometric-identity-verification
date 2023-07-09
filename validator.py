@@ -6,12 +6,14 @@ from logistic_regression import LogisticRegression
 from svm import SupportVectorMachine
 from GMM import GMM
 from mlFunc import *
+from plotter import Plotter
 class Validation:
     def __init__(self):
         self.MVG = MultivariateGaussianClassifier()
         self.LR = LogisticRegression()
         self.svm = SupportVectorMachine()
         self.GMM = GMM()
+        self.PLT = Plotter()
     def k_fold_MVG(self, k,DTR, LTR):
         llrMVG = []
         llrNV = []
@@ -35,7 +37,8 @@ class Validation:
 
             D = numpy.hstack(D)
             L = numpy.hstack(L)
-
+            #IF Z-NORM
+            #D, Dte = znorm(D, Dte)
             # Train the model
             self._getScoresMVG(Dte, D, L, llrMVG, llrNV, llrTCV, llrTNV)
             labelMVG = numpy.append(labelMVG, Lte, axis=0)
@@ -53,7 +56,7 @@ class Validation:
         llrTNV.append(llrsTNV)
 
 
-    def MVG_validation(self, DTR, LTR, pi, C_fn, C_fp, DTE, LTE):
+    def MVG_validation(self, DTR, LTR, pi, C_fn, C_fp):
         #SU DTE
         # llrs = self.MVG.predict_MVG(DTR.T, LTR, DTE.T)
         # minDCF_MVG_test = compute_min_DCF(llrs,LTE, pi, C_fn, C_fp)
@@ -98,7 +101,7 @@ class Validation:
         print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_TNV)
        # bayes_error_min_act_plot(numpy.hstack(llrTNV), LTR, 1)
 
-    def k_fold_LR(self,k,DTR,LTR):
+    def k_fold_LR(self,k,DTR,LTR, pi, l):
         lr_score = []
         labelLR = []
         Dtr = numpy.split(DTR.T, k, axis=1)
@@ -119,25 +122,40 @@ class Validation:
             L = numpy.hstack(L)
 
             # Train the model
+            #D,Dte = znorm(D,Dte)
             labelLR = numpy.append(labelLR, Lte, axis=0)
-            lr_score.append(self.LR.preditc_Logistic_Regression(D, L, Dte, 0.00001))
+            lr_score.append(self.LR.predict_Logistic_Regression_weigthed(D, L, Dte, l, pi))
+            #lr_score.append(self.LR.preditc_Logistic_Regression(D, L, Dte, 0.00001))
 
 
         return lr_score, labelLR
 
     def LR_validation(self,DTR, LTR, pi, C_fn, C_fp):
-        lr, labelLr = self.k_fold_LR(5,DTR,LTR)
+        lr, labelLr = self.k_fold_LR(5,DTR,LTR,pi, 0.01)
         print("############LOGISTIC REGRESSION#############")
         minDCF_LR = compute_min_DCF(numpy.hstack(lr), numpy.hstack(labelLr), pi, C_fn, C_fp)
         actDCF_LR = compute_act_DCF(numpy.hstack(lr), numpy.hstack(labelLr),pi, C_fn, C_fp)
         print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_LR)
         print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_LR)
+        lam = numpy.logspace(-5, 1,30)
+        minDCF_LR_0_5 = []
+        minDCF_LR_0_1 =[]
+        minDCF_LR_0_9 =[]
+        for l in lam:
+            lr1, labelLr1 = self.k_fold_LR(5, DTR, LTR, 0.5, l)
+
+            minDCF_LR_0_5 = numpy.hstack((minDCF_LR_0_5,compute_min_DCF(numpy.hstack(lr1), numpy.hstack(labelLr1), 0.5, C_fn, C_fp)))
+
+            lr2, labelLr2 = self.k_fold_LR(5, DTR, LTR, 0.1,l)
+
+            minDCF_LR_0_1 = numpy.hstack((minDCF_LR_0_1,compute_min_DCF(numpy.hstack(lr2), numpy.hstack(labelLr2), 0.1, C_fn, C_fp)))
+
+            lr2, labelLr2 = self.k_fold_LR(5, DTR, LTR, 0.9, l)
+            minDCF_LR_0_9 = numpy.hstack((minDCF_LR_0_9,compute_min_DCF(numpy.hstack(lr2), numpy.hstack(labelLr2), 0.9, C_fn, C_fp)))
+
+        self.PLT.plot_DCF_lambda(lam, numpy.hstack(minDCF_LR_0_5), numpy.hstack(minDCF_LR_0_1),numpy.hstack(minDCF_LR_0_9))
 
         #bayes_error_min_act_plot(s_LR, LTR, 1)
-
-        #########################################################
-        #                     BOH
-        #########################################################
 
 
         # print("---------------MVG WITH LDA--------------------------")

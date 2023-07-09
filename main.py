@@ -36,33 +36,38 @@ if __name__ == "__main__":
 
     print("---------------PRINCIPAL COMPONENT ANALYSIS-------------")
     DPA = dimRed.PCA(DTR, 8)
-    DPEA = dimRed.PCA(DTR, 2)
+    #DPEA = dimRed.PCA(DTR, 2)
     plt.plot_PCA_scatter(DPA,LTR)
     dimRed.evaluatePCA(DPA,LTR)
     print("---------------LINEAR DISCRIMINANT ANALYSIS-------------")
     DP = dimRed.LDA(DTR,LTR)
     DPE = dimRed.LDA(DTE,LTE)
     plt.plot_LDA_scatter(DP,LTR)
+    #plt.plot_histogram(DP.T, LTR)
 
     #plt.plot_correlations(DTR.T,"heatmap")
     #plt.plot_correlations(DTR.T[:, LTR == 0], "heatmap_spoofed_", cmap="Reds")
     #plt.plot_correlations(DTR.T[:, LTR == 1], "heatmap_authentic_", cmap="Blues")
 
 
-    # VA.MVG_validation(DTR,LTR, 0.9, 1,1,DTE,LTE)
+    # VA.MVG_validation(DTR,LTR, 0.5, 1,10)
     # for i in range (7,10):
-    #     print("PCA con", i)
-    #     DPA = dimRed.PCA(DTR, i)
-    #     VA.MVG_validation(DPA.T, LTR, 0.9, 1, 1, DTE, LTE)
+    #      print("PCA con", i)
+    #      DPA = dimRed.PCA(DTR, i)
+    #      VA.MVG_validation(DPA.T, LTR, 0.5, 1, 10)
 
 
     VA.LR_validation(DTR,LTR, 0.5,1,10)
+    # for i in range (7,10):
+    #      print("PCA con", i)
+    #      DPA = dimRed.PCA(DTR, i)
+    #      VA.LR_validation(DPA.T,LTR, 0.5,1,10)
 
-    K_arr = [0.1, 1.0, 10.0]
-    C_arr = [0.01, 0.1, 1.0, 10.0]
-    #for k in K_arr:
-        #for c in C_arr:
-            #print("SVM, K: ",k," C: ", c)
-            #VA.SVM_validation(DTR, LTR, 0.1, 1, 10, k, c)
+    # K_arr = [0.1, 1.0, 10.0]
+    # C_arr = [0.01, 0.1, 1.0, 10.0]
+    # for k in K_arr:
+    #     for c in C_arr:
+    #         print("SVM, K: ",k," C: ", c)
+    #         VA.SVM_validation(DTR, LTR, 0.9, 1, 10, k, c)
     #VA.GMM_validation(DTR,LTR, 0.5,1,10, 2,8, 0.1, 0.01)
     VA.SVM_validation(DTR, LTR, 0.5, 1, 10, 1, 1, True)

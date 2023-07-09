@@ -12,6 +12,13 @@ class LogisticRegression:
             numpy.logaddexp(0, -zi * (numpy.dot(w.T, DTR) + b)))
         return (f)
 
+    def predict_Logistic_Regression_weigthed(self,D,L,DTE,l,pi):
+        _v, _J, _d = scipy.optimize.fmin_l_bfgs_b(self.logreg_obj_weighted, numpy.zeros(D.shape[0] + 1),
+                                                  approx_grad=True, args=(D, L, l, pi))
+        _w = _v[0:D.shape[0]]
+        _b = _v[-1]
+        s = numpy.dot(numpy.array(_w).T, DTE) + _b
+        return s
     def preditc_Logistic_Regression(self,D,L,DTE,l):
         v = numpy.zeros(D.shape[0] + 1)
         x = numpy.array([0, 1])
@@ -59,7 +66,7 @@ class LogisticRegression:
         _v, _J, _d = scipy.optimize.fmin_l_bfgs_b(self.logreg_obj_weighted, numpy.zeros(D.shape[0] + 1), approx_grad=True, args=(D,L,l,pi))
         _w = _v[0:D.shape[0]]
         _b = _v[-1]
-        calibration = 0 if pi is None else numpy.log(pi / (1 - pi))
+        calibration = numpy.log(pi / (1 - pi))
         STE = numpy.dot(_w.T, DTE) + _b - calibration
         return STE, _w, _b
 

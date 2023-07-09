@@ -7,20 +7,18 @@ class DimensionalityReduction:
     # ----------PRINCIPAL COMPONENT ANALISYS---------------
     def PCA(self,D, m):
         D = D.transpose()
-        mu = empirical_mean(D)
-        # DC = D - D.mean(1).reshape((D.shape[0], 1))
-        # C = numpy.dot(DC, DC.T)
-        # C = C / float(DC.shape[1])
-        C = empirical_covariance(D, mu)
+
+        DC = D - D.mean(1).reshape((D.shape[0], 1))
+        C = numpy.dot(DC, DC.T)
+        C = C / float(DC.shape[1])
 
         DP = self._computePCA(D, m, C)
         return DP
 
     def _computePCA(self, D, m, C):
         U, s, Vh = numpy.linalg.svd(C)
-
         P = U[:, 0:m]
-        # P = numpy.dot(P, [[1, 0], [0, -1]])
+        #P = numpy.dot(P, [[1, 0], [0, -1]])
         DP = numpy.dot(P.T, D)
         return DP
 

@@ -15,8 +15,9 @@ class Plotter:
             plt.hist(D1, bins=100, density=True, ec='black', color="#279847", alpha=0.5, label="Autenthic Fingerprint")
 
             plt.legend(loc='upper right')
-            plt.savefig("./images/hist/hist_" + str(i) + ".png")
-            plt.close()
+            #plt.savefig("./images/hist/hist_" + str(i) + ".png")
+            plt.show()
+            #plt.close()
             
     def plot_scatter(self, D, L):
         D = D.transpose()
@@ -86,3 +87,16 @@ class Plotter:
         plt.show()
         fig = heatmap.get_figure()
         fig.savefig("./images/" + title + ".png")
+
+    def plot_DCF_lambda(self, x, y_05, y_01, y_09):
+        plt.figure()
+        plt.plot(x, y_05, label='min DCF prior=0.5', color='b')
+        plt.plot(x, y_09, label='min DCF prior=0.9', color='g')
+        plt.plot(x, y_01, label='min DCF prior=0.1', color='r')
+        plt.xlim([min(x), max(x)])
+        plt.xscale("log", base=10)
+        plt.legend(["min DCF prior=0.5", "min DCF prior=0.9", "min DCF prior=0.1"])
+        plt.xlabel('lambda')
+        plt.ylabel("min DCF")
+        #plt.savefig('./images/DCF_' + title + '.svg')
+        plt.show()
