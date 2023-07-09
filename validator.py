@@ -409,11 +409,11 @@ class Validation:
 
             minDCF_LR_0_5 = numpy.hstack((minDCF_LR_0_5,compute_min_DCF(numpy.hstack(lr1), numpy.hstack(labelLr1), 0.5, C_fn, C_fp)))
 
-            lr2, labelLr2 = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.1)
+            lr2, _, _, labelLr2 = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.1)
 
             minDCF_LR_0_1 = numpy.hstack((minDCF_LR_0_1,compute_min_DCF(numpy.hstack(lr2), numpy.hstack(labelLr2), 0.1, C_fn, C_fp)))
 
-            lr2, labelLr2 = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.9)
+            lr2, _, _, labelLr2 = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.9)
             minDCF_LR_0_9 = numpy.hstack((minDCF_LR_0_9,compute_min_DCF(numpy.hstack(lr2), numpy.hstack(labelLr2), 0.9, C_fn, C_fp)))
 
         self.PLT.plot_DCF_lambda(C_arr, numpy.hstack(minDCF_LR_0_5), numpy.hstack(minDCF_LR_0_1),numpy.hstack(minDCF_LR_0_9), 'C')
