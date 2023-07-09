@@ -95,8 +95,36 @@ class Plotter:
         plt.plot(x, y_01, label='min DCF prior=0.1', color='r')
         plt.xlim([min(x), max(x)])
         plt.xscale("log", base=10)
-        plt.legend(["min DCF prior=0.5", "min DCF prior=0.9", "min DCF prior=0.1"])
+        plt.legend(loc='upper left')
         plt.xlabel('lambda')
         plt.ylabel("min DCF")
-        #plt.savefig('./images/DCF_' + title + '.svg')
+        #plt.savefig('./images/DCF_' + 'LR' + '.png')
         plt.show()
+
+    def plot_DCF_compare(self, x, y, y_z):
+        plt.figure()
+        plt.plot(x, y_z, label='Log-Reg (z-norm)', color='b')
+        plt.plot(x, y, label='Log-Reg', color='r')
+        plt.xlim([min(x), max(x)])
+        plt.xscale("log", base=10)
+        plt.legend(loc='upper left')
+        plt.xlabel('lambda')
+        plt.ylabel("min DCF")
+        #plt.savefig('./images/DCF_' + 'LR' + '.png')
+        plt.show()
+
+    def plot_DCF_compare_PCA(self, x, y, y_9, y_8, y_7):
+        plt.figure()
+        plt.plot(x, y, label='Log-Reg', color='r' ,linestyle='dashed')
+        plt.plot(x, y_8, label='Log-Reg PCA-8', color='b')
+        plt.plot(x, y_7, label='Log-Reg PCA-7', color='y')
+        plt.plot(x, y_9, label='Log-Reg PCA-9', color='g')
+        plt.xlim([min(x), max(x)])
+        plt.xscale("log", base=10)
+        plt.legend(loc='upper left')
+        plt.xlabel('lambda')
+        plt.ylabel("min DCF")
+        plt.savefig('./images/DCF_PCA_' + 'LR' + '.png')
+        plt.show()
+
+

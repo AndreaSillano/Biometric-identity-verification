@@ -57,11 +57,11 @@ if __name__ == "__main__":
     #      VA.MVG_validation(DPA.T, LTR, 0.5, 1, 10)
 
 
-    VA.LR_validation(DTR,LTR, 0.5,1,10)
+    VA.LR_validation(DTR,LTR, 0.5,1,10, plot = False)
     # for i in range (7,10):
     #      print("PCA con", i)
     #      DPA = dimRed.PCA(DTR, i)
-    #      VA.LR_validation(DPA.T,LTR, 0.5,1,10)
+    #      VA.LR_validation(DPA.T,LTR, 0.1,1,10, False)
 
     # K_arr = [0.1, 1.0, 10.0]
     # C_arr = [0.01, 0.1, 1.0, 10.0]

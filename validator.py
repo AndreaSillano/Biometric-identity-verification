@@ -4,6 +4,7 @@ from dimensionality_reduction import DimensionalityReduction
 from gaussian_classifier import MultivariateGaussianClassifier
 from logistic_regression import LogisticRegression
 from svm import SupportVectorMachine
+from dimensionality_reduction import DimensionalityReduction
 from GMM import GMM
 from mlFunc import *
 from plotter import Plotter
@@ -14,6 +15,7 @@ class Validation:
         self.svm = SupportVectorMachine()
         self.GMM = GMM()
         self.PLT = Plotter()
+        self.dimRed = DimensionalityReduction()
     def k_fold_MVG(self, k,DTR, LTR):
         llrMVG = []
         llrNV = []
@@ -101,7 +103,7 @@ class Validation:
         print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_TNV)
        # bayes_error_min_act_plot(numpy.hstack(llrTNV), LTR, 1)
 
-    def k_fold_LR(self,k,DTR,LTR, pi, l):
+    def k_fold_LR(self,k,DTR,LTR, pi, l, norm=False):
         lr_score = []
         labelLR = []
         Dtr = numpy.split(DTR.T, k, axis=1)
@@ -123,6 +125,9 @@ class Validation:
 
             # Train the model
             #D,Dte = znorm(D,Dte)
+            if norm:
+                D, Dte = znorm(D, Dte)
+
             labelLR = numpy.append(labelLR, Lte, axis=0)
             lr_score.append(self.LR.predict_Logistic_Regression_weigthed(D, L, Dte, l, pi))
             #lr_score.append(self.LR.preditc_Logistic_Regression(D, L, Dte, 0.00001))
@@ -130,30 +135,88 @@ class Validation:
 
         return lr_score, labelLR
 
-    def LR_validation(self,DTR, LTR, pi, C_fn, C_fp):
-        lr, labelLr = self.k_fold_LR(5,DTR,LTR,pi, 0.01)
+    def LR_validation(self,DTR, LTR, pi, C_fn, C_fp, plot):
+        lr, labelLr = self.k_fold_LR(5,DTR,LTR,pi, 0.1, True)
         print("############LOGISTIC REGRESSION#############")
         minDCF_LR = compute_min_DCF(numpy.hstack(lr), numpy.hstack(labelLr), pi, C_fn, C_fp)
         actDCF_LR = compute_act_DCF(numpy.hstack(lr), numpy.hstack(labelLr),pi, C_fn, C_fp)
         print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_LR)
         print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_LR)
-        lam = numpy.logspace(-5, 1,30)
-        minDCF_LR_0_5 = []
-        minDCF_LR_0_1 =[]
-        minDCF_LR_0_9 =[]
+
+
+        '''Plot PCA LOG'''
+        lam = numpy.logspace(-5, 1, 30)
+        minDCF_9 = []
+        minDCF_8 = []
+        minDCF_7 = []
+        minDCF_LR = []
+        DP_9 = self.dimRed.PCA(DTR, 9)
+        DP_8 = self.dimRed.PCA(DTR, 8)
+        DP_7 = self.dimRed.PCA(DTR, 7)
         for l in lam:
-            lr1, labelLr1 = self.k_fold_LR(5, DTR, LTR, 0.5, l)
+            lr1, labelLr1 = self.k_fold_LR(5, DTR, LTR, pi, l)
 
-            minDCF_LR_0_5 = numpy.hstack((minDCF_LR_0_5,compute_min_DCF(numpy.hstack(lr1), numpy.hstack(labelLr1), 0.5, C_fn, C_fp)))
+            minDCF_LR = numpy.hstack(
+                (minDCF_LR, compute_min_DCF(numpy.hstack(lr1), numpy.hstack(labelLr1), pi, C_fn, C_fp)))
 
-            lr2, labelLr2 = self.k_fold_LR(5, DTR, LTR, 0.1,l)
+            lr9, labelLr9 = self.k_fold_LR(5, DP_9.T, LTR, pi, l)
 
-            minDCF_LR_0_1 = numpy.hstack((minDCF_LR_0_1,compute_min_DCF(numpy.hstack(lr2), numpy.hstack(labelLr2), 0.1, C_fn, C_fp)))
+            minDCF_9 = numpy.hstack(
+                (minDCF_9, compute_min_DCF(numpy.hstack(lr9), numpy.hstack(labelLr9), pi, C_fn, C_fp)))
 
-            lr2, labelLr2 = self.k_fold_LR(5, DTR, LTR, 0.9, l)
-            minDCF_LR_0_9 = numpy.hstack((minDCF_LR_0_9,compute_min_DCF(numpy.hstack(lr2), numpy.hstack(labelLr2), 0.9, C_fn, C_fp)))
+            lr8, labelLr8 = self.k_fold_LR(5, DP_8.T, LTR, pi, l)
 
-        self.PLT.plot_DCF_lambda(lam, numpy.hstack(minDCF_LR_0_5), numpy.hstack(minDCF_LR_0_1),numpy.hstack(minDCF_LR_0_9))
+            minDCF_8 = numpy.hstack(
+                (minDCF_8, compute_min_DCF(numpy.hstack(lr8), numpy.hstack(labelLr8), pi, C_fn, C_fp)))
+
+            lr7, labelLr7 = self.k_fold_LR(5, DP_7.T, LTR, pi, l)
+
+            minDCF_7 = numpy.hstack(
+                (minDCF_7, compute_min_DCF(numpy.hstack(lr7), numpy.hstack(labelLr7), pi, C_fn, C_fp)))
+
+        self.PLT.plot_DCF_compare_PCA(lam, numpy.hstack(minDCF_LR), numpy.hstack(minDCF_9),numpy.hstack(minDCF_8), numpy.hstack(minDCF_7))
+
+        if plot:
+            '''Plot minDCF on different lambda and prior'''
+            lam = numpy.logspace(-5, 1, 30)
+            minDCF_LR_0_5 = []
+            minDCF_LR_0_1 = []
+            minDCF_LR_0_9 = []
+            for l in lam:
+                lr1, labelLr1 = self.k_fold_LR(5, DTR, LTR, 0.5, l)
+
+                minDCF_LR_0_5 = numpy.hstack(
+                    (minDCF_LR_0_5, compute_min_DCF(numpy.hstack(lr1), numpy.hstack(labelLr1), 0.5, C_fn, C_fp)))
+
+                lr2, labelLr2 = self.k_fold_LR(5, DTR, LTR, 0.1, l)
+
+                minDCF_LR_0_1 = numpy.hstack(
+                    (minDCF_LR_0_1, compute_min_DCF(numpy.hstack(lr2), numpy.hstack(labelLr2), 0.1, C_fn, C_fp)))
+
+                lr3, labelLr3 = self.k_fold_LR(5, DTR, LTR, 0.9, l)
+                minDCF_LR_0_9 = numpy.hstack(
+                    (minDCF_LR_0_9, compute_min_DCF(numpy.hstack(lr3), numpy.hstack(labelLr3), 0.9, C_fn, C_fp)))
+
+            self.PLT.plot_DCF_lambda(lam, numpy.hstack(minDCF_LR_0_5), numpy.hstack(minDCF_LR_0_1),
+                                     numpy.hstack(minDCF_LR_0_9))
+            '''Plot min DCF vs minDCF with z-norm'''
+            lam = numpy.logspace(-5, 1, 30)
+            minDCF_LR = []
+            minDCF_LR_Z = []
+
+            for l in lam:
+                lr1, labelLr1 = self.k_fold_LR(5, DTR, LTR, pi, l)
+
+                minDCF_LR = numpy.hstack(
+                    (minDCF_LR, compute_min_DCF(numpy.hstack(lr1), numpy.hstack(labelLr1), pi, C_fn, C_fp)))
+
+                lr2, labelLr2 = self.k_fold_LR(5, DTR, LTR, pi, l, True)
+
+                minDCF_LR_Z = numpy.hstack(
+                    (minDCF_LR_Z, compute_min_DCF(numpy.hstack(lr2), numpy.hstack(labelLr2), pi, C_fn, C_fp)))
+
+            self.PLT.plot_DCF_compare(lam, numpy.hstack(minDCF_LR), numpy.hstack(minDCF_LR_Z))
+
 
         #bayes_error_min_act_plot(s_LR, LTR, 1)
 
