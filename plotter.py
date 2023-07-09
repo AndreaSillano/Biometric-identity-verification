@@ -88,7 +88,7 @@ class Plotter:
         fig = heatmap.get_figure()
         fig.savefig("./images/" + title + ".png")
 
-    def plot_DCF_lambda(self, x, y_05, y_01, y_09):
+    def plot_DCF_lambda(self, x, y_05, y_01, y_09, xlabel):
         plt.figure()
         plt.plot(x, y_05, label='min DCF prior=0.5', color='b')
         plt.plot(x, y_09, label='min DCF prior=0.9', color='g')
@@ -96,7 +96,7 @@ class Plotter:
         plt.xlim([min(x), max(x)])
         plt.xscale("log", base=10)
         plt.legend(["min DCF prior=0.5", "min DCF prior=0.9", "min DCF prior=0.1"])
-        plt.xlabel('lambda')
+        plt.xlabel(xlabel)
         plt.ylabel("min DCF")
         #plt.savefig('./images/DCF_' + title + '.svg')
         plt.show()
