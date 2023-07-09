@@ -219,8 +219,8 @@ class Validation:
     def get_scores_SVM(self, D, L, Dte, Lte, C, K, costant, degree, gamma, scoresLin_append, scoresPol_append, scoresRBF_append, balanced, pi):    
 
         scoresLin_append.append(self.svm.predict_SVM_Linear(D, L, C, K, Dte, balanced, pi))
-        scoresPol_append.append(self.svm.predict_SVM_Pol(D, L, C, K, Dte, costant, degree))
-        scoresRBF_append.append(self.svm.predict_SVM_RBF(D, L, C, K, Dte, gamma))
+        #scoresPol_append.append(self.svm.predict_SVM_Pol(D, L, C, K, Dte, costant, degree))
+        #scoresRBF_append.append(self.svm.predict_SVM_RBF(D, L, C, K, Dte, gamma))
 
     def kfold_SVM(self, DTR, LTR, K, C, balanced, pi):
         k = 5
@@ -405,7 +405,7 @@ class Validation:
         minDCF_LR_0_1 =[]
         minDCF_LR_0_9 =[]
         for c in C_arr:
-            lr1, labelLr1 = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.5)
+            lr1, _, _, labelLr1 = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.5)
 
             minDCF_LR_0_5 = numpy.hstack((minDCF_LR_0_5,compute_min_DCF(numpy.hstack(lr1), numpy.hstack(labelLr1), 0.5, C_fn, C_fp)))
 
