@@ -56,12 +56,12 @@ if __name__ == "__main__":
     #     VA.MVG_validation(DPA.T, LTR, 0.9, 1, 1, DTE, LTE)
 
 
-    #VA.LR_validation(DTR,LTR, 0.5,1,10)
+    VA.LR_validation(DTR,LTR, 0.5,1,10)
 
     K_arr = [0.1, 1.0, 10.0]
     C_arr = [0.01, 0.1, 1.0, 10.0]
-    for k in K_arr:
-        for c in C_arr:
-            print("SVM, K: ",k," C: ", c)
-            VA.SVM_validation(DTR, LTR, 0.5, 1, 10, k, c)
+    #for k in K_arr:
+        #for c in C_arr:
+            #print("SVM, K: ",k," C: ", c)
+            #VA.SVM_validation(DTR, LTR, 0.1, 1, 10, k, c)
     #VA.GMM_validation(DTR,LTR, 0.5,1,10, 2,8, 0.1, 0.01)

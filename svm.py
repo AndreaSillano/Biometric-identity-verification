@@ -74,7 +74,7 @@ def calculate_lbgf(H, DTR, C):
     alphaStar, _x, _y = fmin_l_bfgs_b(
         LDual,
         numpy.zeros(DTR.shape[1]),
-        bounds=[(0, C)] * DTR.shape[1],
+        bounds=C,
         factr=1.0,
         maxiter=10000,
         maxfun=100000,
@@ -89,7 +89,7 @@ class SupportVectorMachine:
         self.dl = []
         self.dg = []
 
-    def train_SVM_linear(self, DTR, LTR, C, K):
+    def train_SVM_linear(self, DTR, LTR, C, K, balanced, pi):
         DTREXT = numpy.vstack([DTR, K * numpy.ones((1, DTR.shape[1]))])
         Z = numpy.zeros(LTR.shape)
         Z[LTR == 1] = 1
@@ -103,7 +103,15 @@ class SupportVectorMachine:
             loss = numpy.maximum(numpy.zeros(S.shape), 1 - Z * S).sum()
             return 0.5 * numpy.linalg.norm(w) ** 2 + C * loss
 
-        alphaStar, JDual, LDual = calculate_lbgf(H, DTR, C)
+        bounds = ''
+        if(balanced):
+            C1 = (C * pi) / (DTR[:, LTR == 1].shape[1] / DTR.shape[1])
+            C0 = (C * (1 - pi)) / (DTR[:, LTR == 0].shape[1] / DTR.shape[1])
+            bounds = [((0, C0) if x == 0 else (0, C1)) for x in LTR.tolist()]
+        else:
+            bounds = [(0, C)] * DTR.shape[1]
+
+        alphaStar, JDual, LDual = calculate_lbgf(H, DTR, bounds)
         wStar = numpy.dot(DTREXT, vcol(alphaStar) * vcol(Z))
         return wStar, JPrimal(wStar)
     
@@ -117,6 +125,7 @@ class SupportVectorMachine:
         # H = numpy.exp(-Dist)
         H = vcol(Z) * vrow(Z) * H
 
+        C = [(0, C)] * DTR.shape[1]
         alphaStar, JDual, LDual = calculate_lbgf(H, DTR, C)
 
         return alphaStar, JDual(alphaStar)[0]
@@ -133,12 +142,13 @@ class SupportVectorMachine:
                 kernel[i, j] = numpy.exp(-gamma * (numpy.linalg.norm(DTR[:, i] - DTR[:, j]) ** 2)) + K * K
         H = vcol(Z) * vrow(Z) * kernel
 
+        C = [(0, C)] * DTR.shape[1]
         alphaStar, JDual, LDual = calculate_lbgf(H, DTR, C)
 
         return alphaStar, JDual(alphaStar)[0]
 
-    def predict_SVM_Linear(self, D, L, C, K, Dte):
-        wStar, primal = self.train_SVM_linear(D, L, C, K)
+    def predict_SVM_Linear(self, D, L, C, K, Dte, balanced, pi):
+        wStar, primal = self.train_SVM_linear(D, L, C, K, balanced, pi)
         DTEEXT = numpy.vstack([Dte, K * numpy.ones((1, Dte.shape[1]))])
 
         scores = numpy.dot(wStar.T, DTEEXT).ravel()
