@@ -65,3 +65,4 @@ if __name__ == "__main__":
             #print("SVM, K: ",k," C: ", c)
             #VA.SVM_validation(DTR, LTR, 0.1, 1, 10, k, c)
     #VA.GMM_validation(DTR,LTR, 0.5,1,10, 2,8, 0.1, 0.01)
+    VA.SVM_validation(DTR, LTR, 0.5, 1, 10, 1, 1, True)

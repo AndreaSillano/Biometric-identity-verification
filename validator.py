@@ -255,7 +255,7 @@ class Validation:
         # π = 0.9
         #scores_tot = compute_min_DCF(scoresLin_append, SVM_labels, 0.9, 1, 1)
         #print(scores_tot)
-    def kfold_calibration_SVM(self, DTR, LTR, K, C):
+    def kfold_calibration_SVM(self, DTR, LTR, K, C, balanced, pi):
         k = 5
         Dtr = numpy.split(DTR, k, axis=1)
         Ltr = numpy.split(LTR, k)
@@ -289,9 +289,9 @@ class Validation:
             SVM_labels = numpy.append(SVM_labels, Lte, axis=0)
             SVM_labels = numpy.hstack(SVM_labels)
 
-            scoresT_Lin = self.svm.predict_SVM_Linear(D, L, C, K, D)
+            scoresT_Lin = self.svm.predict_SVM_Linear(D, L, C, K, D, balanced, pi)
             a,b = self.LR.compute_scores_param(scoresT_Lin, L, 1e-4 ,0.5)
-            scoresV_Lin = self.svm.predict_SVM_Linear(D, L, C, K, Dte)
+            scoresV_Lin = self.svm.predict_SVM_Linear(D, L, C, K, Dte, balanced, pi)
             computeLLR = a * scoresV_Lin + b - numpy.log(0.5 / (1 - 0.5))
 
             scoresLin_append.append(computeLLR)
@@ -347,7 +347,7 @@ class Validation:
 
         scoresLin_append, scoresPol_append, scoresRBF_append, SVM_labels = self.kfold_SVM(DTR, LTR, K, C, balanced, pi)
 
-        print("##########LINEAR##########")
+        print("##########LINEAR##########\nbalanced= ",balanced,"\n")
         scores_tot = compute_min_DCF(numpy.hstack(scoresLin_append), SVM_labels, pi, Cfn, Cfp)
         print(f'- with prior = {pi} -> minDCF = %.3f' % scores_tot)
 
@@ -369,7 +369,7 @@ class Validation:
         rettt = compute_act_DCF(numpy.hstack(scoresRBF_append), SVM_labels, pi, Cfn, Cfp, None)
         print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
 
-        cal_score_Lin, cal_score_Pol, cal_score_RBF, cal_label = self.kfold_calibration_SVM(DTR, LTR, K, C)
+        cal_score_Lin, cal_score_Pol, cal_score_RBF, cal_label = self.kfold_calibration_SVM(DTR, LTR, K, C, balanced, pi)
         rettt = compute_act_DCF(numpy.hstack(cal_score_Lin), cal_label, 0.5, 1, 10, None)
         print("ACT DFC ON TRAIN SVM Lin - CAL", rettt)
         rettt = compute_act_DCF(numpy.hstack(cal_score_Pol), cal_label, 0.5, 1, 10, None)
