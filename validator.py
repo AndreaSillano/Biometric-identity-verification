@@ -198,7 +198,7 @@ class Validation:
                     (minDCF_LR_0_9, compute_min_DCF(numpy.hstack(lr3), numpy.hstack(labelLr3), 0.9, C_fn, C_fp)))
 
             self.PLT.plot_DCF_lambda(lam, numpy.hstack(minDCF_LR_0_5), numpy.hstack(minDCF_LR_0_1),
-                                     numpy.hstack(minDCF_LR_0_9))
+                                     numpy.hstack(minDCF_LR_0_9), 'lambda')
             '''Plot min DCF vs minDCF with z-norm'''
             lam = numpy.logspace(-5, 1, 30)
             minDCF_LR = []
@@ -282,8 +282,8 @@ class Validation:
     def get_scores_SVM(self, D, L, Dte, Lte, C, K, costant, degree, gamma, scoresLin_append, scoresPol_append, scoresRBF_append, balanced, pi):    
 
         scoresLin_append.append(self.svm.predict_SVM_Linear(D, L, C, K, Dte, balanced, pi))
-        scoresPol_append.append(self.svm.predict_SVM_Pol(D, L, C, K, Dte, costant, degree))
-        scoresRBF_append.append(self.svm.predict_SVM_RBF(D, L, C, K, Dte, gamma))
+        #scoresPol_append.append(self.svm.predict_SVM_Pol(D, L, C, K, Dte, costant, degree))
+        #scoresRBF_append.append(self.svm.predict_SVM_RBF(D, L, C, K, Dte, gamma))
 
     def kfold_SVM(self, DTR, LTR, K, C, balanced, pi):
         k = 5
@@ -336,7 +336,7 @@ class Validation:
         # π = 0.9
         #scores_tot = compute_min_DCF(scoresLin_append, SVM_labels, 0.9, 1, 1)
         #print(scores_tot)
-    def kfold_calibration_SVM(self, DTR, LTR, K, C):
+    def kfold_calibration_SVM(self, DTR, LTR, K, C, balanced, pi):
         k = 5
         Dtr = numpy.split(DTR, k, axis=1)
         Ltr = numpy.split(LTR, k)
@@ -370,9 +370,9 @@ class Validation:
             SVM_labels = numpy.append(SVM_labels, Lte, axis=0)
             SVM_labels = numpy.hstack(SVM_labels)
 
-            scoresT_Lin = self.svm.predict_SVM_Linear(D, L, C, K, D)
+            scoresT_Lin = self.svm.predict_SVM_Linear(D, L, C, K, D, balanced, pi)
             a,b = self.LR.compute_scores_param(scoresT_Lin, L, 1e-4 ,0.5)
-            scoresV_Lin = self.svm.predict_SVM_Linear(D, L, C, K, Dte)
+            scoresV_Lin = self.svm.predict_SVM_Linear(D, L, C, K, Dte, balanced, pi)
             computeLLR = a * scoresV_Lin + b - numpy.log(0.5 / (1 - 0.5))
 
             scoresLin_append.append(computeLLR)
@@ -419,49 +419,67 @@ class Validation:
         print("DFC Calibrated Linear: ", min(actDFCLin), "\nDFC Calibrated Polynomial: ", min(actDFCPol), "\nDFC Calibrated RBF: ", min(actDFCRBF))
 
 
-    def SVM_validation(self, DTR, LTR, pi, Cfn, Cfp, K, C, balanced):
+    def SVM_validation(self, DTR, LTR, pi, C_fn, C_fp, K, C, balanced):
         scoresLin_append = []
         scoresPol_append = []
         scoresRBF_append = []
         SVM_labels = []
         DTR = DTR.T
 
-        scoresLin_append, scoresPol_append, scoresRBF_append, SVM_labels = self.kfold_SVM(DTR, LTR, K, C, balanced, pi)
+        # scoresLin_append, scoresPol_append, scoresRBF_append, SVM_labels = self.kfold_SVM(DTR, LTR, K, C, balanced, pi)
 
-        print("##########LINEAR##########")
-        scores_tot = compute_min_DCF(numpy.hstack(scoresLin_append), SVM_labels, pi, Cfn, Cfp)
-        print(f'- with prior = {pi} -> minDCF = %.3f' % scores_tot)
+        # print("##########LINEAR##########\nbalanced= ",balanced,"\n")
+        # scores_tot = compute_min_DCF(numpy.hstack(scoresLin_append), SVM_labels, pi, C_fn, C_fp)
+        # print(f'- with prior = {pi} -> minDCF = %.3f' % scores_tot)
 
-        rettt = compute_act_DCF(numpy.hstack(scoresLin_append), SVM_labels, pi, Cfn, Cfp, None)
-        print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
+        # rettt = compute_act_DCF(numpy.hstack(scoresLin_append), SVM_labels, pi, C_fn, C_fp, None)
+        # print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
 
-        print("##########POLYNOMIAL##########")
-        scores_tot = compute_min_DCF(numpy.hstack(scoresPol_append), SVM_labels, pi, Cfn, Cfp)
-        print(f'- with prior = {pi} -> minDCF = %.3f' % scores_tot)
+        # print("##########POLYNOMIAL##########")
+        # scores_tot = compute_min_DCF(numpy.hstack(scoresPol_append), SVM_labels, pi, C_fn, C_fp)
+        # print(f'- with prior = {pi} -> minDCF = %.3f' % scores_tot)
 
-        rettt = compute_act_DCF(numpy.hstack(scoresPol_append), SVM_labels, pi, Cfn, Cfp, None)
-        print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
+        # rettt = compute_act_DCF(numpy.hstack(scoresPol_append), SVM_labels, pi, C_fn, C_fp, None)
+        # print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
 
 
-        print("##########RBF##########")
-        scores_tot = compute_min_DCF(numpy.hstack(scoresRBF_append), SVM_labels, pi, Cfn, Cfp)
-        print(f'- with prior = {pi} -> minDCF = %.3f' % scores_tot)
+        # print("##########RBF##########")
+        # scores_tot = compute_min_DCF(numpy.hstack(scoresRBF_append), SVM_labels, pi, C_fn, C_fp)
+        # print(f'- with prior = {pi} -> minDCF = %.3f' % scores_tot)
 
-        rettt = compute_act_DCF(numpy.hstack(scoresRBF_append), SVM_labels, pi, Cfn, Cfp, None)
-        print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
+        # rettt = compute_act_DCF(numpy.hstack(scoresRBF_append), SVM_labels, pi, C_fn, C_fp, None)
+        # print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
 
-        cal_score_Lin, cal_score_Pol, cal_score_RBF, cal_label = self.kfold_calibration_SVM(DTR, LTR, K, C)
-        rettt = compute_act_DCF(numpy.hstack(cal_score_Lin), cal_label, 0.5, 1, 10, None)
-        print("ACT DFC ON TRAIN SVM Lin - CAL", rettt)
-        rettt = compute_act_DCF(numpy.hstack(cal_score_Pol), cal_label, 0.5, 1, 10, None)
-        print("ACT DFC ON TRAIN SVM Pol - CAL", rettt)
-        rettt = compute_act_DCF(numpy.hstack(cal_score_RBF), cal_label, 0.5, 1, 10, None)
-        print("ACT DFC ON TRAIN SVM RBF - CAL", rettt)
+        # cal_score_Lin, cal_score_Pol, cal_score_RBF, cal_label = self.kfold_calibration_SVM(DTR, LTR, K, C, balanced, pi)
+        # rettt = compute_act_DCF(numpy.hstack(cal_score_Lin), cal_label, 0.5, 1, 10, None)
+        # print("ACT DFC ON TRAIN SVM Lin - CAL", rettt)
+        # rettt = compute_act_DCF(numpy.hstack(cal_score_Pol), cal_label, 0.5, 1, 10, None)
+        # print("ACT DFC ON TRAIN SVM Pol - CAL", rettt)
+        # rettt = compute_act_DCF(numpy.hstack(cal_score_RBF), cal_label, 0.5, 1, 10, None)
+        # print("ACT DFC ON TRAIN SVM RBF - CAL", rettt)
 
-        K_arr = [0.1, 1.0, 10.0]
-        C_arr = [0.01, 0.1, 1.0, 10.0]
+        #K_arr = [0.1, 1.0, 10.0]
+        #C_arr = [0.01, 0.1, 1.0, 10.0]
         #C_arr = [0.1, 1.0, 10.0]
         #self.SVM_score_calibration(DTR, LTR, K_arr, C_arr, pi, Cfn, Cfp)
+
+        C_arr = numpy.logspace(-5, 1,30)
+        minDCF_LR_0_5 = []
+        minDCF_LR_0_1 =[]
+        minDCF_LR_0_9 =[]
+        for c in C_arr:
+            lr1, _, _, labelLr1 = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.5)
+
+            minDCF_LR_0_5 = numpy.hstack((minDCF_LR_0_5,compute_min_DCF(numpy.hstack(lr1), numpy.hstack(labelLr1), 0.5, C_fn, C_fp)))
+
+            lr2, _, _, labelLr2 = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.1)
+
+            minDCF_LR_0_1 = numpy.hstack((minDCF_LR_0_1,compute_min_DCF(numpy.hstack(lr2), numpy.hstack(labelLr2), 0.1, C_fn, C_fp)))
+
+            lr2, _, _, labelLr2 = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.9)
+            minDCF_LR_0_9 = numpy.hstack((minDCF_LR_0_9,compute_min_DCF(numpy.hstack(lr2), numpy.hstack(labelLr2), 0.9, C_fn, C_fp)))
+
+        self.PLT.plot_DCF_lambda(C_arr, numpy.hstack(minDCF_LR_0_5), numpy.hstack(minDCF_LR_0_1),numpy.hstack(minDCF_LR_0_9), 'C')
 
     def _getScoreGMM(self, D, L, Dte, components, componentsNT, a, p, llrGMM_full, llr_GMM_naive, llr_GMM_Tied, llr_GMM_TiedNaive):
         llrGMM_f = self.GMM.predict_GMM_full(D, L, Dte, components, componentsNT, a, p)
