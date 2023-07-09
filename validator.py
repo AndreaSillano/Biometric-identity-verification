@@ -144,38 +144,6 @@ class Validation:
         print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_LR)
 
 
-        '''Plot PCA LOG'''
-        lam = numpy.logspace(-5, 1, 30)
-        minDCF_9 = []
-        minDCF_8 = []
-        minDCF_7 = []
-        minDCF_LR = []
-        DP_9 = self.dimRed.PCA(DTR, 9)
-        DP_8 = self.dimRed.PCA(DTR, 8)
-        DP_7 = self.dimRed.PCA(DTR, 7)
-        for l in lam:
-            lr1, labelLr1 = self.k_fold_LR(5, DTR, LTR, pi, l)
-
-            minDCF_LR = numpy.hstack(
-                (minDCF_LR, compute_min_DCF(numpy.hstack(lr1), numpy.hstack(labelLr1), pi, C_fn, C_fp)))
-
-            lr9, labelLr9 = self.k_fold_LR(5, DP_9.T, LTR, pi, l)
-
-            minDCF_9 = numpy.hstack(
-                (minDCF_9, compute_min_DCF(numpy.hstack(lr9), numpy.hstack(labelLr9), pi, C_fn, C_fp)))
-
-            lr8, labelLr8 = self.k_fold_LR(5, DP_8.T, LTR, pi, l)
-
-            minDCF_8 = numpy.hstack(
-                (minDCF_8, compute_min_DCF(numpy.hstack(lr8), numpy.hstack(labelLr8), pi, C_fn, C_fp)))
-
-            lr7, labelLr7 = self.k_fold_LR(5, DP_7.T, LTR, pi, l)
-
-            minDCF_7 = numpy.hstack(
-                (minDCF_7, compute_min_DCF(numpy.hstack(lr7), numpy.hstack(labelLr7), pi, C_fn, C_fp)))
-
-        self.PLT.plot_DCF_compare_PCA(lam, numpy.hstack(minDCF_LR), numpy.hstack(minDCF_9),numpy.hstack(minDCF_8), numpy.hstack(minDCF_7))
-
         if plot:
             '''Plot minDCF on different lambda and prior'''
             lam = numpy.logspace(-5, 1, 30)
@@ -199,6 +167,41 @@ class Validation:
 
             self.PLT.plot_DCF_lambda(lam, numpy.hstack(minDCF_LR_0_5), numpy.hstack(minDCF_LR_0_1),
                                      numpy.hstack(minDCF_LR_0_9), 'lambda')
+
+            '''Plot PCA LOG'''
+            lam = numpy.logspace(-5, 1, 30)
+            minDCF_9 = []
+            minDCF_8 = []
+            minDCF_7 = []
+            minDCF_LR = []
+            DP_9 = self.dimRed.PCA(DTR, 9)
+            DP_8 = self.dimRed.PCA(DTR, 8)
+            DP_7 = self.dimRed.PCA(DTR, 7)
+            for l in lam:
+                lr1, labelLr1 = self.k_fold_LR(5, DTR, LTR, pi, l)
+
+                minDCF_LR = numpy.hstack(
+                    (minDCF_LR, compute_min_DCF(numpy.hstack(lr1), numpy.hstack(labelLr1), pi, C_fn, C_fp)))
+
+                lr9, labelLr9 = self.k_fold_LR(5, DP_9.T, LTR, pi, l)
+
+                minDCF_9 = numpy.hstack(
+                    (minDCF_9, compute_min_DCF(numpy.hstack(lr9), numpy.hstack(labelLr9), pi, C_fn, C_fp)))
+
+                lr8, labelLr8 = self.k_fold_LR(5, DP_8.T, LTR, pi, l)
+
+                minDCF_8 = numpy.hstack(
+                    (minDCF_8, compute_min_DCF(numpy.hstack(lr8), numpy.hstack(labelLr8), pi, C_fn, C_fp)))
+
+                lr7, labelLr7 = self.k_fold_LR(5, DP_7.T, LTR, pi, l)
+
+                minDCF_7 = numpy.hstack(
+                    (minDCF_7, compute_min_DCF(numpy.hstack(lr7), numpy.hstack(labelLr7), pi, C_fn, C_fp)))
+
+            self.PLT.plot_DCF_compare_PCA(lam, numpy.hstack(minDCF_LR), numpy.hstack(minDCF_9), numpy.hstack(minDCF_8),
+                                          numpy.hstack(minDCF_7))
+
+
             '''Plot min DCF vs minDCF with z-norm'''
             lam = numpy.logspace(-5, 1, 30)
             minDCF_LR = []
