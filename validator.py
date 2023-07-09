@@ -216,13 +216,13 @@ class Validation:
         #print("---------------SVM Kernel RBG REGRESSION WITHOUT LDA--------------------------")
         #self.svmLin.setup_kernelRBF_svm(DTR.T, LTR, DTE.T, LTE)
 
-    def get_scores_SVM(self, D, L, Dte, Lte, C, K, costant, degree, gamma, scoresLin_append, scoresPol_append, scoresRBF_append):    
+    def get_scores_SVM(self, D, L, Dte, Lte, C, K, costant, degree, gamma, scoresLin_append, scoresPol_append, scoresRBF_append, balanced, pi):    
 
-        scoresLin_append.append(self.svm.predict_SVM_Linear(D, L, C, K, Dte))
+        scoresLin_append.append(self.svm.predict_SVM_Linear(D, L, C, K, Dte, balanced, pi))
         scoresPol_append.append(self.svm.predict_SVM_Pol(D, L, C, K, Dte, costant, degree))
         scoresRBF_append.append(self.svm.predict_SVM_RBF(D, L, C, K, Dte, gamma))
 
-    def kfold_SVM(self, DTR, LTR, K, C):
+    def kfold_SVM(self, DTR, LTR, K, C, balanced, pi):
         k = 5
         Dtr = numpy.split(DTR, k, axis=1)
         Ltr = numpy.split(LTR, k)
@@ -254,7 +254,7 @@ class Validation:
             SVM_labels = numpy.append(SVM_labels, Lte, axis=0)
             SVM_labels = numpy.hstack(SVM_labels)
 
-            self.get_scores_SVM(D, L, Dte, Lte, C, K, costant, degree, gamma, scoresLin_append, scoresPol_append, scoresRBF_append)
+            self.get_scores_SVM(D, L, Dte, Lte, C, K, costant, degree, gamma, scoresLin_append, scoresPol_append, scoresRBF_append, balanced, pi)
         
         return scoresLin_append, scoresPol_append, scoresRBF_append, SVM_labels
 
@@ -356,14 +356,14 @@ class Validation:
         print("DFC Calibrated Linear: ", min(actDFCLin), "\nDFC Calibrated Polynomial: ", min(actDFCPol), "\nDFC Calibrated RBF: ", min(actDFCRBF))
 
 
-    def SVM_validation(self, DTR, LTR, pi, Cfn, Cfp, K, C):
+    def SVM_validation(self, DTR, LTR, pi, Cfn, Cfp, K, C, balanced):
         scoresLin_append = []
         scoresPol_append = []
         scoresRBF_append = []
         SVM_labels = []
         DTR = DTR.T
 
-        scoresLin_append, scoresPol_append, scoresRBF_append, SVM_labels = self.kfold_SVM(DTR, LTR, K, C)
+        scoresLin_append, scoresPol_append, scoresRBF_append, SVM_labels = self.kfold_SVM(DTR, LTR, K, C, balanced, pi)
 
         print("##########LINEAR##########")
         scores_tot = compute_min_DCF(numpy.hstack(scoresLin_append), SVM_labels, pi, Cfn, Cfp)
