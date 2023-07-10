@@ -17,3 +17,6 @@ class Evaluator:
         self.GMM = GMM()
         self.PLT = Plotter()
         self.dimRed = DimensionalityReduction()
+    
+    def MVG_evalution(self, DTE, LTE, pi, C_fn, C_fp):
+        return

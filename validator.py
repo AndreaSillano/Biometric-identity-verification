@@ -283,13 +283,16 @@ class Validation:
         #print("---------------SVM Kernel RBG REGRESSION WITHOUT LDA--------------------------")
         #self.svmLin.setup_kernelRBF_svm(DTR.T, LTR, DTE.T, LTE)
 
-    def get_scores_SVM(self, D, L, Dte, Lte, C, K, costant, degree, gamma, scoresLin_append, scoresPol_append, scoresRBF_append, balanced, pi):    
+    def get_scores_SVM(self, D, L, Dte, Lte, C, K, costant, degree, gamma, scoresLin_append, scoresPol_append, scoresRBF_append, balanced, pi, method):    
 
-        scoresLin_append.append(self.svm.predict_SVM_Linear(D, L, C, K, Dte, balanced, pi))
-        scoresPol_append.append(self.svm.predict_SVM_Pol(D, L, C, K, Dte, costant, degree))
-        scoresRBF_append.append(self.svm.predict_SVM_RBF(D, L, C, K, Dte, gamma))
+        if method == 'linear':
+            scoresLin_append.append(self.svm.predict_SVM_Linear(D, L, C, K, Dte, balanced, pi))
+        if method == 'pol':
+            scoresPol_append.append(self.svm.predict_SVM_Pol(D, L, C, K, Dte, costant, degree))
+        if method == 'rbf':
+            scoresRBF_append.append(self.svm.predict_SVM_RBF(D, L, C, K, Dte, gamma))
 
-    def kfold_SVM(self, DTR, LTR, K, C, balanced, pi):
+    def kfold_SVM(self, DTR, LTR, K, C, balanced, pi, method, norm=False):
         k = 5
         Dtr = numpy.split(DTR, k, axis=1)
         Ltr = numpy.split(LTR, k)
@@ -315,13 +318,16 @@ class Validation:
             D = numpy.hstack(D)
             L = numpy.hstack(L)   
 
+            if norm:
+                D, Dte = znorm(D, Dte)
+
             costant = 0
             degree = 2
             gamma=0.001
             SVM_labels = numpy.append(SVM_labels, Lte, axis=0)
             SVM_labels = numpy.hstack(SVM_labels)
 
-            self.get_scores_SVM(D, L, Dte, Lte, C, K, costant, degree, gamma, scoresLin_append, scoresPol_append, scoresRBF_append, balanced, pi)
+            self.get_scores_SVM(D, L, Dte, Lte, C, K, costant, degree, gamma, scoresLin_append, scoresPol_append, scoresRBF_append, balanced, pi, method)
         
         return scoresLin_append, scoresPol_append, scoresRBF_append, SVM_labels
 
@@ -480,12 +486,17 @@ class Validation:
         minDCF_rbf_0_5 = []
         minDCF_rbf_0_1 =[]
         minDCF_rbf_0_9 =[]
-        # for c in C_arr:
-        #     lr1, pol1, rbf1, labelLr1 = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.5)
+        for c in C_arr:
+            K=1
+            lr1, _, _, labelLr1 = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.5, 'linear')
+            K=10
+            _, pol1, _, labelLr1 = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.5, 'pol')
+            K=0.1
+            _, _, rbf1, labelLr1 = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.5, 'rbf')
 
-        #     minDCF_LR_0_5 = numpy.hstack((minDCF_LR_0_5,compute_min_DCF(numpy.hstack(lr1), numpy.hstack(labelLr1), 0.5, C_fn, C_fp)))
-        #     #minDCF_pol_0_5 = numpy.hstack((minDCF_pol_0_5,compute_min_DCF(numpy.hstack(pol1), numpy.hstack(labelLr1), 0.5, C_fn, C_fp)))
-        #     #minDCF_rbf_0_5 = numpy.hstack((minDCF_rbf_0_5,compute_min_DCF(numpy.hstack(rbf1), numpy.hstack(labelLr1), 0.5, C_fn, C_fp)))
+            minDCF_LR_0_5 = numpy.hstack((minDCF_LR_0_5,compute_min_DCF(numpy.hstack(lr1), numpy.hstack(labelLr1), 0.5, C_fn, C_fp)))
+            minDCF_pol_0_5 = numpy.hstack((minDCF_pol_0_5,compute_min_DCF(numpy.hstack(pol1), numpy.hstack(labelLr1), 0.5, C_fn, C_fp)))
+            minDCF_rbf_0_5 = numpy.hstack((minDCF_rbf_0_5,compute_min_DCF(numpy.hstack(rbf1), numpy.hstack(labelLr1), 0.5, C_fn, C_fp)))
 
         #     lr2, pol2, rbf2, labelLr2 = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.1)
 
@@ -498,40 +509,39 @@ class Validation:
         #     #minDCF_pol_0_9 = numpy.hstack((minDCF_pol_0_9,compute_min_DCF(numpy.hstack(pol2), numpy.hstack(labelLr1), 0.9, C_fn, C_fp)))
         #     #minDCF_rbf_0_9 = numpy.hstack((minDCF_rbf_0_9,compute_min_DCF(numpy.hstack(rbf2), numpy.hstack(labelLr1), 0.9, C_fn, C_fp)))
 
-        # self.PLT.plot_DCF_lambda(C_arr, numpy.hstack(minDCF_LR_0_5), numpy.hstack(minDCF_LR_0_1),numpy.hstack(minDCF_LR_0_9), 'C', 'Lin')
+        self.PLT.plot_DCF_lambda(C_arr, numpy.hstack(minDCF_LR_0_5), numpy.hstack(minDCF_pol_0_5),numpy.hstack(minDCF_rbf_0_5), 'C', 'comp')
         # #self.PLT.plot_DCF_lambda(C_arr, numpy.hstack(minDCF_pol_0_5), numpy.hstack(minDCF_pol_0_1),numpy.hstack(minDCF_pol_0_9), 'C', 'Pol')
         # #self.PLT.plot_DCF_lambda(C_arr, numpy.hstack(minDCF_rbf_0_5), numpy.hstack(minDCF_rbf_0_1),numpy.hstack(minDCF_rbf_0_9), 'C', 'RBF')
 
-        DP_9 = self.dimRed.PCA(DTR.T, 9)
-        DP_8 = self.dimRed.PCA(DTR.T, 8)
-        DP_7 = self.dimRed.PCA(DTR.T, 7)
-        minDCF_9 = []
-        minDCF_8 = []
-        minDCF_7 = []
-        minDCF_LR = []
-        for c in C_arr:
-            lr1, _, _, labelLr1 = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.5)
+        # DP_9 = self.dimRed.PCA(DTR.T, 9)
+        # DP_8 = self.dimRed.PCA(DTR.T, 8)
+        # minDCF_9 = []
+        # minDCF_8 = []
+        # minDCF_z = []
+        # minDCF_LR = []
+        # for c in C_arr:
+        #     lr1, _, _, labelLr1 = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.5)
 
-            minDCF_LR = numpy.hstack(
-                    (minDCF_LR, compute_min_DCF(numpy.hstack(lr1), numpy.hstack(labelLr1), 0.5, C_fn, C_fp)))
+        #     minDCF_LR = numpy.hstack(
+        #             (minDCF_LR, compute_min_DCF(numpy.hstack(lr1), numpy.hstack(labelLr1), 0.5, C_fn, C_fp)))
 
-            lr9, _, _, labelLr9 = self.kfold_SVM(DP_9, LTR, K, c, balanced, 0.5)
+        #     lr9, _, _, labelLr9 = self.kfold_SVM(DP_9, LTR, K, c, balanced, 0.5)
 
-            minDCF_9 = numpy.hstack(
-                (minDCF_9, compute_min_DCF(numpy.hstack(lr9), numpy.hstack(labelLr9), 0.5, C_fn, C_fp)))
+        #     minDCF_9 = numpy.hstack(
+        #         (minDCF_9, compute_min_DCF(numpy.hstack(lr9), numpy.hstack(labelLr9), 0.5, C_fn, C_fp)))
 
-            lr8, _, _, labelLr8 = self.kfold_SVM(DP_8, LTR, K, c, balanced, 0.5)
+        #     lr8, _, _, labelLr8 = self.kfold_SVM(DP_8, LTR, K, c, balanced, 0.5) #prova con pca sempre 9 ma con true su znorm
 
-            minDCF_8 = numpy.hstack(
-                (minDCF_8, compute_min_DCF(numpy.hstack(lr8), numpy.hstack(labelLr8), 0.5, C_fn, C_fp)))
+        #     minDCF_8 = numpy.hstack(
+        #         (minDCF_8, compute_min_DCF(numpy.hstack(lr8), numpy.hstack(labelLr8), 0.5, C_fn, C_fp)))
 
-            lr7, _, _, labelLr7 = self.kfold_SVM(DP_7, LTR, K, c, balanced, 0.5)
+        #     lrz, _, _, labelLrz = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.5, True)
 
-            minDCF_7 = numpy.hstack(
-                (minDCF_7, compute_min_DCF(numpy.hstack(lr7), numpy.hstack(labelLr7), 0.5, C_fn, C_fp)))
+        #     minDCF_z = numpy.hstack(
+        #         (minDCF_z, compute_min_DCF(numpy.hstack(lrz), numpy.hstack(labelLrz), 0.5, C_fn, C_fp)))
 
-        self.PLT.plot_DCF_compare_PCA_SVM(C_arr, numpy.hstack(minDCF_LR), numpy.hstack(minDCF_9), numpy.hstack(minDCF_8),
-                                          numpy.hstack(minDCF_7))
+        # self.PLT.plot_DCF_compare_PCA_SVM(C_arr, numpy.hstack(minDCF_LR), numpy.hstack(minDCF_9), numpy.hstack(minDCF_8),
+        #                                   numpy.hstack(minDCF_z))
         #self.PLT.plot_DCF_lambda(C_arr, numpy.hstack(minDCF_pol_0_5), numpy.hstack(minDCF_pol_0_1),numpy.hstack(minDCF_pol_0_9), 'C', 'Pol')
         #self.PLT.plot_DCF_lambda(C_arr, numpy.hstack(minDCF_rbf_0_5), numpy.hstack(minDCF_rbf_0_1),numpy.hstack(minDCF_rbf_0_9), 'C', 'RBF')
 

@@ -102,6 +102,20 @@ class Plotter:
         plt.show()
         plt.close()
 
+    def plot_DCF_SVM_C(self, x, y_05, y_01, y_09, xlabel, title=''):
+        plt.figure()
+        plt.plot(x, y_05, label='SVM Linear', color='b')
+        plt.plot(x, y_09, label='SVM Polynomial', color='g')
+        plt.plot(x, y_01, label='SVM RBF', color='r')
+        plt.xlim([min(x), max(x)])
+        plt.xscale("log", base=10)
+        plt.legend(loc='upper left')
+        plt.xlabel(xlabel)
+        plt.ylabel("min DCF")
+        plt.savefig('./images/DCF_' + title + '.png')
+        plt.show()
+        plt.close()
+
     def plot_DCF_compare(self, x, y, y_z):
         plt.figure()
         plt.plot(x, y_z, label='Log-Reg (z-norm)', color='b')
@@ -132,7 +146,7 @@ class Plotter:
         plt.figure()
         plt.plot(x, y, label='SVM Linear', color='r' ,linestyle='dashed')
         plt.plot(x, y_8, label='SVM Linear PCA-8', color='b')
-        plt.plot(x, y_7, label='SVM Linear PCA-7', color='y')
+        plt.plot(x, y_7, label='SVM Linear (z-norm)', color='y')
         plt.plot(x, y_9, label='SVM Linear PCA-9', color='g')
         plt.xlim([min(x), max(x)])
         plt.xscale("log", base=10)
