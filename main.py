@@ -35,7 +35,7 @@ if __name__ == "__main__":
     #plt.plot_scatter(DTR, LTR)
 
     print("---------------PRINCIPAL COMPONENT ANALYSIS-------------")
-    DPA = dimRed.PCA(DTR, 8)
+    DPA = dimRed.PCA(DTR, 7)
     #DPEA = dimRed.PCA(DTR, 2)
     plt.plot_PCA_scatter(DPA,LTR)
     dimRed.evaluatePCA(DPA,LTR)
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     #      VA.MVG_validation(DPA.T, LTR, 0.5, 1, 10)
 
 
-    #VA.LR_validation(DTR,LTR, 0.5,1,10, plot = False)
+    VA.LR_validation(DPA.T,LTR, 0.1,1,10, plot = False)
     # for i in range (7,10):
     #      print("PCA con", i)
     #      DPA = dimRed.PCA(DTR, i)
@@ -70,4 +70,4 @@ if __name__ == "__main__":
     #         print("SVM, K: ",k," C: ", c)
     #         VA.SVM_validation(DTR, LTR, 0.9, 1, 10, k, c)
     #VA.GMM_validation(DTR,LTR, 0.5,1,10, 2,8, 0.1, 0.01)
-    VA.SVM_validation(DTR, LTR, 0.5, 1, 10, 1, 1, False)
+   #VA.SVM_validation(DTR, LTR, 0.5, 1, 10, 1, 1, False)
