@@ -88,7 +88,7 @@ class Plotter:
         fig = heatmap.get_figure()
         fig.savefig("./images/" + title + ".png")
 
-    def plot_DCF_lambda(self, x, y_05, y_01, y_09, xlabel):
+    def plot_DCF_lambda(self, x, y_05, y_01, y_09, xlabel, title=''):
         plt.figure()
         plt.plot(x, y_05, label='min DCF prior=0.5', color='b')
         plt.plot(x, y_09, label='min DCF prior=0.9', color='g')
@@ -98,7 +98,21 @@ class Plotter:
         plt.legend(loc='upper left')
         plt.xlabel(xlabel)
         plt.ylabel("min DCF")
-        plt.savefig('./images/DCF_' + 'LR' + '.png')
+        plt.savefig('./images/DCF_' + title + '.png')
+        plt.show()
+        plt.close()
+
+    def plot_DCF_SVM_C(self, x, y_05, y_01, y_09, xlabel, title=''):
+        plt.figure()
+        plt.plot(x, y_05, label='SVM Linear', color='b')
+        plt.plot(x, y_09, label='SVM Polynomial', color='g')
+        plt.plot(x, y_01, label='SVM RBF', color='r')
+        plt.xlim([min(x), max(x)])
+        plt.xscale("log", base=10)
+        plt.legend(loc='upper left')
+        plt.xlabel(xlabel)
+        plt.ylabel("min DCF")
+        plt.savefig('./images/DCF_' + title + '.png')
         plt.show()
 
     def plot_DCF_compare(self, x, y, y_z):
@@ -110,7 +124,7 @@ class Plotter:
         plt.legend(loc='upper left')
         plt.xlabel('lambda')
         plt.ylabel("min DCF")
-        # plt.savefig('./images/DCF_' + 'LR' + '.png')
+        #plt.savefig('./images/DCF_' + 'LR' + '.png')
         plt.show()
     def plot_DCF_compare_QUAD(self, x, y, y_z):
         plt.figure()
@@ -137,6 +151,21 @@ class Plotter:
         plt.ylabel("min DCF")
         #plt.savefig('./images/DCF_' + title + '.svg')
         plt.show()
+
+    def plot_DCF_compare_PCA_SVM(self, x, y, y_9, y_8, y_7, title=''):
+        plt.figure()
+        plt.plot(x, y, label='SVM Linear', color='r' ,linestyle='dashed')
+        plt.plot(x, y_8, label='SVM Linear PCA-8', color='b')
+        plt.plot(x, y_7, label='SVM Linear (z-norm)', color='y')
+        plt.plot(x, y_9, label='SVM Linear PCA-9', color='g')
+        plt.xlim([min(x), max(x)])
+        plt.xscale("log", base=10)
+        plt.legend(loc='upper left')
+        plt.xlabel('C')
+        plt.ylabel("min DCF")
+        plt.savefig('./images/DCF_' + title + '.svg')
+        plt.show()
+        plt.close()
     def plot_DCF_compare_PCA_Q(self, x, y, y_9, y_8, y_7, y_6):
         plt.figure()
         plt.plot(x, y, label='Log-Reg', color='r' ,linestyle='dashed')
