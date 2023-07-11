@@ -71,9 +71,9 @@ def bayes_error_plot(pArray, scores, labels, minCost=False, th=None):
     for p in pArray:
         pi = 1.0 / (1.0 + numpy.exp(-p))
         if minCost:
-            y.append(compute_min_DCF(scores, labels, pi, 1, 1))
+            y.append(compute_min_DCF(scores, labels, pi, 1, 10))
         else:
-            y.append(compute_act_DCF(scores, labels, pi, 1, 1, th))
+            y.append(compute_act_DCF(scores, labels, pi, 1, 10, th))
     return numpy.array(y)
 
 def bayes_error_plot_compare(pi, scores, labels):
@@ -85,10 +85,12 @@ def bayes_error_plot_compare(pi, scores, labels):
 
 
 def bayes_error_min_act_plot(D, LTE,  ylim):
-    p = numpy.linspace(-3, 3, 21)
-    plt.plot(p, bayes_error_plot(p, D, LTE, minCost=False), color='r')
-    plt.plot(p, bayes_error_plot(p, D, LTE, minCost=True), color='b')
+    p = numpy.linspace(-3, 6, 21)
+    plt.plot(p, bayes_error_plot(p, D, LTE, minCost=False), color='r', label='actDCF')
+    plt.plot(p, bayes_error_plot(p, D, LTE, minCost=True), color='b', label='minDCF')
     plt.ylim(0, ylim)
+    plt.ylabel('DCF')
+    plt.legend(loc = 'upper left')
     plt.show()
 
 
