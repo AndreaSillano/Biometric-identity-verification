@@ -70,6 +70,16 @@ class LogisticRegression:
         STE = numpy.dot(_w.T, DTE) + _b - calibration
         return STE, _w, _b
 
+
+
+    def predict_quad_Logistic_Regression(self, D, L, DTE, l, pi):
+        _v, _J, _d = scipy.optimize.fmin_l_bfgs_b(self.logreg_obj_weighted, numpy.zeros(D.shape[0] + 1), approx_grad=True, args=(D,L,l,pi))
+        _w = _v[0:D.shape[0]]
+        _b = _v[-1]
+        STE = numpy.dot(_w.T, DTE) + _b
+        return STE
+
+
     def compute_scores_param(self,scores, labels, l, pi):
         scores = vrow(scores)
         _, _w,_b = self.calibration_score_weighted_LR(scores, labels, scores, l, pi)
