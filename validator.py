@@ -149,6 +149,47 @@ class Validation:
 
 
         return lr_score, lr_score_quad,labelLR
+    def k_fold_LR_Cal(self,k,DTR,LTR, pi, l, norm=False):
+        lr_score = []
+        lr_score_quad =[]
+        labelLR = []
+        Dtr = numpy.split(DTR.T, k, axis=1)
+        Ltr = numpy.split(LTR, k)
+
+        for i in range(k):
+            Dte = Dtr[i]
+            Lte = Ltr[i]
+            D = []
+            L = []
+
+            for j in range(k):
+                if j != i:
+                    D.append(Dtr[j])
+                    L.append(Ltr[j])
+
+            D = numpy.hstack(D)
+            L = numpy.hstack(L)
+
+            # Train the model
+            #D,Dte = znorm(D,Dte)
+
+            if norm:
+                D, Dte = znorm(D, Dte)
+
+            expanded_DTR = numpy.apply_along_axis(self.vecxxT, 0, D)
+            expanded_DTE = numpy.apply_along_axis(self.vecxxT, 0, Dte)
+            phi = numpy.vstack([expanded_DTR, D])
+
+            phi_DTE = numpy.vstack([expanded_DTE, Dte])
+
+            labelLR = numpy.append(labelLR, Lte, axis=0)
+            lr_score.append(self.LR.predict_Logistic_Regression_weigthed(D, L, Dte, l, pi))
+            #lr_score.append(0)
+            lr_score_quad.append(self.LR.predict_quad_Logistic_Regression(phi, L, phi_DTE, l, pi))
+            #lr_score.append(self.LR.preditc_Logistic_Regression(D, L, Dte, 0.00001))
+
+
+        return lr_score, lr_score_quad,labelLR
 
     def plot_DCF_lamda_prior(self, DTR, LTR, C_fn,C_fp):
         '''Plot minDCF on different lambda and prior'''
@@ -308,54 +349,7 @@ class Validation:
                 (minDCF_7_Z, compute_min_DCF(numpy.hstack(lr7_z), numpy.hstack(labelLr7_z), pi, C_fn, C_fp)))
 
         self.PLT.plot_DCF_compare_PCA_Z(lam, numpy.hstack(minDCF_7), numpy.hstack(minDCF_7_Z))
-    def kfold_LR_score_calibration_Q(self,k,DTR,LTR, pi, l, norm=False):
-
-        lr_score = []
-        lr_score_quad = []
-        labelLR = []
-        Dtr = numpy.split(DTR.T, k, axis=1)
-        Ltr = numpy.split(LTR, k)
-
-        for i in range(k):
-            Dte = Dtr[i]
-            Lte = Ltr[i]
-            D = []
-            L = []
-
-            for j in range(k):
-                if j != i:
-                    D.append(Dtr[j])
-                    L.append(Ltr[j])
-
-            D = numpy.hstack(D)
-            L = numpy.hstack(L)
-
-            # Train the model
-            # D,Dte = znorm(D,Dte)
-
-            if norm:
-                D, Dte = znorm(D, Dte)
-
-            expanded_DTR = numpy.apply_along_axis(self.vecxxT, 0, D)
-            expanded_DTE = numpy.apply_along_axis(self.vecxxT, 0, Dte)
-            phi = numpy.vstack([expanded_DTR, D])
-
-            phi_DTE = numpy.vstack([expanded_DTE, Dte])
-
-            labelLR = numpy.append(labelLR, Lte, axis=0)
-            lr_score.append(self.LR.predict_Logistic_Regression_weigthed(D, L, Dte, l, pi))
-            # lr_score.append(0)
-            lr_score_quad.append(self.LR.predict_quad_Logistic_Regression(phi, L, phi_DTE, l, pi))
-            # lr_score.append(self.LR.preditc_Logistic_Regression(D, L, Dte, 0.00001))
-
-        #return lr_score, lr_score_quad, labelLR
-
-        llr =numpy.hstack(lr_score_quad)
-        a, b = self.LR.compute_scores_param(llr,labelLR, 1e-4, 0.75)
-        llr_s = llr.reshape(1, llr.shape[0])
-        llr= numpy.dot(a, llr_s) + b
-
-        return llr, labelLR
+    
 
     def LR_validation(self,DTR, LTR, pi, C_fn, C_fp, plot):
         lr,lrQ, labelLr = self.k_fold_LR(5,DTR,LTR,pi, 0.01, False)
@@ -383,10 +377,13 @@ class Validation:
             #self.plot_minDCF_Z_PCA(DTR, LTR, pi, C_fn, C_fp)
 
         print("score calibartion")
-        QLR_score_cal, labelLR = self.kfold_LR_score_calibration_Q(5,DTR,LTR,pi, 0.01, False)
+        
+        _w,_b = self.LR.compute_scores_param(numpy.hstack(lrQ), labelLr, 0.01, 0.6)
+        #cal_score = numpy.dot(_w.T,numpy.hstack(lrQ).reshape(1, numpy.hstack(lrQ).shape[0])) #- numpy.log(pi/(1-pi))
+        cal_score = _w*lrQ + _b -numpy.log(pi/(1-pi))
 
         if plot:
-            bayes_error_min_act_plot(numpy.hstack(QLR_score_cal), numpy.hstack(labelLR), 1)
+            bayes_error_min_act_plot(numpy.hstack(cal_score), numpy.hstack(labelLr), 1)
 
 
 
