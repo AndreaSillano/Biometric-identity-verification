@@ -4,6 +4,26 @@ import numpy as numpy
 
 class Plotter:
 
+    def plot_bar_GMM(self, data):
+        K_T = ["1","2", "4"]
+        x = numpy.arange(len(K_T))  # the label locations
+        width = 0.10  # the width of the bars
+        multiplier = 0
+        print(data)
+        for K, val in data.items():
+            offset = width * multiplier
+            rects = plt.bar(x + offset, val, width, label=K)
+            plt.bar_label(rects, padding=3)
+            multiplier += 1
+
+        # Add some text for labels, title and custom x-axis tick labels, etc.
+        plt.ylabel('minDCF')
+        plt.xlabel('K-Target')
+        plt.xticks(x + width, K_T)
+        plt.legend(loc='upper left')
+
+        plt.show()
+
     def plot_histogram(self, D, L):
         D = D.transpose()
 
