@@ -115,7 +115,7 @@ class SupportVectorMachine:
         wStar = numpy.dot(DTREXT, vcol(alphaStar) * vcol(Z))
         return wStar, JPrimal(wStar)
     
-    def train_SVM_polynomial(self, DTR, LTR, C, K=1, constant=0, degree=2):
+    def train_SVM_polynomial(self, DTR, LTR, C, balanced, pi, K=1, constant=0, degree=2):
         Z = numpy.zeros(LTR.shape)
         Z[LTR == 1] = 1
         Z[LTR == 0] = -1
@@ -125,12 +125,19 @@ class SupportVectorMachine:
         # H = numpy.exp(-Dist)
         H = vcol(Z) * vrow(Z) * H
 
-        C = [(0, C)] * DTR.shape[1]
-        alphaStar, JDual, LDual = calculate_lbgf(H, DTR, C)
+        bounds = ''
+        if(balanced):
+            C1 = (C * pi) / (DTR[:, LTR == 1].shape[1] / DTR.shape[1])
+            C0 = (C * (1 - pi)) / (DTR[:, LTR == 0].shape[1] / DTR.shape[1])
+            bounds = [((0, C0) if x == 0 else (0, C1)) for x in LTR.tolist()]
+        else:
+            bounds = [(0, C)] * DTR.shape[1]
+
+        alphaStar, JDual, LDual = calculate_lbgf(H, DTR, bounds)
 
         return alphaStar, JDual(alphaStar)[0]
     
-    def train_SVM_RBF(self, DTR, LTR, C, K=1, gamma=1.):
+    def train_SVM_RBF(self, DTR, LTR, C, balanced, pi, K=1, gamma=1.):
         Z = numpy.zeros(LTR.shape)
         Z[LTR == 1] = 1
         Z[LTR == 0] = -1
@@ -142,8 +149,15 @@ class SupportVectorMachine:
                 kernel[i, j] = numpy.exp(-gamma * (numpy.linalg.norm(DTR[:, i] - DTR[:, j]) ** 2)) + K * K
         H = vcol(Z) * vrow(Z) * kernel
 
-        C = [(0, C)] * DTR.shape[1]
-        alphaStar, JDual, LDual = calculate_lbgf(H, DTR, C)
+        bounds = ''
+        if(balanced):
+            C1 = (C * pi) / (DTR[:, LTR == 1].shape[1] / DTR.shape[1])
+            C0 = (C * (1 - pi)) / (DTR[:, LTR == 0].shape[1] / DTR.shape[1])
+            bounds = [((0, C0) if x == 0 else (0, C1)) for x in LTR.tolist()]
+        else:
+            bounds = [(0, C)] * DTR.shape[1]
+
+        alphaStar, JDual, LDual = calculate_lbgf(H, DTR, bounds)
 
         return alphaStar, JDual(alphaStar)[0]
 
@@ -154,10 +168,10 @@ class SupportVectorMachine:
         scores = numpy.dot(wStar.T, DTEEXT).ravel()
         return scores
     
-    def predict_SVM_Pol(self, D, L, C, K, Dte, costant, degree):
+    def predict_SVM_Pol(self, D, L, C, K, Dte, costant, degree, balanced, pi):
         #costant = 0
         #degree = 2
-        aStar, primal = self.train_SVM_polynomial(D, L, C, K, costant, degree)
+        aStar, primal = self.train_SVM_polynomial(D, L, C, balanced, pi, K, costant, degree)
         Z = numpy.zeros(L.shape)
         Z[L == 1] = 1
         Z[L == 0] = -1
@@ -165,11 +179,11 @@ class SupportVectorMachine:
         scores = numpy.sum(numpy.dot(aStar * vrow(Z), kernel), axis=0)
         return scores
     
-    def predict_SVM_RBF(self, D, L, C, K, Dte, gamma):
+    def predict_SVM_RBF(self, D, L, C, K, Dte, gamma, balanced, pi):
         Z = L * 2 - 1
         #gamma=0.001
 
-        aStar, loss = self.train_SVM_RBF(D, L, C, K, gamma)
+        aStar, loss = self.train_SVM_RBF(D, L, C, balanced, pi, K, gamma)
         kern = numpy.zeros((D.shape[1], Dte.shape[1]))
         for i in range(D.shape[1]):
             for j in range(Dte.shape[1]):
