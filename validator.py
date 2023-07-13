@@ -507,11 +507,11 @@ class Validation:
 
             if method=='rbf' or method=='all':
                 scoresT_RBF = self.svm.predict_SVM_RBF(D, L, C, K, D, gamma, False, pi)
-                a,b = self.LR.compute_scores_param(scoresT_RBF, L, 5*1e-4, 0.5)
+                a,b = self.LR.compute_scores_param(scoresT_RBF, L, 5*1e-5, 0.5)
                 scoresV_RBF = self.svm.predict_SVM_RBF(D, L, C, K, Dte, gamma, False, pi)
                 computeLLR = a * scoresV_RBF + b - numpy.log(0.5 / (1 - 0.5))
 
-                scoresRBF_append.append(computeLLR)           
+                scoresRBF_append.append(scoresT_RBF)           
 
 
         return scoresLin_append, scoresPol_append, scoresRBF_append, SVM_labels, a, b
@@ -548,7 +548,7 @@ class Validation:
         SVM_labels = []
         DTR = DTR.T
         print("start")
-        scoresLin_append, scoresPol_append, scoresRBF_append, SVM_labels = self.kfold_SVM(DTR, LTR, K, C, balanced, pi, "rbf")
+        #scoresLin_append, scoresPol_append, scoresRBF_append, SVM_labels = self.kfold_SVM(DTR, LTR, K, C, balanced, pi, "rbf")
 
         #print("##########LINEAR##########\nbalanced= ",balanced,"\n")
         #scores_tot = compute_min_DCF(numpy.hstack(scoresLin_append), SVM_labels, pi, C_fn, C_fp)
@@ -566,9 +566,9 @@ class Validation:
 
 
         print("##########RBF##########")
-        scores_tot = compute_min_DCF(numpy.hstack(scoresRBF_append), SVM_labels, pi, C_fn, C_fp)
-        print(f'- with prior = {pi} -> minDCF = %.3f' % scores_tot)
-        bayes_error_min_act_plot(numpy.hstack(scoresRBF_append), numpy.hstack(SVM_labels), 1)
+        #scores_tot = compute_min_DCF(numpy.hstack(scoresRBF_append), SVM_labels, pi, C_fn, C_fp)
+        #print(f'- with prior = {pi} -> minDCF = %.3f' % scores_tot)
+        #bayes_error_min_act_plot(numpy.hstack(scoresRBF_append), numpy.hstack(SVM_labels), 1)
 
         # rettt = compute_act_DCF(numpy.hstack(scoresRBF_append), SVM_labels, pi, C_fn, C_fp, None)
         # print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
@@ -578,9 +578,9 @@ class Validation:
         # print("ACT DFC ON TRAIN SVM Lin - CAL", rettt)
         # rettt = compute_act_DCF(numpy.hstack(cal_score_Pol), cal_label, 0.5, 1, 10, None)
         # print("ACT DFC ON TRAIN SVM Pol - CAL", rettt)
-        rettt = compute_act_DCF(numpy.hstack(cal_score_RBF), cal_label, 0.5, 1, 10, None)
-        print("ACT DFC ON TRAIN SVM RBF - CAL", rettt)
-        bayes_error_min_act_plot(numpy.hstack(cal_score_RBF), numpy.hstack(cal_label), 1)
+        #rettt = compute_act_DCF(numpy.hstack(cal_score_RBF), cal_label, 0.5, 1, 10, None)
+        #print("ACT DFC ON TRAIN SVM RBF - CAL", rettt)
+        #bayes_error_min_act_plot(numpy.hstack(cal_score_RBF), numpy.hstack(cal_label), 1)
 
         #K_arr = [0.1, 1.0, 10.0]
         #C_arr = [0.01, 0.1, 1.0, 10.0]
