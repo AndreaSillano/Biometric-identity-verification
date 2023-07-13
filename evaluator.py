@@ -40,6 +40,13 @@ class Evaluator:
 
         self._getScoresMVG(DTE, DTR, LTR, llrMVG, llrNV, llrTCV, llrTNV)
         labelMVG = numpy.append(labelMVG, LTE, axis=0)
+        minDCF_MVG = compute_min_DCF(numpy.hstack(llrMVG), numpy.hstack(labelMVG), pi, C_fn, C_fp)
+        actDCF_MVG = compute_act_DCF(numpy.hstack(llrMVG), numpy.hstack(labelMVG), pi, C_fn, C_fp)
+        print("############MVG###############")
+        print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_MVG)
+        print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_MVG)
+        #bayes_error_min_act_plot(numpy.hstack(llrMVG), numpy.hstack(labelMVG), 1)
+
 
         # minDCF_MVG = compute_min_DCF(numpy.hstack(llrMVG), numpy.hstack(labelMVG), pi, C_fn, C_fp)
         # actDCF_MVG = compute_act_DCF(numpy.hstack(llrMVG), numpy.hstack(labelMVG), pi, C_fn, C_fp)
@@ -68,6 +75,7 @@ class Evaluator:
         actDCF_TNV = compute_act_DCF(numpy.hstack(llrTNV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
         print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_TNV)
         print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_TNV)
+        # #bayes_error_min_act_plot(numpy.hstack(llrMVG), numpy.hstack(labelMVG), 1)
     def vecxxT(self, x):
         x = x[:, None]
         xxT = x.dot(x.T).reshape(x.size ** 2, order='F')
@@ -402,6 +410,23 @@ class Evaluator:
 
         self.PLT.plot_bar_GMM(data)
 
+    def get_scores_SVM(self, D, L, Dte, C, K, gamma, scoresRBF_append, pi):
+        scoresRBF_append.append(self.svm.predict_SVM_RBF(D, L, C, K, Dte, gamma, False, pi))
+
+    def SVM_evaluation(self, DTE, LTE, DTR, LTR, pi, C_fn, C_fp):
+        scores_RBF = []
+        labelRBF = []
+
+
+        self.get_scores_SVM(DTR, LTR, DTE, 10, 0.1, 0.001, scores_RBF, pi)
+        labelRBF = numpy.append(labelRBF, LTE, axis=0)
+        minDCF_MVG = compute_min_DCF(numpy.hstack(scores_RBF), numpy.hstack(labelRBF), pi, C_fn, C_fp)
+        actDCF_MVG = compute_act_DCF(numpy.hstack(scores_RBF), numpy.hstack(labelRBF), pi, C_fn, C_fp)
+        print("############MVG###############")
+        print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_MVG)
+        print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_MVG)
+        #bayes_error_min_act_plot(numpy.hstack(llrMVG), numpy.hstack(labelMVG), 1)
+
     def GMM_evaluation(self, DTE, LTE, DTR, LTR, pi, Cfn, Cfp, comp, compNT, a, p):
         DTR = DTR.T
         DTE = DTE.T
@@ -418,4 +443,4 @@ class Evaluator:
         #self.plot_GMM_full(DTR,LTR,DTE,LTE, pi,a,p,Cfn,Cfp)
         #self.plot_GMM_naive(DTR,LTR,DTE,LTE, pi,a,p,Cfn,Cfp)
         #self.plot_GMM_tied(DTR,LTR,DTE,LTE, pi,a,p,Cfn,Cfp)
-        self.plot_GMM_tiedNaive(DTR,LTR,DTE,LTE, pi,a,p,Cfn,Cfp)
+        #self.plot_GMM_tiedNaive(DTR,LTR,DTE,LTE, pi,a,p,Cfn,Cfp)
