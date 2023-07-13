@@ -15,12 +15,24 @@ class DimensionalityReduction:
         DP = self._computePCA(D, m, C)
         return DP
 
+    def PCA_DTE(self,D, m, DTE):
+        D = D.transpose()
+        DTE = DTE.transpose()
+        DC = D - D.mean(1).reshape((D.shape[0], 1))
+        C = numpy.dot(DC, DC.T)
+        C = C / float(DC.shape[1])
+
+        DPE =  self._computePCA(DTE, m, C)
+        return DPE
+
     def _computePCA(self, D, m, C):
         U, s, Vh = numpy.linalg.svd(C)
         P = U[:, 0:m]
         #P = numpy.dot(P, [[1, 0], [0, -1]])
         DP = numpy.dot(P.T, D)
         return DP
+
+
 
     def evaluatePCA(self, DP, L):
         D0 = DP[:, L == 0]
