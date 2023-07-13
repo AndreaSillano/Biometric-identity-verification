@@ -199,17 +199,17 @@ class Validation:
         minDCF_LR_0_1 = []
         minDCF_LR_0_9 = []
         for l in lam:
-            lr1, _,labelLr1 = self.k_fold_LR(5, DTR, LTR, 0.5, l,False)
+            lr1, _,labelLr1 = self.k_fold_LR(5, DTR, LTR, 0.5, l,True)
 
             minDCF_LR_0_5 = numpy.hstack(
                 (minDCF_LR_0_5, compute_min_DCF(numpy.hstack(lr1), numpy.hstack(labelLr1), 0.5, C_fn, C_fp)))
 
-            lr2, _,labelLr2 = self.k_fold_LR(5, DTR, LTR, 0.1, l,False)
+            lr2, _,labelLr2 = self.k_fold_LR(5, DTR, LTR, 0.1, l,True)
 
             minDCF_LR_0_1 = numpy.hstack(
                 (minDCF_LR_0_1, compute_min_DCF(numpy.hstack(lr2), numpy.hstack(labelLr2), 0.1, C_fn, C_fp)))
 
-            lr3, _,labelLr3 = self.k_fold_LR(5, DTR, LTR, 0.9, l,False)
+            lr3, _,labelLr3 = self.k_fold_LR(5, DTR, LTR, 0.9, l,True)
             minDCF_LR_0_9 = numpy.hstack(
                 (minDCF_LR_0_9, compute_min_DCF(numpy.hstack(lr3), numpy.hstack(labelLr3), 0.9, C_fn, C_fp)))
 
@@ -333,7 +333,8 @@ class Validation:
         self.PLT.plot_DCF_compare_QUAD(lam, numpy.hstack(minDCF_LR), numpy.hstack(minDCF_LR_Z))
     def plot_minDCF_Z_PCA(self,DTR, LTR, pi, C_fn, C_fp):
         '''Plot PCA Q-LOG'''
-        lam = numpy.logspace(-5, 1, 30)
+        #lam = numpy.logspace(-5, 1, 30)
+        lam = [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 10]
         minDCF_7 = []
         minDCF_7_Z = []
         DP_7 = self.dimRed.PCA(DTR, 7)
@@ -378,10 +379,9 @@ class Validation:
 
         print("score calibartion")
         
-        _w,_b = self.LR.compute_scores_param(numpy.hstack(lrQ), labelLr, 0.01, 0.6)
+        _w,_b = self.LR.compute_scores_param(numpy.hstack(lrQ), labelLr, 0.01, 0.7)
         #cal_score = numpy.dot(_w.T,numpy.hstack(lrQ).reshape(1, numpy.hstack(lrQ).shape[0])) #- numpy.log(pi/(1-pi))
         cal_score = _w*lrQ + _b -numpy.log(pi/(1-pi))
-
         if plot:
             bayes_error_min_act_plot(numpy.hstack(cal_score), numpy.hstack(labelLr), 1)
 
