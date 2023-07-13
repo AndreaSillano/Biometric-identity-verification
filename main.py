@@ -41,11 +41,12 @@ def validation(DTR,LTR, VA, dimRed):
     # DPA_7 = dimRed.PCA(DTR, 7)
     # VA.GMM_validation(DPA_7.T,LTR, 0.5,1,10, 1,4, 0.1, 0.01, True)
     return
-def evaluation(DTE,LTE,DTR,LTR, EV,dimRed):
+def evaluation(DTE, LTE, DTR, LTR, EV, dimRed):
     print("##################################")
     print("EVALUATION")
     print("##################################")
-    EV.MVG_evaluation(DTE.T,LTE, DTR.T,LTR,0.5,1,10)
+    #EV.MVG_evaluation(DTE.T, LTE, DTR.T, LTR, 0.5, 1, 10)
+    EV.SVM_evaluation(DTE.T, LTE, DTR.T, LTR, 0.5, 1, 10)
 
 if __name__ == "__main__":
 
@@ -85,7 +86,7 @@ if __name__ == "__main__":
     #plt.plot_histogram(DP.T, LTR)
 
     validation(DTR,LTR,VA,dimRed)
-    evaluation(DTE, LTE, DTR,LTR,EV,dimRed)
+    evaluation(DTE, LTE, DTR, LTR, EV, dimRed)
 
     #plt.plot_correlations(DTR.T,"heatmap")
     #plt.plot_correlations(DTR.T[:, LTR == 0], "heatmap_spoofed_", cmap="Reds")
