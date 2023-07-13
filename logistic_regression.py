@@ -82,9 +82,9 @@ class LogisticRegression:
 
     def compute_scores_param(self,scores, labels,l, pi):
         #scores = vrow(scores)
-        scores_70 = numpy.array([scores[:int(len(scores) * 0.5)]])
-        scores_30 = numpy.array([scores[int(len(scores) * 0.5):]])
-        labels_70 = labels[:int(len(labels) * 0.5)]
+        scores_70 = numpy.array([scores[:int(len(scores) * 0.6)]])
+        scores_30 = numpy.array([scores[int(len(scores) * 0.6):]])
+        labels_70 = labels[:int(len(labels) * 0.6)]
         #labels_30 = labels[int(len(labels) * 0.7):]
         _, _w,_b = self.calibration_score_weighted_LR(scores_70, labels_70, scores_30, l, pi)
         return _w, _b

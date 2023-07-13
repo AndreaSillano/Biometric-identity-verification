@@ -192,7 +192,7 @@ class Plotter:
         plt.plot(x, y_8, label='Q-Log-Reg PCA-8', color='b')
         plt.plot(x, y_7, label='Q-Log-Reg PCA-7', color='y')
         plt.plot(x, y_9, label='Q-Log-Reg PCA-9', color='g')
-        plt.plot(x, y_6, label='Q-Log-Reg PCA-6', color='b')
+        plt.plot(x, y_6, label='Q-Log-Reg PCA-6', color='c')
         plt.xlim([min(x), max(x)])
         plt.xscale("log", base=10)
         plt.legend(loc='upper left')
