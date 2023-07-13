@@ -80,7 +80,7 @@ class Validation:
         print("############MVG###############")
         print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_MVG)
         print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_MVG)
-        bayes_error_min_act_plot(numpy.hstack(llrMVG),numpy.hstack(labelMVG), 1)
+        #bayes_error_min_act_plot(numpy.hstack(llrMVG),numpy.hstack(labelMVG), 1)
 
         print("############NAIVE BAYES#############")
         minDCF_NV = compute_min_DCF(numpy.hstack(llrNV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
