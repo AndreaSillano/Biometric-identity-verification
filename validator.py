@@ -149,25 +149,67 @@ class Validation:
 
 
         return lr_score, lr_score_quad,labelLR
+    def k_fold_LR_Cal(self,k,DTR,LTR, pi, l, norm=False):
+        lr_score = []
+        lr_score_quad =[]
+        labelLR = []
+        Dtr = numpy.split(DTR.T, k, axis=1)
+        Ltr = numpy.split(LTR, k)
+
+        for i in range(k):
+            Dte = Dtr[i]
+            Lte = Ltr[i]
+            D = []
+            L = []
+
+            for j in range(k):
+                if j != i:
+                    D.append(Dtr[j])
+                    L.append(Ltr[j])
+
+            D = numpy.hstack(D)
+            L = numpy.hstack(L)
+
+            # Train the model
+            #D,Dte = znorm(D,Dte)
+
+            if norm:
+                D, Dte = znorm(D, Dte)
+
+            expanded_DTR = numpy.apply_along_axis(self.vecxxT, 0, D)
+            expanded_DTE = numpy.apply_along_axis(self.vecxxT, 0, Dte)
+            phi = numpy.vstack([expanded_DTR, D])
+
+            phi_DTE = numpy.vstack([expanded_DTE, Dte])
+
+            labelLR = numpy.append(labelLR, Lte, axis=0)
+            lr_score.append(self.LR.predict_Logistic_Regression_weigthed(D, L, Dte, l, pi))
+            #lr_score.append(0)
+            lr_score_quad.append(self.LR.predict_quad_Logistic_Regression(phi, L, phi_DTE, l, pi))
+            #lr_score.append(self.LR.preditc_Logistic_Regression(D, L, Dte, 0.00001))
+
+
+        return lr_score, lr_score_quad,labelLR
 
     def plot_DCF_lamda_prior(self, DTR, LTR, C_fn,C_fp):
         '''Plot minDCF on different lambda and prior'''
         lam = numpy.logspace(-5, 1, 30)
+        #lam = [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 10]
         minDCF_LR_0_5 = []
         minDCF_LR_0_1 = []
         minDCF_LR_0_9 = []
         for l in lam:
-            lr1, _,labelLr1 = self.k_fold_LR(5, DTR, LTR, 0.5, l,True)
+            lr1, _,labelLr1 = self.k_fold_LR(5, DTR, LTR, 0.5, l,False)
 
             minDCF_LR_0_5 = numpy.hstack(
                 (minDCF_LR_0_5, compute_min_DCF(numpy.hstack(lr1), numpy.hstack(labelLr1), 0.5, C_fn, C_fp)))
 
-            lr2, _,labelLr2 = self.k_fold_LR(5, DTR, LTR, 0.1, l,True)
+            lr2, _,labelLr2 = self.k_fold_LR(5, DTR, LTR, 0.1, l,False)
 
             minDCF_LR_0_1 = numpy.hstack(
                 (minDCF_LR_0_1, compute_min_DCF(numpy.hstack(lr2), numpy.hstack(labelLr2), 0.1, C_fn, C_fp)))
 
-            lr3, _,labelLr3 = self.k_fold_LR(5, DTR, LTR, 0.9, l,True)
+            lr3, _,labelLr3 = self.k_fold_LR(5, DTR, LTR, 0.9, l,False)
             minDCF_LR_0_9 = numpy.hstack(
                 (minDCF_LR_0_9, compute_min_DCF(numpy.hstack(lr3), numpy.hstack(labelLr3), 0.9, C_fn, C_fp)))
 
@@ -175,7 +217,8 @@ class Validation:
                                  numpy.hstack(minDCF_LR_0_9), 'lambda')
     def plot_DCF_PCA(self,DTR, LTR, pi, C_fn, C_fp):
         '''Plot PCA LOG'''
-        lam = numpy.logspace(-5, 1, 30)
+        #lam = numpy.logspace(-5, 1, 30)
+        lam =[1e-5,1e-4, 1e-3, 1e-2, 1e-1, 1, 10]
         minDCF_9 = []
         minDCF_8 = []
         minDCF_7 = []
@@ -209,7 +252,8 @@ class Validation:
 
     def plot_minDCF_Z(self, DTR, LTR, pi, C_fn, C_fp):
         '''Plot min DCF vs minDCF with z-norm'''
-        lam = numpy.logspace(-5, 1, 30)
+        #lam = numpy.logspace(-5, 1, 30)
+        lam = [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 10]
         minDCF_LR = []
         minDCF_LR_Z = []
 
@@ -229,7 +273,8 @@ class Validation:
 
     def plot_DCF_PCA_Q(self,DTR, LTR, pi, C_fn, C_fp):
         '''Plot PCA Q-LOG'''
-        lam = numpy.logspace(-5, 1, 30)
+        #lam = numpy.logspace(-5, 1, 30)
+        lam = [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 10]
         minDCF_9 = []
         minDCF_8 = []
         minDCF_7 = []
@@ -269,7 +314,8 @@ class Validation:
                                       numpy.hstack(minDCF_7),numpy.hstack(minDCF_6))
     def plot_minDCF_Z_Q(self, DTR, LTR, pi, C_fn, C_fp):
         '''Plot min DCF vs minDCF with z-norm QUAD'''
-        lam = numpy.logspace(-5, 1, 30)
+        #lam = numpy.logspace(-5, 1, 30)
+        lam = [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 10]
         minDCF_LR = []
         minDCF_LR_Z = []
 
@@ -303,7 +349,7 @@ class Validation:
                 (minDCF_7_Z, compute_min_DCF(numpy.hstack(lr7_z), numpy.hstack(labelLr7_z), pi, C_fn, C_fp)))
 
         self.PLT.plot_DCF_compare_PCA_Z(lam, numpy.hstack(minDCF_7), numpy.hstack(minDCF_7_Z))
-
+    
 
     def LR_validation(self,DTR, LTR, pi, C_fn, C_fp, plot):
         lr,lrQ, labelLr = self.k_fold_LR(5,DTR,LTR,pi, 0.01, False)
@@ -330,8 +376,15 @@ class Validation:
             #self.plot_DCF_PCA_Q(DTR,LTR,pi,C_fn,C_fp)
             #self.plot_minDCF_Z_PCA(DTR, LTR, pi, C_fn, C_fp)
 
+        print("score calibartion")
+        
+        _w,_b = self.LR.compute_scores_param(numpy.hstack(lrQ), labelLr, 0.01, 0.6)
+        #cal_score = numpy.dot(_w.T,numpy.hstack(lrQ).reshape(1, numpy.hstack(lrQ).shape[0])) #- numpy.log(pi/(1-pi))
+        cal_score = _w*lrQ + _b -numpy.log(pi/(1-pi))
 
-        #bayes_error_min_act_plot(s_LR, LTR, 1)
+        if plot:
+            bayes_error_min_act_plot(numpy.hstack(cal_score), numpy.hstack(labelLr), 1)
+
 
 
         # print("---------------MVG WITH LDA--------------------------")
@@ -701,9 +754,119 @@ class Validation:
         return llr_GMM_full, llr_GMM_naive,llr_GMM_Tied, llr_GMM_TiedNaive, labelGMM
 
 
-            #llr_GMM_full.append(self.LR.preditc_Logistic_Regression(D, L, Dte, 0.00001))
 
-    def GMM_validation(self,DTR,LTR, pi, Cfn, Cfp,comp, compNT,a,p ):
+
+
+    def plot_GMM_full(self, DTR, LTR,pi, a,p, Cfn,Cfp):
+        data = {
+            "Non-target K = 1": [],
+            "Non-target K = 2": [],
+            "Non-target K = 4": [],
+            "Non-target K = 8": [],
+            "Non-target K = 16": [],
+            "Non-target K = 32": []
+        }
+        for i in range(0, 6):
+            # TARGET 1
+            llr_GMM_Full, _, _, _, llr_GMM_labels = self.kfold_GMM(5, DTR, LTR, 1, 2 ** i, a, p)
+            llr = numpy.hstack(llr_GMM_Full)
+            scores_tot = compute_min_DCF(llr, llr_GMM_labels, pi, Cfn, Cfp)
+            data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
+            # TARGET 2
+            llr_GMM_Full, _, _, _, _ = self.kfold_GMM(5, DTR, LTR, 2, 2 ** i, a, p)
+            llr = numpy.hstack(llr_GMM_Full)
+            scores_tot = compute_min_DCF(llr, llr_GMM_labels, pi, Cfn, Cfp)
+            data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
+            # TARGET 4
+            llr_GMM_Full, _, _, _, _ = self.kfold_GMM(5, DTR, LTR, 4, 2 ** i, a, p)
+            llr = numpy.hstack(llr_GMM_Full)
+            scores_tot = compute_min_DCF(llr, llr_GMM_labels, pi, Cfn, Cfp)
+            data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
+
+        self.PLT.plot_bar_GMM(data)
+    def plot_GMM_NAIVE(self, DTR, LTR,pi, a,p, Cfn,Cfp):
+        data = {
+            "Non-target K = 1": [],
+            "Non-target K = 2": [],
+            "Non-target K = 4": [],
+            "Non-target K = 8": [],
+            "Non-target K = 16": [],
+            "Non-target K = 32": []
+        }
+        for i in range(0, 6):
+            # TARGET 1
+            _, llr_GMM_Naive, _, _, llr_GMM_labels = self.kfold_GMM(5, DTR, LTR, 1, 2 ** i, a, p)
+            llr = numpy.hstack(llr_GMM_Naive)
+            scores_tot = compute_min_DCF(llr, llr_GMM_labels, pi, Cfn, Cfp)
+            data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
+            # TARGET 2
+            _, llr_GMM_Naive, _, _, llr_GMM_labels = self.kfold_GMM(5, DTR, LTR, 2, 2 ** i, a, p)
+            llr = numpy.hstack(llr_GMM_Naive)
+            scores_tot = compute_min_DCF(llr, llr_GMM_labels, pi, Cfn, Cfp)
+            data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
+            # TARGET 4
+            _, llr_GMM_Naive, _, _, llr_GMM_labels = self.kfold_GMM(5, DTR, LTR, 4, 2 ** i, a, p)
+            llr = numpy.hstack(llr_GMM_Naive)
+            scores_tot = compute_min_DCF(llr, llr_GMM_labels, pi, Cfn, Cfp)
+            data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
+
+        self.PLT.plot_bar_GMM(data)
+    def plot_GMM_TIED(self, DTR, LTR,pi, a,p, Cfn,Cfp):
+        data = {
+            "Non-target K = 1": [],
+            "Non-target K = 2": [],
+            "Non-target K = 4": [],
+            "Non-target K = 8": [],
+            "Non-target K = 16": [],
+            "Non-target K = 32": []
+        }
+        for i in range(0, 6):
+            # TARGET 1
+            _, _, llr_GMM_Tied, _, llr_GMM_labels = self.kfold_GMM(5, DTR, LTR, 1, 2 ** i, a, p)
+            llr = numpy.hstack(llr_GMM_Tied)
+            scores_tot = compute_min_DCF(llr, llr_GMM_labels, pi, Cfn, Cfp)
+            data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
+            # TARGET 2
+            _, _, llr_GMM_Tied, _, llr_GMM_labels = self.kfold_GMM(5, DTR, LTR, 2, 2 ** i, a, p)
+            llr = numpy.hstack(llr_GMM_Tied)
+            scores_tot = compute_min_DCF(llr, llr_GMM_labels, pi, Cfn, Cfp)
+            data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
+            # TARGET 4
+            _, _, llr_GMM_Tied, _, llr_GMM_labels = self.kfold_GMM(5, DTR, LTR, 4, 2 ** i, a, p)
+            llr = numpy.hstack(llr_GMM_Tied)
+            scores_tot = compute_min_DCF(llr, llr_GMM_labels, pi, Cfn, Cfp)
+            data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
+
+        self.PLT.plot_bar_GMM(data)
+    def plot_GMM_NAIVETIED(self, DTR, LTR,pi, a,p, Cfn,Cfp):
+        data = {
+            "Non-target K = 1": [],
+            "Non-target K = 2": [],
+            "Non-target K = 4": [],
+            "Non-target K = 8": [],
+            "Non-target K = 16": [],
+            "Non-target K = 32": []
+        }
+        for i in range(0, 6):
+            # TARGET 1
+            _, _, _, llr_GMM_TiedNaive, llr_GMM_labels = self.kfold_GMM(5, DTR, LTR, 1, 2 ** i, a, p)
+            llr = numpy.hstack(llr_GMM_TiedNaive)
+            scores_tot = compute_min_DCF(llr, llr_GMM_labels, pi, Cfn, Cfp)
+            data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
+            # TARGET 2
+            _, _, _, llr_GMM_TiedNaive, llr_GMM_labels = self.kfold_GMM(5, DTR, LTR, 2, 2 ** i, a, p)
+            llr = numpy.hstack(llr_GMM_TiedNaive)
+            scores_tot = compute_min_DCF(llr, llr_GMM_labels, pi, Cfn, Cfp)
+            data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
+            # TARGET 4
+            _, _, _, llr_GMM_TiedNaive, llr_GMM_labels = self.kfold_GMM(5, DTR, LTR, 4, 2 ** i, a, p)
+            llr = numpy.hstack(llr_GMM_TiedNaive)
+            scores_tot = compute_min_DCF(llr, llr_GMM_labels, pi, Cfn, Cfp)
+            data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
+
+        self.PLT.plot_bar_GMM(data)
+
+    def GMM_validation(self,DTR,LTR, pi, Cfn, Cfp,comp, compNT,a,p, plot=False ):
 
         llr_GMM_Full, llr_GMM_Naive, llr_GMM_Tied,llr_GMM_TiedNaive,llr_GMM_labels= self.kfold_GMM(5, DTR, LTR, comp,compNT, a, p)
         print("##########GMM FULL##########")
@@ -713,23 +876,32 @@ class Validation:
         rettt = compute_act_DCF(llr, llr_GMM_labels, pi, Cfn, Cfp, None)
         print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
 
-        print("##########GMM NAIVE##########")
-        llrN = numpy.hstack(llr_GMM_Naive)
-        scores_totN = compute_min_DCF(llrN, llr_GMM_labels, pi, Cfn, Cfp)
-        print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_totN))
-        rettt = compute_act_DCF(llrN, llr_GMM_labels, pi, Cfn, Cfp, None)
-        print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
+        # print("##########GMM NAIVE##########")
+        # llrN = numpy.hstack(llr_GMM_Naive)
+        # scores_totN = compute_min_DCF(llrN, llr_GMM_labels, pi, Cfn, Cfp)
+        # print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_totN))
+        # rettt = compute_act_DCF(llrN, llr_GMM_labels, pi, Cfn, Cfp, None)
+        # print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
 
-        print("##########GMM TIED##########")
-        llrT = numpy.hstack(llr_GMM_Tied)
-        scores_totT = compute_min_DCF(llrT, llr_GMM_labels, pi, Cfn, Cfp)
-        print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_totT))
-        rettt = compute_act_DCF(llrT, llr_GMM_labels, pi, Cfn, Cfp, None)
-        print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
+        # print("##########GMM TIED##########")
+        # llrT = numpy.hstack(llr_GMM_Tied)
+        # scores_totT = compute_min_DCF(llrT, llr_GMM_labels, pi, Cfn, Cfp)
+        # print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_totT))
+        # rettt = compute_act_DCF(llrT, llr_GMM_labels, pi, Cfn, Cfp, None)
+        # print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
 
-        print("##########GMM TIED NAIVE##########")
-        llrTN = numpy.hstack(llr_GMM_TiedNaive)
-        scores_totTN = compute_min_DCF(llrTN, llr_GMM_labels, pi, Cfn, Cfp)
-        print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_totTN))
-        rettt = compute_act_DCF(llrTN, llr_GMM_labels, pi, Cfn, Cfp, None)
-        print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
+        # print("##########GMM TIED NAIVE##########")
+        # llrTN = numpy.hstack(llr_GMM_TiedNaive)
+        # scores_totTN = compute_min_DCF(llrTN, llr_GMM_labels, pi, Cfn, Cfp)
+        # print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_totTN))
+        # rettt = compute_act_DCF(llrTN, llr_GMM_labels, pi, Cfn, Cfp, None)
+        # print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
+
+
+        if plot:
+            print("Plotting it may take a while")
+            bayes_error_min_act_plot(numpy.hstack(llr_GMM_Full), llr_GMM_labels, 1)
+            #self.plot_GMM_full(DTR,LTR,pi,a,p, Cfn,Cfp)
+            #self.plot_GMM_NAIVE(DTR,LTR,pi,a,p,Cfn,Cfp)
+            #self.plot_GMM_TIED(DTR,LTR,pi,a,p,Cfn,Cfp)
+            #self.plot_GMM_NAIVETIED(DTR,LTR,pi,a,p, Cfn, Cfp)

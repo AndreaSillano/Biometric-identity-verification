@@ -50,14 +50,14 @@ if __name__ == "__main__":
     #plt.plot_correlations(DTR.T[:, LTR == 1], "heatmap_authentic_", cmap="Blues")
 
 
-    #VA.MVG_validation(DTR,LTR, 0.5, 1,10)
+    # VA.MVG_validation(DTR,LTR, 0.5, 1,10)
     # for i in range (7,10):
     #      print("PCA con", i)
     #      DPA = dimRed.PCA(DTR, i)
     #      VA.MVG_validation(DPA.T, LTR, 0.5, 1, 10)
 
 
-    #VA.LR_validation(DPA.T, LTR, 0.5, 1, 10, plot = False)
+    VA.LR_validation(DPA.T,LTR, 0.5,1,10, plot = True)
     # for i in range (7,10):
     #      print("PCA con", i)
     #      DPA = dimRed.PCA(DTR, i)
@@ -69,5 +69,12 @@ if __name__ == "__main__":
     #     for c in C_arr:
     #         print("SVM, K: ",k," C: ", c)
     #         VA.SVM_validation(DTR, LTR, 0.9, 1, 10, k, c)
-    #VA.GMM_validation(DTR,LTR, 0.5,1,10, 2,8, 0.1, 0.01)
-    VA.SVM_validation(DTR, LTR, 0.5, 1, 10, 10, 10, True)
+    # VA.SVM_validation(DTR, LTR, 0.5, 1, 10, 1, 1, False)
+
+    #VA.GMM_validation(DTR,LTR, 0.5,1,10, 1,4, 0.1, 0.01, False)
+    # for i in range (7,10):
+    #      print("PCA con", i)
+    #      DPA = dimRed.PCA(DTR, i)
+    #      VA.GMM_validation(DPA.T,LTR, 0.5,1,10, 1,4, 0.1, 0.01)
+    #DPA_7 = dimRed.PCA(DTR, 7)
+    #VA.GMM_validation(DPA_7.T,LTR, 0.5,1,10, 1,4, 0.1, 0.01, True)
