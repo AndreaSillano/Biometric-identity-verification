@@ -45,13 +45,25 @@ def evaluation(DTE,LTE,DTR,LTR, EV, dimRed):
     print("##################################")
     print("EVALUATION")
     print("##################################")
-    EV.MVG_evaluation(DTE, LTE, DTR, LTR, 0.1, 1, 10)
-    for i in range(7, 10):
-        print("PCA con", i)
-        DPA = dimRed.PCA(DTR, i)
-        DPE = dimRed.PCA_DTE(DTR, i,DTE)
-        EV.MVG_evaluation(DPE.T, LTE, DPA.T, LTR, 0.1, 1, 10)
-    #EV.LR_evaluation(DTE.T, LTE, DTR.T, LTR, 0.5, 1, 10)
+    print("MVG EVALUATION")
+    # EV.MVG_evaluation(DTE, LTE, DTR, LTR, 0.5, 1, 10)
+    # for i in range(7, 10):
+    #     print("PCA con", i)
+    #     DPA = dimRed.PCA(DTR, i)
+    #     DPE = dimRed.PCA_DTE(DTR, i,DTE)
+    #     EV.MVG_evaluation(DPE.T, LTE, DPA.T, LTR, 0.5, 1, 10)
+
+    print("LOGISTIC EVALUATION")
+
+    #EV.LR_evaluation(DTE, LTE, DTR, LTR, 0.1, 1, 10, False)
+    # for i in range(7, 10):
+    #     print("PCA con", i)
+    #     DPA = dimRed.PCA(DTR, i)
+    #     DPE = dimRed.PCA_DTE(DTR, i,DTE)
+    #     EV.LR_evaluation(DPE.T, LTE, DPA.T, LTR, 0.5, 1, 10)
+
+    print("GMM")
+    EV.GMM_evaluation(DTE, LTE, DTR, LTR, 0.5, 1, 10, 1, 4, 0.1, 0.01)
 
 if __name__ == "__main__":
 
