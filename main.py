@@ -12,14 +12,14 @@ def validation(DTR,LTR, VA, dimRed):
     print("##################################")
     print("VALIDATION")
     print("##################################")
-
-    VA.MVG_validation(DTR,LTR, 0.5, 1,10)
+    #DPA = dimRed.PCA(DTR, 8)
+    #VA.MVG_validation(DPA.T,LTR, 0.5, 1,10)
     # for i in range (7,10):
     #      print("PCA con", i)
     #      DPA = dimRed.PCA(DTR, i)
     #      VA.MVG_validation(DPA.T, LTR, 0.5, 1, 10)
-
-    #VA.LR_validation(DTR, LTR, 0.5, 1, 10, plot=True)
+    #DPA = dimRed.PCA(DTR, 7)
+    #VA.LR_validation(DPA.T, LTR, 0.5, 1, 10, plot=True)
     # for i in range (7,10):
     #      print("PCA con", i)
     #      DPA = dimRed.PCA(DTR, i)
@@ -33,13 +33,15 @@ def validation(DTR,LTR, VA, dimRed):
     #         VA.SVM_validation(DTR, LTR, 0.9, 1, 10, k, c)
     # VA.SVM_validation(DTR, LTR, 0.5, 1, 10, 1, 1, False)
 
-    # VA.GMM_validation(DTR,LTR, 0.5,1,10, 1,4, 0.1, 0.01, False)
+    #VA.GMM_validation(DTR,LTR, 0.5,1,10, 1,8, 0.1, 0.01, True)
     # for i in range (7,10):
     #      print("PCA con", i)
     #      DPA = dimRed.PCA(DTR, i)
-    #      VA.GMM_validation(DPA.T,LTR, 0.5,1,10, 1,4, 0.1, 0.01)
+    #      VA.GMM_validation(DPA.T,LTR, 0.5,1,10, 1,8, 0.1, 0.01)
     # DPA_7 = dimRed.PCA(DTR, 7)
-    # VA.GMM_validation(DPA_7.T,LTR, 0.5,1,10, 1,4, 0.1, 0.01, True)
+    #VA.GMM_validation(DPA_7.T,LTR, 0.5,1,10, 1,4, 0.1, 0.01, True)
+    print("Comparing Scores")
+    #VA.plot_minDCF_cal_score(DTR, LTR, 0.5)
     return
 
 def evaluation(DTE, LTE, DTR, LTR, EV,  dimRed):
@@ -63,8 +65,14 @@ def evaluation(DTE, LTE, DTR, LTR, EV,  dimRed):
     #     DPE = dimRed.PCA_DTE(DTR, i,DTE)
     #     EV.LR_evaluation(DPE.T, LTE, DPA.T, LTR, 0.5, 1, 10)
 
-    print("GMM")
-    EV.GMM_evaluation(DTE, LTE, DTR, LTR, 0.5, 1, 10, 1, 4, 0.1, 0.01)
+    # print("GMM")
+    # EV.GMM_evaluation(DTE, LTE, DTR, LTR, 0.9, 1, 10, 1, 16, 0.1, 0.01)
+    # for i in range(7, 10):
+    #     print("PCA con", i)
+    #     DPA = dimRed.PCA(DTR, i)
+    #     DPE = dimRed.PCA_DTE(DTR, i,DTE)
+    #     EV.GMM_evaluation(DPE.T, LTE, DPA.T, LTR, 0.9, 1, 10, 1, 16, 0.1, 0.01)
+    EV.plot_minDCF_cal_score(DTR, LTR, DTE,LTE,0.5)
 
 if __name__ == "__main__":
 

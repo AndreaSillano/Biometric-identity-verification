@@ -76,11 +76,6 @@ def bayes_error_plot(pArray, scores, labels, minCost=False, th=None):
             y.append(compute_act_DCF(scores, labels, pi, 1, 1, th))
     return numpy.array(y)
 
-def bayes_error_plot_compare(pi, scores, labels):
-    y = []
-#    pi = 1.0 / (1.0 + numpy.exp(-pi)) #todo
-    y.append(compute_min_DCF(scores, labels, pi, 1, 1))
-    return numpy.array(y)
 
 
 
@@ -88,6 +83,22 @@ def bayes_error_min_act_plot(D, LTE,  ylim):
     p = numpy.linspace(-3, 3, 21)
     plt.plot(p, bayes_error_plot(p, D, LTE, minCost=False), color='r', label='actDCF')
     plt.plot(p, bayes_error_plot(p, D, LTE, minCost=True), color='b', label='minDCF')
+    plt.ylim(0, ylim)
+    plt.ylabel('DCF')
+    plt.legend(loc = 'upper left')
+    plt.show()
+
+def bayes_error_min_act_plot_compare(mvg, qlog,svm,gmm, mvg_l, qlog_l,svm_l, gmm_l, ylim):
+    p = numpy.linspace(-3, 3, 21)
+    plt.plot(p, bayes_error_plot(p, mvg, mvg_l, minCost=False), color='r', label='MVG Full - actDCF' )
+    plt.plot(p, bayes_error_plot(p, mvg, mvg_l, minCost=True), color='r', label='MVG Full - minDCF', linestyle='dashed')
+    plt.plot(p, bayes_error_plot(p, qlog, qlog_l, minCost=False), color='b', label='Q-Log-Reg - actDCF')
+    plt.plot(p, bayes_error_plot(p, qlog, qlog_l, minCost=True), color='b', label='Q-Log-Reg - minDCF', linestyle='dashed')
+    plt.plot(p, bayes_error_plot(p, svm, svm_l, minCost=False), color='y', label='SVM RBF - actDCF')
+    plt.plot(p, bayes_error_plot(p, svm, svm_l, minCost=True), color='y', label='SVM RBF - minDCF', linestyle='dashed')
+    plt.plot(p, bayes_error_plot(p, gmm, gmm_l, minCost=False), color='c', label='GMM - actDCF')
+    plt.plot(p, bayes_error_plot(p, gmm, gmm_l, minCost=True), color='c', label='GMM - minDCF', linestyle='dashed')
+
     plt.ylim(0, ylim)
     plt.ylabel('DCF')
     plt.legend(loc = 'upper left')
