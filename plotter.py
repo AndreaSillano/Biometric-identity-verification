@@ -125,8 +125,8 @@ class Plotter:
     def plot_DCF_SVM_C(self, x, y_lin, y_pol, y_rbf, xlabel, title=''):
         plt.figure()
         plt.plot(x, y_lin, label='SVM Linear', color='b')
-        plt.plot(x, y_pol, label='SVM Polynomial', color='g')
-        plt.plot(x, y_rbf, label='SVM RBF', color='r')
+        plt.plot(x, y_pol, label='SVM Linear PCA 7', color='g')
+        plt.plot(x, y_rbf, label='SVM Linear (Z-norm)', color='r')
         plt.xlim([min(x), max(x)])
         plt.xscale("log", base=10)
         plt.legend(loc='upper left')

@@ -542,10 +542,10 @@ class Validation:
         # print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
 
 
-        #print("##########RBF##########")
-        #scores_tot = compute_min_DCF(numpy.hstack(scoresRBF_append), SVM_labels, pi, C_fn, C_fp)
-        #print(f'- with prior = {pi} -> minDCF = %.3f' % scores_tot)
-        #bayes_error_min_act_plot(numpy.hstack(scoresRBF_append), numpy.hstack(SVM_labels), 1)
+        print("##########RBF##########")
+        scores_tot = compute_min_DCF(numpy.hstack(scoresRBF_append), SVM_labels, pi, C_fn, C_fp)
+        print(f'- with prior = {pi} -> minDCF = %.3f' % scores_tot)
+        bayes_error_min_act_plot(numpy.hstack(scoresRBF_append), numpy.hstack(SVM_labels), 1)
 
         # rettt = compute_act_DCF(numpy.hstack(scoresRBF_append), SVM_labels, pi, C_fn, C_fp, None)
         # print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
