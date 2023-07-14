@@ -31,7 +31,7 @@ def validation(DTR,LTR, VA, dimRed):
     #     for c in C_arr:
     #         print("SVM, K: ",k," C: ", c)
     #         VA.SVM_validation(DTR, LTR, 0.9, 1, 10, k, c)
-    # VA.SVM_validation(DTR, LTR, 0.5, 1, 10, 1, 1, False)
+    #VA.SVM_validation(DTR, LTR, 0.5, 1, 10, 10, 10, False)
 
     #VA.GMM_validation(DTR,LTR, 0.5,1,10, 1,8, 0.1, 0.01, True)
     # for i in range (7,10):
@@ -39,6 +39,8 @@ def validation(DTR,LTR, VA, dimRed):
     #      DPA = dimRed.PCA(DTR, i)
     #      VA.GMM_validation(DPA.T,LTR, 0.5,1,10, 1,8, 0.1, 0.01)
     # DPA_7 = dimRed.PCA(DTR, 7)
+    # VA.GMM_validation(DPA_7.T,LTR, 0.5,1,10, 1,4, 0.1, 0.01, True)
+    VA.plot_ROC(DTR, LTR, 0.5)
     #VA.GMM_validation(DPA_7.T,LTR, 0.5,1,10, 1,4, 0.1, 0.01, True)
     print("Comparing Scores")
     #VA.plot_minDCF_cal_score(DTR, LTR, 0.5)
@@ -49,12 +51,12 @@ def evaluation(DTE, LTE, DTR, LTR, EV,  dimRed):
     print("EVALUATION")
     print("##################################")
     print("MVG EVALUATION")
-    # EV.MVG_evaluation(DTE, LTE, DTR, LTR, 0.5, 1, 10)
-    # for i in range(7, 10):
-    #     print("PCA con", i)
-    #     DPA = dimRed.PCA(DTR, i)
-    #     DPE = dimRed.PCA_DTE(DTR, i,DTE)
-    #     EV.MVG_evaluation(DPE.T, LTE, DPA.T, LTR, 0.5, 1, 10)
+    # #EV.MVG_evaluation(DTE, LTE, DTR, LTR, 0.5, 1, 10)
+    # #for i in range(7, 10):
+    # #    print("PCA con", i)
+    # #    DPA = dimRed.PCA(DTR, i)
+    # #    DPE = dimRed.PCA_DTE(DTR, i,DTE)
+    # #    EV.MVG_evaluation(DPE.T, LTE, DPA.T, LTR, 0.5, 1, 10)
 
     print("LOGISTIC EVALUATION")
 
@@ -65,7 +67,15 @@ def evaluation(DTE, LTE, DTR, LTR, EV,  dimRed):
     #     DPE = dimRed.PCA_DTE(DTR, i,DTE)
     #     EV.LR_evaluation(DPE.T, LTE, DPA.T, LTR, 0.5, 1, 10)
 
-    # print("GMM")
+
+    #EV.GMM_evaluation(DTE, LTE, DTR, LTR, 0.5, 1, 10, 1, 4, 0.1, 0.01)
+    EV.SVM_evaluation(DTE.T, LTE, DTR.T, LTR, 0.5, 1, 10)
+    #for i in range(7, 10):
+     #   print("PCA con", i)
+      #  DPA = dimRed.PCA(DTR, i)
+       # DPE = dimRed.PCA_DTE(DTR, i,DTE)
+        #EV.SVM_evaluation(DPE, LTE, DPA, LTR, 0.9, 1, 10)
+    print("GMM")
     # EV.GMM_evaluation(DTE, LTE, DTR, LTR, 0.9, 1, 10, 1, 16, 0.1, 0.01)
     # for i in range(7, 10):
     #     print("PCA con", i)
