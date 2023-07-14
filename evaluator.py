@@ -80,17 +80,211 @@ class Evaluator:
         x = x[:, None]
         xxT = x.dot(x.T).reshape(x.size ** 2, order='F')
         return xxT
+    def plot_DCF_PCA(self,DTR, LTR,DTE,LTE ,pi, C_fn, C_fp):
+        '''Plot PCA LOG'''
+        #lam = numpy.logspace(-5, 1, 30)
+        lam =[1e-5,1e-4, 1e-3, 1e-2, 1e-1, 1, 10]
+        minDCF_9 = []
+        minDCF_8 = []
+        minDCF_7 = []
+        minDCF_LR = []
+        DP_9 = self.dimRed.PCA(DTR.T, 9)
+        DPE_9 = self.dimRed.PCA_DTE(DTR.T,9,DTE.T)
+        DP_8 = self.dimRed.PCA(DTR.T, 8)
+        DPE_8 = self.dimRed.PCA_DTE(DTR.T, 8, DTE.T)
+        DP_7 = self.dimRed.PCA(DTR.T, 7)
+        DPE_7 = self.dimRed.PCA_DTE(DTR.T, 7, DTE.T)
+        for l in lam:
+            lr1=self.LR.predict_Logistic_Regression_weigthed(DTR, LTR, DTE, l, 0.5)
 
-    def LR_evaluation(self, DTE, LTE, DTR, LTR, pi, C_fn, C_fp):
-        labelLr =[]
+            minDCF_LR = numpy.hstack(
+                (minDCF_LR, compute_min_DCF(numpy.hstack(lr1), numpy.hstack(LTE), pi, C_fn, C_fp)))
+
+            lr9 = self.LR.predict_Logistic_Regression_weigthed(DP_9, LTR, DPE_9, l, 0.5)
+
+            minDCF_9 = numpy.hstack(
+                (minDCF_9, compute_min_DCF(numpy.hstack(lr9), numpy.hstack(LTE), pi, C_fn, C_fp)))
+
+            lr8 = self.LR.predict_Logistic_Regression_weigthed(DP_8, LTR, DPE_8, l, 0.5)
+
+            minDCF_8 = numpy.hstack(
+                (minDCF_8, compute_min_DCF(numpy.hstack(lr8), numpy.hstack(LTE), pi, C_fn, C_fp)))
+
+            lr7 = self.LR.predict_Logistic_Regression_weigthed(DP_7, LTR, DPE_7, l, 0.5)
+
+            minDCF_7 = numpy.hstack(
+                (minDCF_7, compute_min_DCF(numpy.hstack(lr7), numpy.hstack(LTE), pi, C_fn, C_fp)))
+
+        self.PLT.plot_DCF_compare_PCA(lam, numpy.hstack(minDCF_LR), numpy.hstack(minDCF_9), numpy.hstack(minDCF_8),
+                                      numpy.hstack(minDCF_7))
+    def plot_DCF_lamda_prior(self, DTR, LTR, DTE, LTE, C_fn, C_fp, norm=False):
+        '''Plot minDCF on different lambda and prior'''
+        lam = numpy.logspace(-5, 1, 30)
+        # lam = [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 10]
+        minDCF_LR_0_5 = []
+        minDCF_LR_0_1 = []
+        minDCF_LR_0_9 = []
+        if norm:
+            DTR, DTE = znorm(DTR, DTE)
+
+        for l in lam:
+
+            lr1 = self.LR.predict_Logistic_Regression_weigthed(DTR, LTR, DTE, l, 0.5)
+
+            minDCF_LR_0_5 = numpy.hstack(
+                (minDCF_LR_0_5, compute_min_DCF(numpy.hstack(lr1), numpy.hstack(LTE), 0.5, C_fn, C_fp)))
+            lr2 = self.LR.predict_Logistic_Regression_weigthed(DTR, LTR, DTE, l, 0.1)
+
+            minDCF_LR_0_1 = numpy.hstack(
+                (minDCF_LR_0_1, compute_min_DCF(numpy.hstack(lr2), numpy.hstack(LTE), 0.1, C_fn, C_fp)))
+
+            lr3 = self.LR.predict_Logistic_Regression_weigthed(DTR, LTR, DTE, l, 0.9)
+            minDCF_LR_0_9 = numpy.hstack(
+                (minDCF_LR_0_9, compute_min_DCF(numpy.hstack(lr3), numpy.hstack(LTE), 0.9, C_fn, C_fp)))
+
+        self.PLT.plot_DCF_lambda(lam, numpy.hstack(minDCF_LR_0_5), numpy.hstack(minDCF_LR_0_1),
+                                 numpy.hstack(minDCF_LR_0_9), 'lambda')
+
+    def plot_minDCF_Z(self, DTR, LTR,DTE,LTE, pi, C_fn, C_fp):
+        '''Plot min DCF vs minDCF with z-norm'''
+        #lam = numpy.logspace(-5, 1, 30)
+        lam = [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 10]
+        minDCF_LR = []
+        minDCF_LR_Z = []
+
+        for l in lam:
+            lr1 = self.LR.predict_Logistic_Regression_weigthed(DTR, LTR, DTE, l, 0.5)
+
+            minDCF_LR = numpy.hstack(
+                (minDCF_LR, compute_min_DCF(numpy.hstack(lr1), numpy.hstack(LTE), pi, C_fn, C_fp)))
+
+            DTR_Z,DTE_Z = znorm(DTR,DTE)
+            lr2 = self.LR.predict_Logistic_Regression_weigthed(DTR_Z, LTR, DTE_Z, l, 0.5)
+            minDCF_LR_Z = numpy.hstack(
+                (minDCF_LR_Z, compute_min_DCF(numpy.hstack(lr2), numpy.hstack(LTE), pi, C_fn, C_fp)))
+
+        self.PLT.plot_DCF_compare(lam, numpy.hstack(minDCF_LR), numpy.hstack(minDCF_LR_Z))
+
+    def plot_minDCF_Z_Q(self, DTR, LTR,DTE,LTE, pi, C_fn, C_fp):
+        '''Plot min DCF vs minDCF with z-norm'''
+        #lam = numpy.logspace(-5, 1, 30)
+        lam = [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 10]
+        minDCF_LR = []
+        minDCF_LR_Z = []
+        expanded_DTR = numpy.apply_along_axis(self.vecxxT, 0, DTR)
+        expanded_DTE = numpy.apply_along_axis(self.vecxxT, 0, DTE)
+        phi = numpy.vstack([expanded_DTR, DTR])
+        phi_DTE = numpy.vstack([expanded_DTE, DTE])
+        DTR_Z, DTE_Z = znorm(DTR, DTE)
+        expanded_DTR_Z = numpy.apply_along_axis(self.vecxxT, 0, DTR_Z)
+        expanded_DTE_Z = numpy.apply_along_axis(self.vecxxT, 0, DTE_Z)
+        phi_Z = numpy.vstack([expanded_DTR_Z, DTR_Z])
+        phi_DTE_Z = numpy.vstack([expanded_DTE_Z, DTE_Z])
+
+
+        for l in lam:
+            lr1 = self.LR.predict_quad_Logistic_Regression(phi, LTR, phi_DTE, l, pi)
+
+            minDCF_LR = numpy.hstack(
+                (minDCF_LR, compute_min_DCF(numpy.hstack(lr1), numpy.hstack(LTE), pi, C_fn, C_fp)))
+
+
+            lr2 = self.LR.predict_quad_Logistic_Regression(phi_Z, LTR, phi_DTE_Z, l, pi)
+            minDCF_LR_Z = numpy.hstack(
+                (minDCF_LR_Z, compute_min_DCF(numpy.hstack(lr2), numpy.hstack(LTE), pi, C_fn, C_fp)))
+
+        self.PLT.plot_DCF_compare_QUAD(lam, numpy.hstack(minDCF_LR), numpy.hstack(minDCF_LR_Z))
+
+
+    def plot_DCF_PCA_Q(self,DTR, LTR,DTE,LTE ,pi, C_fn, C_fp):
+        '''Plot PCA LOG'''
+        #lam = numpy.logspace(-5, 1, 15)
+        lam =[1e-5,1e-4, 1e-3, 1e-2, 1e-1, 1, 10]
+        minDCF_9 = []
+        minDCF_8 = []
+        minDCF_7 = []
+        minDCF_6 = []
+        minDCF_LR = []
+        expanded_DTR = numpy.apply_along_axis(self.vecxxT, 0, DTR)
+        expanded_DTE = numpy.apply_along_axis(self.vecxxT, 0, DTE)
+        phi = numpy.vstack([expanded_DTR, DTR])
+        phi_DTE = numpy.vstack([expanded_DTE, DTE])
+
+        DP_9 = self.dimRed.PCA(DTR.T, 9)
+        DPE_9 = self.dimRed.PCA_DTE(DTR.T,9,DTE.T)
+        expanded_DTR_9 = numpy.apply_along_axis(self.vecxxT, 0, DP_9)
+        expanded_DTE_9 = numpy.apply_along_axis(self.vecxxT, 0, DPE_9)
+        phi_9 = numpy.vstack([expanded_DTR_9, DP_9])
+        phi_DTE_9 = numpy.vstack([expanded_DTE_9, DPE_9])
+
+        DP_8 = self.dimRed.PCA(DTR.T, 8)
+        DPE_8 = self.dimRed.PCA_DTE(DTR.T, 8, DTE.T)
+        expanded_DTR_8 = numpy.apply_along_axis(self.vecxxT, 0, DP_8)
+        expanded_DTE_8 = numpy.apply_along_axis(self.vecxxT, 0, DPE_8)
+        phi_8 = numpy.vstack([expanded_DTR_8, DP_8])
+        phi_DTE_8 = numpy.vstack([expanded_DTE_8, DPE_8])
+
+        DP_7 = self.dimRed.PCA(DTR.T, 7)
+        DPE_7 = self.dimRed.PCA_DTE(DTR.T, 7, DTE.T)
+        expanded_DTR_7 = numpy.apply_along_axis(self.vecxxT, 0, DP_7)
+        expanded_DTE_7 = numpy.apply_along_axis(self.vecxxT, 0, DPE_7)
+        phi_7 = numpy.vstack([expanded_DTR_7, DP_7])
+        phi_DTE_7 = numpy.vstack([expanded_DTE_7, DPE_7])
+
+        DP_6 = self.dimRed.PCA(DTR.T, 6)
+        DPE_6 = self.dimRed.PCA_DTE(DTR.T, 6, DTE.T)
+        expanded_DTR_6 = numpy.apply_along_axis(self.vecxxT, 0, DP_6)
+        expanded_DTE_6 = numpy.apply_along_axis(self.vecxxT, 0, DPE_6)
+        phi_6 = numpy.vstack([expanded_DTR_6, DP_6])
+        phi_DTE_6 = numpy.vstack([expanded_DTE_6, DPE_6])
+        for l in lam:
+            lr1=self.LR.predict_quad_Logistic_Regression(phi, LTR, phi_DTE, l, pi)
+
+            minDCF_LR = numpy.hstack(
+                (minDCF_LR, compute_min_DCF(numpy.hstack(lr1), numpy.hstack(LTE), pi, C_fn, C_fp)))
+
+            lr9 = self.LR.predict_quad_Logistic_Regression(phi_9, LTR, phi_DTE_9, l, pi)
+
+            minDCF_9 = numpy.hstack(
+                (minDCF_9, compute_min_DCF(numpy.hstack(lr9), numpy.hstack(LTE), pi, C_fn, C_fp)))
+
+            lr8 = self.LR.predict_quad_Logistic_Regression(phi_8, LTR, phi_DTE_8, l, pi)
+
+            minDCF_8 = numpy.hstack(
+                (minDCF_8, compute_min_DCF(numpy.hstack(lr8), numpy.hstack(LTE), pi, C_fn, C_fp)))
+
+            lr7 = self.LR.predict_quad_Logistic_Regression(phi_7, LTR, phi_DTE_7, l, pi)
+
+            minDCF_7 = numpy.hstack(
+                (minDCF_7, compute_min_DCF(numpy.hstack(lr7), numpy.hstack(LTE), pi, C_fn, C_fp)))
+
+            lr6 = self.LR.predict_quad_Logistic_Regression(phi_6, LTR, phi_DTE_6, l, pi)
+
+            minDCF_6 = numpy.hstack(
+                (minDCF_6, compute_min_DCF(numpy.hstack(lr6), numpy.hstack(LTE), pi, C_fn, C_fp)))
+
+        self.PLT.plot_DCF_compare_PCA_Q(lam, numpy.hstack(minDCF_LR), numpy.hstack(minDCF_9), numpy.hstack(minDCF_8),
+                                        numpy.hstack(minDCF_7), numpy.hstack(minDCF_6))
+
+    def LR_evaluation(self, DTE, LTE, DTR, LTR, pi, C_fn, C_fp, norm=False):
+        DTE = DTE.T
+        DTR = DTR.T
+        if norm:
+            DTR, DTE = znorm(DTR, DTE)
         expanded_DTR = numpy.apply_along_axis(self.vecxxT, 0, DTR)
         expanded_DTE = numpy.apply_along_axis(self.vecxxT, 0, DTE)
         phi = numpy.vstack([expanded_DTR, DTR])
 
         phi_DTE = numpy.vstack([expanded_DTE, DTE])
 
-        labelLr = numpy.append(labelLr, LTE, axis=0)
-        lrQ = self.LR.predict_quad_Logistic_Regression(phi, LTR, phi_DTE, 0.01, pi)
+        lrQ = self.LR.predict_quad_Logistic_Regression(phi, LTR, phi_DTE, 1e-4, pi)
+        lr =  self.LR.predict_Logistic_Regression_weigthed(DTR, LTR, DTE, 0.1, pi)
+
+        print("############LOGISTIC REGRESSION#############")
+        minDCF_LR = compute_min_DCF(numpy.hstack(lr), numpy.hstack(LTE), pi, C_fn, C_fp)
+        actDCF_LR = compute_act_DCF(numpy.hstack(lr), numpy.hstack(LTE), pi, C_fn, C_fp)
+        print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_LR)
+        print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_LR)
 
         print("############LOGISTIC REGRESSION QUADRATIC#############")
         minDCF_LRQ = compute_min_DCF(numpy.hstack(lrQ), numpy.hstack(LTE), pi, C_fn, C_fp)
@@ -98,7 +292,123 @@ class Evaluator:
         print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_LRQ)
         print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_LRQ)
 
-        #bayes_error_min_act_plot(numpy.hstack(lrQ), numpy.hstack(labelLr), 1)
+        #self.plot_DCF_lamda_prior(DTR, LTR,DTE,LTE, C_fn,C_fp)
+        #self.plot_DCF_lamda_prior(DTR, LTR,DTE,LTE, C_fn,C_fp, True)
+        #self.plot_minDCF_Z(DTR,LTR,DTE,LTE,pi,C_fn,C_fp)
+        #self.plot_DCF_PCA(DTR,LTR,DTE,LTE,pi,C_fn,C_fp)
+        #self.plot_minDCF_Z_Q(DTR,LTR,DTE,LTE,pi,C_fn,C_fp)
+        #self.plot_DCF_PCA_Q(DTR, LTR, DTE, LTE, pi, C_fn, C_fp)
+
+    def plot_GMM_full(self, DTR, LTR, DTE, LTE,pi, a, p, Cfn, Cfp):
+        data = {
+            "Non-target K = 1": [],
+            "Non-target K = 2": [],
+            "Non-target K = 4": [],
+            "Non-target K = 8": [],
+            "Non-target K = 16": [],
+            "Non-target K = 32": []
+        }
+        for i in range(0, 6):
+            # TARGET 1
+            llr_GMM_Full = self.GMM.predict_GMM_full(DTR, LTR, DTE, 1, 2**i, a, p)
+            llr = numpy.hstack(llr_GMM_Full)
+            scores_tot = compute_min_DCF(llr, numpy.hstack(LTE), pi, Cfn, Cfp)
+            data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
+            # TARGET 2
+            llr_GMM_Full=self.GMM.predict_GMM_full(DTR, LTR, DTE, 2, 2**i, a, p)
+            llr = numpy.hstack(llr_GMM_Full)
+            scores_tot = compute_min_DCF(llr, numpy.hstack(LTE), pi, Cfn, Cfp)
+            data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
+            # TARGET 4
+            llr_GMM_Full = self.GMM.predict_GMM_full(DTR, LTR, DTE, 4, 2**i, a, p)
+            llr = numpy.hstack(llr_GMM_Full)
+            scores_tot = compute_min_DCF(llr, numpy.hstack(LTE), pi, Cfn, Cfp)
+            data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
+
+        self.PLT.plot_bar_GMM(data)
+
+    def plot_GMM_naive(self, DTR, LTR, DTE, LTE,pi, a, p, Cfn, Cfp):
+        data = {
+            "Non-target K = 1": [],
+            "Non-target K = 2": [],
+            "Non-target K = 4": [],
+            "Non-target K = 8": [],
+            "Non-target K = 16": [],
+            "Non-target K = 32": []
+        }
+        for i in range(0, 6):
+            # TARGET 1
+            llr_GMM_Full = self.GMM.predict_GMM_naive(DTR, LTR, DTE, 1, 2**i, a, p)
+            llr = numpy.hstack(llr_GMM_Full)
+            scores_tot = compute_min_DCF(llr, numpy.hstack(LTE), pi, Cfn, Cfp)
+            data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
+            # TARGET 2
+            llr_GMM_Full=self.GMM.predict_GMM_naive(DTR, LTR, DTE, 2, 2**i, a, p)
+            llr = numpy.hstack(llr_GMM_Full)
+            scores_tot = compute_min_DCF(llr, numpy.hstack(LTE), pi, Cfn, Cfp)
+            data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
+            # TARGET 4
+            llr_GMM_Full = self.GMM.predict_GMM_naive(DTR, LTR, DTE, 4, 2**i, a, p)
+            llr = numpy.hstack(llr_GMM_Full)
+            scores_tot = compute_min_DCF(llr, numpy.hstack(LTE), pi, Cfn, Cfp)
+            data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
+
+        self.PLT.plot_bar_GMM(data)
+    def plot_GMM_tied(self, DTR, LTR, DTE, LTE,pi, a, p, Cfn, Cfp):
+        data = {
+            "Non-target K = 1": [],
+            "Non-target K = 2": [],
+            "Non-target K = 4": [],
+            "Non-target K = 8": [],
+            "Non-target K = 16": [],
+            "Non-target K = 32": []
+        }
+        for i in range(0, 6):
+            # TARGET 1
+            llr_GMM_Full = self.GMM.predict_GMM_TiedCov(DTR, LTR, DTE, 1, 2**i, a, p)
+            llr = numpy.hstack(llr_GMM_Full)
+            scores_tot = compute_min_DCF(llr, numpy.hstack(LTE), pi, Cfn, Cfp)
+            data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
+            # TARGET 2
+            llr_GMM_Full=self.GMM.predict_GMM_TiedCov(DTR, LTR, DTE, 2, 2**i, a, p)
+            llr = numpy.hstack(llr_GMM_Full)
+            scores_tot = compute_min_DCF(llr, numpy.hstack(LTE), pi, Cfn, Cfp)
+            data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
+            # TARGET 4
+            llr_GMM_Full = self.GMM.predict_GMM_TiedCov(DTR, LTR, DTE, 4, 2**i, a, p)
+            llr = numpy.hstack(llr_GMM_Full)
+            scores_tot = compute_min_DCF(llr, numpy.hstack(LTE), pi, Cfn, Cfp)
+            data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
+
+        self.PLT.plot_bar_GMM(data)
+
+    def plot_GMM_tiedNaive(self, DTR, LTR, DTE, LTE,pi, a, p, Cfn, Cfp):
+        data = {
+            "Non-target K = 1": [],
+            "Non-target K = 2": [],
+            "Non-target K = 4": [],
+            "Non-target K = 8": [],
+            "Non-target K = 16": [],
+            "Non-target K = 32": []
+        }
+        for i in range(0, 6):
+            # TARGET 1
+            llr_GMM_Full = self.GMM.predict_GMM_TiedNaive(DTR, LTR, DTE, 1, 2**i, a, p)
+            llr = numpy.hstack(llr_GMM_Full)
+            scores_tot = compute_min_DCF(llr, numpy.hstack(LTE), pi, Cfn, Cfp)
+            data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
+            # TARGET 2
+            llr_GMM_Full=self.GMM.predict_GMM_TiedNaive(DTR, LTR, DTE, 2, 2**i, a, p)
+            llr = numpy.hstack(llr_GMM_Full)
+            scores_tot = compute_min_DCF(llr, numpy.hstack(LTE), pi, Cfn, Cfp)
+            data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
+            # TARGET 4
+            llr_GMM_Full = self.GMM.predict_GMM_TiedNaive(DTR, LTR, DTE, 4, 2**i, a, p)
+            llr = numpy.hstack(llr_GMM_Full)
+            scores_tot = compute_min_DCF(llr, numpy.hstack(LTE), pi, Cfn, Cfp)
+            data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
+
+        self.PLT.plot_bar_GMM(data)
 
     def get_scores_SVM(self, D, L, Dte, scoresLin_append, scoresPol_append, scoresRBF_append, pi):    
         scoresLin_append.append(self.svm.predict_SVM_Linear(D, L, 10, 1, Dte, False, pi))
@@ -143,14 +453,19 @@ class Evaluator:
         self.PLT.plot_DCF_SVM_C(C_arr, numpy.hstack(minDCF_Lin), numpy.hstack(minDCF_Pol), numpy.hstack(minDCF_RBF), 'C', 'comp')
 
     def GMM_evaluation(self, DTE, LTE, DTR, LTR, pi, Cfn, Cfp, comp, compNT, a, p):
-
+        DTR = DTR.T
+        DTE = DTE.T
         #labelGMM = numpy.append(labelGMM, Lte, axis=0)
         llr_GMM_Full = self.GMM.predict_GMM_full(DTR, LTR, DTE, comp, compNT, a, p)
 
-        print("##########GMM FULL##########")
+        print("##########GMM FULL############")
         llr = numpy.hstack(llr_GMM_Full)
         scores_tot = compute_min_DCF(llr, LTE, pi, Cfn, Cfp)
         print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_tot))
         #rettt = compute_act_DCF(llr, llr_GMM_labels, pi, Cfn, Cfp, None)
         #print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
 
+        #self.plot_GMM_full(DTR,LTR,DTE,LTE, pi,a,p,Cfn,Cfp)
+        #self.plot_GMM_naive(DTR,LTR,DTE,LTE, pi,a,p,Cfn,Cfp)
+        #self.plot_GMM_tied(DTR,LTR,DTE,LTE, pi,a,p,Cfn,Cfp)
+        #self.plot_GMM_tiedNaive(DTR,LTR,DTE,LTE, pi,a,p,Cfn,Cfp)
