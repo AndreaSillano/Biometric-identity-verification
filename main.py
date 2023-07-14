@@ -13,7 +13,7 @@ def validation(DTR,LTR, VA, dimRed):
     print("VALIDATION")
     print("##################################")
 
-    VA.MVG_validation(DTR,LTR, 0.5, 1,10)
+    #VA.MVG_validation(DTR,LTR, 0.5, 1,10)
     # for i in range (7,10):
     #      print("PCA con", i)
     #      DPA = dimRed.PCA(DTR, i)
@@ -31,7 +31,7 @@ def validation(DTR,LTR, VA, dimRed):
     #     for c in C_arr:
     #         print("SVM, K: ",k," C: ", c)
     #         VA.SVM_validation(DTR, LTR, 0.9, 1, 10, k, c)
-    VA.SVM_validation(DTR, LTR, 0.5, 1, 10, 0.1, 10, False)
+    #VA.SVM_validation(DTR, LTR, 0.5, 1, 10, 10, 10, False)
 
     # VA.GMM_validation(DTR,LTR, 0.5,1,10, 1,4, 0.1, 0.01, False)
     # for i in range (7,10):
@@ -40,6 +40,7 @@ def validation(DTR,LTR, VA, dimRed):
     #      VA.GMM_validation(DPA.T,LTR, 0.5,1,10, 1,4, 0.1, 0.01)
     # DPA_7 = dimRed.PCA(DTR, 7)
     # VA.GMM_validation(DPA_7.T,LTR, 0.5,1,10, 1,4, 0.1, 0.01, True)
+    VA.plot_ROC(DTR, LTR, 0.5)
     return
 
 def evaluation(DTE, LTE, DTR, LTR, EV,  dimRed):
@@ -64,8 +65,13 @@ def evaluation(DTE, LTE, DTR, LTR, EV,  dimRed):
     #     EV.LR_evaluation(DPE.T, LTE, DPA.T, LTR, 0.5, 1, 10)
 
     print("GMM")
-    EV.GMM_evaluation(DTE, LTE, DTR, LTR, 0.5, 1, 10, 1, 4, 0.1, 0.01)
+    #EV.GMM_evaluation(DTE, LTE, DTR, LTR, 0.5, 1, 10, 1, 4, 0.1, 0.01)
     EV.SVM_evaluation(DTE.T, LTE, DTR.T, LTR, 0.5, 1, 10)
+    #for i in range(7, 10):
+     #   print("PCA con", i)
+      #  DPA = dimRed.PCA(DTR, i)
+       # DPE = dimRed.PCA_DTE(DTR, i,DTE)
+        #EV.SVM_evaluation(DPE, LTE, DPA, LTR, 0.9, 1, 10)
 
 if __name__ == "__main__":
 
@@ -108,7 +114,7 @@ if __name__ == "__main__":
     # plt.plot_correlations(DTE.T[:, LTE == 0], "heatmap_spoofed_", cmap="Reds")
     # plt.plot_correlations(DTE.T[:, LTE == 1], "heatmap_authentic_", cmap="Blues")
 
-    #validation(DTR,LTR,VA,dimRed)
+    validation(DTR,LTR,VA,dimRed)
     evaluation(DTE, LTE, DTR, LTR, EV, dimRed)
 
     #plt.plot_correlations(DTR.T,"heatmap")

@@ -124,9 +124,9 @@ class Plotter:
 
     def plot_DCF_SVM_C(self, x, y_lin, y_pol, y_rbf, xlabel, title=''):
         plt.figure()
-        plt.plot(x, y_lin, label='SVM Linear', color='b')
-        plt.plot(x, y_pol, label='SVM Linear PCA 7', color='g')
-        plt.plot(x, y_rbf, label='SVM Linear (Z-norm)', color='r')
+        plt.plot(x, y_lin, label='SVM Polynomial', color='b')
+        plt.plot(x, y_pol, label='SVM Polynomial PCA 7', color='g')
+        plt.plot(x, y_rbf, label='SVM Polynomial (Z-norm)', color='r')
         plt.xlim([min(x), max(x)])
         plt.xscale("log", base=10)
         plt.legend(loc='upper left')
@@ -210,4 +210,65 @@ class Plotter:
         plt.xlabel('lambda')
         plt.ylabel("min DCF")
         # plt.savefig('./images/DCF_' + 'LR' + '.png')
+        plt.show()
+
+    def ROC_curve(self, firstModel, secondModel, thirdModel, fourthModel, LTR1, LTR2, LTR3, LTR4):
+        plt.figure()
+
+        thresholds = numpy.array(firstModel)
+        thresholds.sort()
+        thresholds = numpy.ravel(thresholds)
+        thresholds = numpy.concatenate([numpy.array([-numpy.inf]), thresholds, numpy.array([numpy.inf])])
+        FPR = numpy.zeros(thresholds.size)
+        TPR = numpy.zeros(thresholds.size)
+        for idx, t in enumerate(thresholds):
+            pred_label = numpy.int32(firstModel > t)
+            conf = confusion_matrix_binary(pred_label, LTR1)
+            TPR[idx] = conf[1, 1] / (conf[1, 1] + conf[0, 1])
+            FPR[idx] = conf[1, 0] / (conf[1, 0] + conf[0, 0])
+        plt.plot(FPR, TPR, label='MVG Full PCA 8', color='r')
+
+        thresholds = numpy.array(secondModel)
+        thresholds.sort()
+        thresholds = numpy.ravel(thresholds)
+        thresholds = numpy.concatenate([numpy.array([-numpy.inf]), thresholds, numpy.array([numpy.inf])])
+        FPR = numpy.zeros(thresholds.size)
+        TPR = numpy.zeros(thresholds.size)
+        for idx, t in enumerate(thresholds):
+            pred_label = numpy.int32(firstModel > t)
+            conf = confusion_matrix_binary(pred_label, LTR2)
+            TPR[idx] = conf[1, 1] / (conf[1, 1] + conf[0, 1])
+            FPR[idx] = conf[1, 0] / (conf[1, 0] + conf[0, 0])
+        plt.plot(FPR, TPR, label='Quadratic LogReg PCA 7', color='b')
+
+        thresholds = numpy.array(thirdModel)
+        thresholds.sort()
+        thresholds = numpy.ravel(thresholds)
+        thresholds = numpy.concatenate([numpy.array([-numpy.inf]), thresholds, numpy.array([numpy.inf])])
+        FPR = numpy.zeros(thresholds.size)
+        TPR = numpy.zeros(thresholds.size)
+        for idx, t in enumerate(thresholds):
+            pred_label = numpy.int32(thirdModel > t)
+            conf = confusion_matrix_binary(pred_label, LTR3)
+            TPR[idx] = conf[1, 1] / (conf[1, 1] + conf[0, 1])
+            FPR[idx] = conf[1, 0] / (conf[1, 0] + conf[0, 0])
+        plt.plot(FPR, TPR, label='RBF SVM', color='y')
+
+        thresholds = numpy.array(fourthModel)
+        thresholds.sort()
+        thresholds = numpy.ravel(thresholds)
+        thresholds = numpy.concatenate([numpy.array([-numpy.inf]), thresholds, numpy.array([numpy.inf])])
+        FPR = numpy.zeros(thresholds.size)
+        TPR = numpy.zeros(thresholds.size)
+        for t in enumerate(thresholds):
+            pred_label = numpy.int32(thirdModel > t)
+            conf = confusion_matrix_binary(pred_label, LTR4)
+            TPR[idx] = conf[1, 1] / (conf[1, 1] + conf[0, 1])
+            FPR[idx] = conf[1, 0] / (conf[1, 0] + conf[0, 0])
+        plt.plot(FPR, TPR, label='GMM Naive 1-8', color='g')
+
+        plt.xlabel('FPR')
+        plt.ylabel('TPR')
+        plt.legend()
+        plt.savefig('images/comparison/' + 'ROC.png')
         plt.show()
