@@ -16,7 +16,7 @@ class Validation:
         self.GMM = GMM()
         self.PLT = Plotter()
         self.dimRed = DimensionalityReduction()
-
+    '''MVG VALIDATION'''
     def k_fold_MVG(self, k,DTR, LTR):
         llrMVG = []
         llrNV = []
@@ -60,49 +60,34 @@ class Validation:
 
 
     def MVG_validation(self, DTR, LTR, pi, C_fn, C_fp):
-        #SU DTE
-        # llrs = self.MVG.predict_MVG(DTR.T, LTR, DTE.T)
-        # minDCF_MVG_test = compute_min_DCF(llrs,LTE, pi, C_fn, C_fp)
-        # #s_MVG = self.MVG.predict_MVG(DTR.T,LTR , DTR.T)
-        # actDCF_MVG_test = compute_act_DCF(llrs,LTE, pi, C_fn, C_fp)
-        # #actDCF_MVG = compute_act_DCF(s_MVG, LTR, pi, C_fn, C_fp)
-        # print("############MVG###############")
-        # print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_MVG_test)
-        # print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_MVG_test)
-
 
         llrMVG, llrNV, llrTCV,llrTNV, labelMVG = self.k_fold_MVG(5,DTR,LTR)
 
         minDCF_MVG = compute_min_DCF(numpy.hstack(llrMVG),numpy.hstack(labelMVG), pi, C_fn, C_fp)
-        #s_MVG = self.MVG.predict_MVG(DTR.T,LTR , DTR.T)
         actDCF_MVG = compute_act_DCF(numpy.hstack(llrMVG), numpy.hstack(labelMVG), pi, C_fn, C_fp)
-        #actDCF_MVG = compute_act_DCF(s_MVG, LTR, pi, C_fn, C_fp)
         print("############MVG###############")
         print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_MVG)
         print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_MVG)
-        #bayes_error_min_act_plot(numpy.hstack(llrMVG),numpy.hstack(labelMVG), 1)
 
         print("############NAIVE BAYES#############")
         minDCF_NV = compute_min_DCF(numpy.hstack(llrNV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
         actDCF_NV = compute_act_DCF(numpy.hstack(llrNV), numpy.hstack(labelMVG),pi, C_fn, C_fp)
         print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_NV)
         print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_NV)
-        #bayes_error_min_act_plot(numpy.hstack(llrNV),LTR, 1)
 
         print("############TIED COV#############")
         minDCF_TCV = compute_min_DCF(numpy.hstack(llrTCV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
         actDCF_TCV = compute_act_DCF(numpy.hstack(llrTCV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
         print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_TCV)
         print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_TCV)
-       # bayes_error_min_act_plot(numpy.hstack(llrTCV), numpy.hstack(labelMVG), 1)
 
         print("############TIED COV BAYES#############")
         minDCF_TNV = compute_min_DCF(numpy.hstack(llrTNV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
-        s_TNV = self.MVG.predict_MVG_Tied_Cov_Naive(DTR.T, LTR, DTR.T)
         actDCF_TNV = compute_act_DCF(numpy.hstack(llrTNV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
         print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_TNV)
         print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_TNV)
-       # bayes_error_min_act_plot(numpy.hstack(llrTNV), LTR, 1)
+
+    '''LOGISTIC REGRESSION VALIDATION'''
     def vecxxT(self, x):
         x = x[:, None]
         xxT = x.dot(x.T).reshape(x.size ** 2, order='F')
@@ -129,9 +114,6 @@ class Validation:
             D = numpy.hstack(D)
             L = numpy.hstack(L)
 
-            # Train the model
-            #D,Dte = znorm(D,Dte)
-
             if norm:
                 D, Dte = znorm(D, Dte)
 
@@ -143,9 +125,7 @@ class Validation:
 
             labelLR = numpy.append(labelLR, Lte, axis=0)
             lr_score.append(self.LR.predict_Logistic_Regression_weigthed(D, L, Dte, l, pi))
-            #lr_score.append(0)
             lr_score_quad.append(self.LR.predict_quad_Logistic_Regression(phi, L, phi_DTE, l, pi))
-            #lr_score.append(self.LR.preditc_Logistic_Regression(D, L, Dte, 0.00001))
 
 
         return lr_score, lr_score_quad,labelLR
@@ -170,9 +150,6 @@ class Validation:
             D = numpy.hstack(D)
             L = numpy.hstack(L)
 
-            # Train the model
-            #D,Dte = znorm(D,Dte)
-
             if norm:
                 D, Dte = znorm(D, Dte)
 
@@ -184,11 +161,7 @@ class Validation:
 
             labelLR = numpy.append(labelLR, Lte, axis=0)
             lr_score.append(self.LR.predict_Logistic_Regression_weigthed(D, L, Dte, l, pi))
-            #lr_score.append(0)
             lr_score_quad.append(self.LR.predict_quad_Logistic_Regression(phi, L, phi_DTE, l, pi))
-            #lr_score.append(self.LR.preditc_Logistic_Regression(D, L, Dte, 0.00001))
-
-
         return lr_score, lr_score_quad,labelLR
 
     def plot_DCF_lamda_prior(self, DTR, LTR, C_fn,C_fp):
@@ -252,7 +225,6 @@ class Validation:
 
     def plot_minDCF_Z(self, DTR, LTR, pi, C_fn, C_fp):
         '''Plot min DCF vs minDCF with z-norm'''
-        #lam = numpy.logspace(-5, 1, 30)
         lam = [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 10]
         minDCF_LR = []
         minDCF_LR_Z = []
@@ -269,7 +241,6 @@ class Validation:
                 (minDCF_LR_Z, compute_min_DCF(numpy.hstack(lr2), numpy.hstack(labelLr2), pi, C_fn, C_fp)))
 
         self.PLT.plot_DCF_compare(lam, numpy.hstack(minDCF_LR), numpy.hstack(minDCF_LR_Z))
-
 
     def plot_DCF_PCA_Q(self,DTR, LTR, pi, C_fn, C_fp):
         '''Plot PCA Q-LOG'''
@@ -314,7 +285,6 @@ class Validation:
                                       numpy.hstack(minDCF_7),numpy.hstack(minDCF_6))
     def plot_minDCF_Z_Q(self, DTR, LTR, pi, C_fn, C_fp):
         '''Plot min DCF vs minDCF with z-norm QUAD'''
-        #lam = numpy.logspace(-5, 1, 30)
         lam = [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 10]
         minDCF_LR = []
         minDCF_LR_Z = []
@@ -333,7 +303,6 @@ class Validation:
         self.PLT.plot_DCF_compare_QUAD(lam, numpy.hstack(minDCF_LR), numpy.hstack(minDCF_LR_Z))
     def plot_minDCF_Z_PCA(self,DTR, LTR, pi, C_fn, C_fp):
         '''Plot PCA Q-LOG'''
-        #lam = numpy.logspace(-5, 1, 30)
         lam = [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 10]
         minDCF_7 = []
         minDCF_7_Z = []
@@ -370,81 +339,20 @@ class Validation:
 
         if plot:
             print("Start Plotting it can take a while")
-            #self.plot_DCF_lamda_prior(DTR, LTR, C_fn,C_fp)
-            #self.plot_DCF_PCA(DTR, LTR, pi, C_fn, C_fp)
-            #self.plot_minDCF_Z(DTR, LTR, pi, C_fn, C_fp)
-            #self.plot_minDCF_Z_Q(DTR, LTR, pi, C_fn, C_fp)
-            #self.plot_DCF_PCA_Q(DTR,LTR,pi,C_fn,C_fp)
-            #self.plot_minDCF_Z_PCA(DTR, LTR, pi, C_fn, C_fp)
+            self.plot_DCF_lamda_prior(DTR, LTR, C_fn,C_fp)
+            self.plot_DCF_PCA(DTR, LTR, pi, C_fn, C_fp)
+            self.plot_minDCF_Z(DTR, LTR, pi, C_fn, C_fp)
+            self.plot_minDCF_Z_Q(DTR, LTR, pi, C_fn, C_fp)
+            self.plot_DCF_PCA_Q(DTR,LTR,pi,C_fn,C_fp)
+            self.plot_minDCF_Z_PCA(DTR, LTR, pi, C_fn, C_fp)
 
         print("score calibartion")
-        
         _w,_b = self.LR.compute_scores_param(numpy.hstack(lrQ), labelLr, 0.01, 0.7)
-        #cal_score = numpy.dot(_w.T,numpy.hstack(lrQ).reshape(1, numpy.hstack(lrQ).shape[0])) #- numpy.log(pi/(1-pi))
         cal_score = _w*lrQ + _b -numpy.log(pi/(1-pi))
         if plot:
             bayes_error_min_act_plot(numpy.hstack(cal_score), numpy.hstack(labelLr), 1)
 
-
-
-        # print("---------------MVG WITH LDA--------------------------")
-        # self.MVG.setup_MVG(DP, LTR)
-        # s1 = self.MVG.predict_MVG(DPE, LTE)
-        # #DFC1 = evaluation(s1, LTE, 0.5, 1, 10)
-        #bayes_error_min_act_plot(DTE.T, LTE, 2)
-
-        #
-        # print("---------------MVG NAIVE BAYES WITHOUT LDA--------------------------")
-        # self.MVG.setup_MVG_Naive_Bayes(DTR.T, LTR)
-        # s2 = self.MVG.predict_MVG_Naive_Bayes(DTE.T, LTE)
-        # DFC2 = evaluation(s2, LTE, 0.5, 1, 10)
-        # print(DFC2)
-        # print("---------------MVG NAIVE BAYES WITH LDA--------------------------")
-        #
-        # self.MVG.setup_MVG_Naive_Bayes(DP, LTR)
-        # s3 = self.MVG.predict_MVG_Naive_Bayes(DPE, LTE)
-        # DFC3 = evaluation(s3, LTE, 0.5, 1, 10)
-        # print(DFC3)
-        # print("---------------MVG TIED COV WITHOUT LDA--------------------------")
-        #
-        # self.MVG.setup_MVG_Tied_Cov(DTR.T, LTR)
-        # s4 = self.MVG.predict_MVG_Tied_Cov(DTE.T, LTE)
-        # DFC4 = evaluation(s4, LTE, 0.5, 1, 10)
-        #
-        # print(DFC4)
-        # print("---------------MVG TIED COV WITH LDA--------------------------")
-        #
-        # self.MVG.setup_MVG_Tied_Cov(DP, LTR)
-        # self.MVG.predict_MVG_Tied_Cov(DPE, LTE)
-        #
-        # print("---------------MVG TIED COV + NAIVE WITHOUT LDA--------------------------")
-        #
-        # self.MVG.setup_MVG_Tied_Cov_Naive(DTR.T, LTR)
-        # self.MVG.predict_MVG_Tied_Cov_Naive(DTE.T, LTE)
-        #
-        # print("---------------MVG TIED COV + NAIVE WITH LDA--------------------------")
-        # self.MVG.setup_MVG_Tied_Cov_Naive(DP, LTR)
-        # self.MVG.predict_MVG_Tied_Cov_Naive(DPE, LTE)
-        #
-        # print("---------------LOGISTIC REGRESSION WITHOUT LDA--------------------------")
-        # self.LR.setup_Logistic_Regression(DTR.T, LTR, 0.1)
-        # self.LR.preditc_Logistic_Regression(DTE.T, LTE, 0.1)
-        #
-        # print("---------------LOGISTIC REGRESSION WITH LDA--------------------------")
-        # self.LR.setup_Logistic_Regression(DP, LTR, 0.1)
-        # self.LR.preditc_Logistic_Regression(DPE, LTE, 0.1)
-
-        #print("---------------SVM Linear REGRESSION WITHOUT LDA--------------------------")
-        #self.svmLin.validation_SVM(DTR.T, LTR, [0.1], [1], "validation svm")
-        #self.svmLin.evaluation_SVM(DTR.T, LTR, DTE.T, LTE, [0.1], [1], "ev svm")
-        #self.svmLin.predict_primal_svm(DTE.T, LTE, 0.1)
-
-        #print("---------------SVM Kernel Poly REGRESSION WITHOUT LDA--------------------------")
-        #self.svmLin.setup_kernelPoly_svm(DTR.T, LTR, DTE.T, LTE)
-
-        #print("---------------SVM Kernel RBG REGRESSION WITHOUT LDA--------------------------")
-        #self.svmLin.setup_kernelRBF_svm(DTR.T, LTR, DTE.T, LTE)
-
+    '''SVM VALIDATION'''
     def get_scores_SVM(self, D, L, Dte, Lte, C, K, costant, degree, gamma, scoresLin_append, scoresPol_append, scoresRBF_append, balanced, pi, method):    
 
         if method == 'linear' or method == 'all':
@@ -463,8 +371,6 @@ class Validation:
         scoresPol_append = []
         scoresRBF_append = []
         SVM_labels = []
-        PCA_SVM_scoresLin_append = []
-        PCA2_SVM_scoresLin_append = []
 
         for i in range(k):
             Dte = Dtr[i]
@@ -527,19 +433,19 @@ class Validation:
         print("start")
         scoresLin_append, scoresPol_append, scoresRBF_append, SVM_labels = self.kfold_SVM(DTR, LTR, K, C, balanced, pi, "rbf", True)
 
-        #print("##########LINEAR##########\nbalanced= ",balanced,"\n")
-        #scores_tot = compute_min_DCF(numpy.hstack(scoresLin_append), SVM_labels, pi, C_fn, C_fp)
-        #print(f'- with prior = {pi} -> minDCF = %.3f' % scores_tot)
+        print("##########LINEAR##########\nbalanced= ",balanced,"\n")
+        scores_tot = compute_min_DCF(numpy.hstack(scoresLin_append), SVM_labels, pi, C_fn, C_fp)
+        print(f'- with prior = {pi} -> minDCF = %.3f' % scores_tot)
 
-        # rettt = compute_act_DCF(numpy.hstack(scoresLin_append), SVM_labels, pi, C_fn, C_fp, None)
-        # print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
+        rettt = compute_act_DCF(numpy.hstack(scoresLin_append), SVM_labels, pi, C_fn, C_fp, None)
+        print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
 
-        #print("##########POLYNOMIAL##########")
-        #scores_tot = compute_min_DCF(numpy.hstack(scoresPol_append), SVM_labels, pi, C_fn, C_fp)
-        #print(f'- with prior = {pi} -> minDCF = %.3f' % scores_tot)
+        print("##########POLYNOMIAL##########")
+        scores_tot = compute_min_DCF(numpy.hstack(scoresPol_append), SVM_labels, pi, C_fn, C_fp)
+        print(f'- with prior = {pi} -> minDCF = %.3f' % scores_tot)
 
-        # rettt = compute_act_DCF(numpy.hstack(scoresPol_append), SVM_labels, pi, C_fn, C_fp, None)
-        # print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
+        rettt = compute_act_DCF(numpy.hstack(scoresPol_append), SVM_labels, pi, C_fn, C_fp, None)
+        print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
 
 
         print("##########RBF##########")
@@ -547,20 +453,20 @@ class Validation:
         print(f'- with prior = {pi} -> minDCF = %.3f' % scores_tot)
         bayes_error_min_act_plot(numpy.hstack(scoresRBF_append), numpy.hstack(SVM_labels), 1)
 
-        # rettt = compute_act_DCF(numpy.hstack(scoresRBF_append), SVM_labels, pi, C_fn, C_fp, None)
-        # print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
+        rettt = compute_act_DCF(numpy.hstack(scoresRBF_append), SVM_labels, pi, C_fn, C_fp, None)
+        print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
 
-        #print("SMV RBF Calibration")
-        #_w, _b = self.LR.compute_scores_param(numpy.hstack(scoresRBF_append), SVM_labels, 0.01, 0.7)
-        #cal_score = _w*scoresRBF_append + _b - numpy.log(pi/(1-pi))
-        #bayes_error_min_act_plot(numpy.hstack(cal_score), numpy.hstack(SVM_labels), 1)
+        print("SMV RBF Calibration")
+        _w, _b = self.LR.compute_scores_param(numpy.hstack(scoresRBF_append), SVM_labels, 0.01, 0.7)
+        cal_score = _w*scoresRBF_append + _b - numpy.log(pi/(1-pi))
+        bayes_error_min_act_plot(numpy.hstack(cal_score), numpy.hstack(SVM_labels), 1)
 
-        #K_arr = [0.1, 1.0, 10.0]
-        #C_arr = [0.01, 0.1, 1.0, 10.0]
-        #C_arr = [0.1, 1.0, 10.0]
-        #self.SVM_score_calibration(DTR, LTR, K_arr, C_arr, pi, Cfn, Cfp)
+        K_arr = [0.1, 1.0, 10.0]
+        C_arr = [0.01, 0.1, 1.0, 10.0]
+        C_arr = [0.1, 1.0, 10.0]
+        self.SVM_score_calibration(DTR, LTR, K_arr, C_arr, pi, Cfn, Cfp)
 
-        #self.plot_DCF_SVM(DTR, LTR, C_fn, C_fp, K, C, balanced)
+        self.plot_DCF_SVM(DTR, LTR, C_fn, C_fp, K, C, balanced)
 
     def plot_DCF_SVM(self, DTR, LTR, C_fn, C_fp, K, C, balanced):
         C_arr = [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 10, 100]
@@ -585,52 +491,52 @@ class Validation:
             minDCF_pol_0_5 = numpy.hstack((minDCF_pol_0_5,compute_min_DCF(numpy.hstack(pol1), numpy.hstack(labelLr1), 0.5, C_fn, C_fp)))
             minDCF_rbf_0_5 = numpy.hstack((minDCF_rbf_0_5,compute_min_DCF(numpy.hstack(rbf1), numpy.hstack(labelLr1), 0.5, C_fn, C_fp)))
 
-        #     lr2, pol2, rbf2, labelLr2 = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.1)
+            lr2, pol2, rbf2, labelLr2 = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.1)
 
-        #     minDCF_LR_0_1 = numpy.hstack((minDCF_LR_0_1,compute_min_DCF(numpy.hstack(lr2), numpy.hstack(labelLr2), 0.1, C_fn, C_fp)))
-        #     #minDCF_pol_0_1 = numpy.hstack((minDCF_pol_0_1,compute_min_DCF(numpy.hstack(pol2), numpy.hstack(labelLr1), 0.1, C_fn, C_fp)))
-        #     #minDCF_rbf_0_1 = numpy.hstack((minDCF_rbf_0_1,compute_min_DCF(numpy.hstack(rbf2), numpy.hstack(labelLr1), 0.1, C_fn, C_fp)))
+            minDCF_LR_0_1 = numpy.hstack((minDCF_LR_0_1,compute_min_DCF(numpy.hstack(lr2), numpy.hstack(labelLr2), 0.1, C_fn, C_fp)))
+            minDCF_pol_0_1 = numpy.hstack((minDCF_pol_0_1,compute_min_DCF(numpy.hstack(pol2), numpy.hstack(labelLr1), 0.1, C_fn, C_fp)))
+            minDCF_rbf_0_1 = numpy.hstack((minDCF_rbf_0_1,compute_min_DCF(numpy.hstack(rbf2), numpy.hstack(labelLr1), 0.1, C_fn, C_fp)))
 
-        #     lr2, pol2, rbf2, labelLr2 = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.9)
-        #     minDCF_LR_0_9 = numpy.hstack((minDCF_LR_0_9,compute_min_DCF(numpy.hstack(lr2), numpy.hstack(labelLr2), 0.9, C_fn, C_fp)))
-        #     #minDCF_pol_0_9 = numpy.hstack((minDCF_pol_0_9,compute_min_DCF(numpy.hstack(pol2), numpy.hstack(labelLr1), 0.9, C_fn, C_fp)))
-        #     #minDCF_rbf_0_9 = numpy.hstack((minDCF_rbf_0_9,compute_min_DCF(numpy.hstack(rbf2), numpy.hstack(labelLr1), 0.9, C_fn, C_fp)))
+            lr2, pol2, rbf2, labelLr2 = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.9)
+            minDCF_LR_0_9 = numpy.hstack((minDCF_LR_0_9,compute_min_DCF(numpy.hstack(lr2), numpy.hstack(labelLr2), 0.9, C_fn, C_fp)))
+            minDCF_pol_0_9 = numpy.hstack((minDCF_pol_0_9,compute_min_DCF(numpy.hstack(pol2), numpy.hstack(labelLr1), 0.9, C_fn, C_fp)))
+            minDCF_rbf_0_9 = numpy.hstack((minDCF_rbf_0_9,compute_min_DCF(numpy.hstack(rbf2), numpy.hstack(labelLr1), 0.9, C_fn, C_fp)))
 
         self.PLT.plot_DCF_SVM_C(C_arr, numpy.hstack(minDCF_LR_0_5), numpy.hstack(minDCF_pol_0_5), numpy.hstack(minDCF_rbf_0_5), 'C', 'comp')
-        # #self.PLT.plot_DCF_lambda(C_arr, numpy.hstack(minDCF_pol_0_5), numpy.hstack(minDCF_pol_0_1),numpy.hstack(minDCF_pol_0_9), 'C', 'Pol')
-        # #self.PLT.plot_DCF_lambda(C_arr, numpy.hstack(minDCF_rbf_0_5), numpy.hstack(minDCF_rbf_0_1),numpy.hstack(minDCF_rbf_0_9), 'C', 'RBF')
+        self.PLT.plot_DCF_lambda(C_arr, numpy.hstack(minDCF_pol_0_5), numpy.hstack(minDCF_pol_0_1),numpy.hstack(minDCF_pol_0_9), 'C', 'Pol')
+        self.PLT.plot_DCF_lambda(C_arr, numpy.hstack(minDCF_rbf_0_5), numpy.hstack(minDCF_rbf_0_1),numpy.hstack(minDCF_rbf_0_9), 'C', 'RBF')
 
-        # DP_9 = self.dimRed.PCA(DTR.T, 9)
-        # DP_8 = self.dimRed.PCA(DTR.T, 8)
-        # minDCF_9 = []
-        # minDCF_8 = []
-        # minDCF_z = []
-        # minDCF_LR = []
-        # for c in C_arr:
-        #     lr1, _, _, labelLr1 = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.5)
+        DP_9 = self.dimRed.PCA(DTR.T, 9)
+        DP_8 = self.dimRed.PCA(DTR.T, 8)
+        minDCF_9 = []
+        minDCF_8 = []
+        minDCF_z = []
+        minDCF_LR = []
+        for c in C_arr:
+            lr1, _, _, labelLr1 = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.5)
 
-        #     minDCF_LR = numpy.hstack(
-        #             (minDCF_LR, compute_min_DCF(numpy.hstack(lr1), numpy.hstack(labelLr1), 0.5, C_fn, C_fp)))
+            minDCF_LR = numpy.hstack(
+                    (minDCF_LR, compute_min_DCF(numpy.hstack(lr1), numpy.hstack(labelLr1), 0.5, C_fn, C_fp)))
 
-        #     lr9, _, _, labelLr9 = self.kfold_SVM(DP_9, LTR, K, c, balanced, 0.5)
+            lr9, _, _, labelLr9 = self.kfold_SVM(DP_9, LTR, K, c, balanced, 0.5)
 
-        #     minDCF_9 = numpy.hstack(
-        #         (minDCF_9, compute_min_DCF(numpy.hstack(lr9), numpy.hstack(labelLr9), 0.5, C_fn, C_fp)))
+            minDCF_9 = numpy.hstack(
+                (minDCF_9, compute_min_DCF(numpy.hstack(lr9), numpy.hstack(labelLr9), 0.5, C_fn, C_fp)))
 
-        #     lr8, _, _, labelLr8 = self.kfold_SVM(DP_8, LTR, K, c, balanced, 0.5) #prova con pca sempre 9 ma con true su znorm
+            lr8, _, _, labelLr8 = self.kfold_SVM(DP_8, LTR, K, c, balanced, 0.5) #prova con pca sempre 9 ma con true su znorm
 
-        #     minDCF_8 = numpy.hstack(
-        #         (minDCF_8, compute_min_DCF(numpy.hstack(lr8), numpy.hstack(labelLr8), 0.5, C_fn, C_fp)))
+            minDCF_8 = numpy.hstack(
+                (minDCF_8, compute_min_DCF(numpy.hstack(lr8), numpy.hstack(labelLr8), 0.5, C_fn, C_fp)))
 
-        #     lrz, _, _, labelLrz = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.5, True)
+            lrz, _, _, labelLrz = self.kfold_SVM(DTR, LTR, K, c, balanced, 0.5, True)
 
-        #     minDCF_z = numpy.hstack(
-        #         (minDCF_z, compute_min_DCF(numpy.hstack(lrz), numpy.hstack(labelLrz), 0.5, C_fn, C_fp)))
+            minDCF_z = numpy.hstack(
+                (minDCF_z, compute_min_DCF(numpy.hstack(lrz), numpy.hstack(labelLrz), 0.5, C_fn, C_fp)))
 
-        # self.PLT.plot_DCF_compare_PCA_SVM(C_arr, numpy.hstack(minDCF_LR), numpy.hstack(minDCF_9), numpy.hstack(minDCF_8),
-        #                                   numpy.hstack(minDCF_z))
-        #self.PLT.plot_DCF_lambda(C_arr, numpy.hstack(minDCF_pol_0_5), numpy.hstack(minDCF_pol_0_1),numpy.hstack(minDCF_pol_0_9), 'C', 'Pol')
-        #self.PLT.plot_DCF_lambda(C_arr, numpy.hstack(minDCF_rbf_0_5), numpy.hstack(minDCF_rbf_0_1),numpy.hstack(minDCF_rbf_0_9), 'C', 'RBF')
+        self.PLT.plot_DCF_compare_PCA_SVM(C_arr, numpy.hstack(minDCF_LR), numpy.hstack(minDCF_9), numpy.hstack(minDCF_8),
+                                          numpy.hstack(minDCF_z))
+        self.PLT.plot_DCF_lambda(C_arr, numpy.hstack(minDCF_pol_0_5), numpy.hstack(minDCF_pol_0_1),numpy.hstack(minDCF_pol_0_9), 'C', 'Pol')
+        self.PLT.plot_DCF_lambda(C_arr, numpy.hstack(minDCF_rbf_0_5), numpy.hstack(minDCF_rbf_0_1),numpy.hstack(minDCF_rbf_0_9), 'C', 'RBF')
 
     def _getScoreGMM(self, D, L, Dte, components, componentsNT, a, p, llrGMM_full, llr_GMM_naive, llr_GMM_Tied, llr_GMM_TiedNaive):
         llrGMM_f = self.GMM.predict_GMM_full(D, L, Dte, components, componentsNT, a, p)
@@ -667,15 +573,12 @@ class Validation:
             D = numpy.hstack(D)
             L = numpy.hstack(L)
 
-            # Train the model
             labelGMM = numpy.append(labelGMM, Lte, axis=0)
             self._getScoreGMM(D,L,Dte,components,componentsNT, a,p, llr_GMM_full, llr_GMM_naive, llr_GMM_Tied,llr_GMM_TiedNaive)
 
         return llr_GMM_full, llr_GMM_naive,llr_GMM_Tied, llr_GMM_TiedNaive, labelGMM
 
-
-
-
+    '''GMM VALIDATION'''
 
     def plot_GMM_full(self, DTR, LTR,pi, a,p, Cfn,Cfp):
         data = {
@@ -822,10 +725,10 @@ class Validation:
         if plot:
             print("Plotting it may take a while")
             bayes_error_min_act_plot(numpy.hstack(llr_GMM_Naive), llr_GMM_labels, 1)
-            #self.plot_GMM_full(DTR,LTR,pi,a,p, Cfn,Cfp)
-            #self.plot_GMM_NAIVE(DTR,LTR,pi,a,p,Cfn,Cfp)
-            #self.plot_GMM_TIED(DTR,LTR,pi,a,p,Cfn,Cfp)
-            #self.plot_GMM_NAIVETIED(DTR,LTR,pi,a,p, Cfn, Cfp)
+            self.plot_GMM_full(DTR,LTR,pi,a,p, Cfn,Cfp)
+            self.plot_GMM_NAIVE(DTR,LTR,pi,a,p,Cfn,Cfp)
+            self.plot_GMM_TIED(DTR,LTR,pi,a,p,Cfn,Cfp)
+            self.plot_GMM_NAIVETIED(DTR,LTR,pi,a,p, Cfn, Cfp)
 
 
     def plot_minDCF_cal_score(self,DTR,LTR, pi):
@@ -836,7 +739,6 @@ class Validation:
         DP_7 = self.dimRed.PCA(DTR,7)
         _, lrQ, labelLr = self.k_fold_LR(5, DP_7.T, LTR, pi, 0.01, False)
         _w, _b = self.LR.compute_scores_param(numpy.hstack(lrQ), labelLr, 0.01, 0.7)
-        # cal_score = numpy.dot(_w.T,numpy.hstack(lrQ).reshape(1, numpy.hstack(lrQ).shape[0])) #- numpy.log(pi/(1-pi))
         cal_score_lr = _w * lrQ + _b - numpy.log(pi / (1 - pi))
         #svm
         _, _, scoresRBF_append, SVM_labels = self.kfold_SVM(DTR.T, LTR, 0.1, 10, False, pi, "rbf")

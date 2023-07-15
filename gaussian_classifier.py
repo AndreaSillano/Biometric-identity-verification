@@ -2,11 +2,8 @@ import numpy
 from mlFunc import *
 import scipy
 class MultivariateGaussianClassifier:
-
-
-
+    '''MVG FULL'''
     def predict_MVG(self, D, L, DTE):
-
         classes = numpy.unique(L)
         covariances =[]
         means = []
@@ -29,19 +26,7 @@ class MultivariateGaussianClassifier:
         Post = numpy.exp(logPost)
         pred = numpy.argmax(Post, axis=0)
 
-        # common_elements = []
-        # for i in range(len(pred)):
-        #     if pred[i] == L[i]:
-        #         common_elements.append(L[i])
-        #
-        # acc = len(common_elements) / len(L) * 100
-        # print("LOG predicion Post Probability")
-        # print("ACCURACY: ", acc, "%")
-        # err = 100 - (acc)
-        # print("ERROR: ", err, "%")
         return numpy.log(dens[1] / dens[0])
-
-
 
     def logpdf_GAU_ND(self, X, mu, C):
         Y = []
@@ -58,9 +43,8 @@ class MultivariateGaussianClassifier:
         v = numpy.dot(xc.T, numpy.dot(L, xc)).ravel()
         return const - 0.5 * logdet - 0.5 * v
 
-    #NAIVE BAYES
 
-
+    '''NAIVE BAYES'''
     def predict_MVG_Naive_Bayes(self, D, L,DTE):
 
         classes = numpy.unique(L)
@@ -85,19 +69,9 @@ class MultivariateGaussianClassifier:
         Post = numpy.exp(logPost)
         pred = numpy.argmax(Post, axis=0)
 
-        # common_elements = []
-        # for i in range(len(pred)):
-        #     if pred[i] == L[i]:
-        #         common_elements.append(L[i])
-        #
-        # acc = len(common_elements) / len(L) * 100
-        # print("LOG predicion Post Probability")
-        # print("ACCURACY: ", acc, "%")
-        # err = 100 - (acc)
-        # print("ERROR: ", err, "%")
         return numpy.log(dens[1] / dens[0])
 
-    #MVG TIED COV
+    '''TIED COV'''
 
     def _computeSW(self, D, L):
         D0 = D[:, L == 0]
@@ -137,19 +111,9 @@ class MultivariateGaussianClassifier:
         Post = numpy.exp(logPost)
         pred = numpy.argmax(Post, axis=0)
 
-        # common_elements = []
-        # for i in range(len(pred)):
-        #     if pred[i] == L[i]:
-        #         common_elements.append(L[i])
-        #
-        # acc = len(common_elements) / len(L) * 100
-        # print("LOG predicion Post Probability")
-        # print("ACCURACY: ", acc, "%")
-        # err = 100 - (acc)
-        # print("ERROR: ", err, "%")
         return numpy.log(dens[1] / dens[0])
 
-    #BYES + TIED
+    '''BAYES+TIED'''
    
 
     def predict_MVG_Tied_Cov_Naive(self, D, L, DTE):
@@ -177,15 +141,4 @@ class MultivariateGaussianClassifier:
         logPost = logSJoint - vrow(logSMarginal)
         Post = numpy.exp(logPost)
         pred = numpy.argmax(Post, axis=0)
-
-        # common_elements = []
-        # for i in range(len(pred)):
-        #     if pred[i] == L[i]:
-        #         common_elements.append(L[i])
-        #
-        # acc = len(common_elements) / len(L) * 100
-        # print("LOG predicion Post Probability")
-        # print("ACCURACY: ", acc, "%")
-        # err = 100 - (acc)
-        # print("ERROR: ", err, "%")
         return numpy.log(dens[1] / dens[0])
