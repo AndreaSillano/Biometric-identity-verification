@@ -765,6 +765,6 @@ class Validation:
         _, _, lRBF, labelRBF = self.kfold_SVM(DTR.T, LTR, 0.1, 10, False, pi, "rbf")
         #minDCF_RBF = compute_min_DCF(numpy.hstack(lRBF), numpy.hstack(labelRBF), pi, 1, 10)
         #gmm naive
-        _, llrGMMN, _, _, labelGMM = self.kfold_GMM(5, DTR, LTR, 1, 8, 0.1, 0.01)
+        _, llrGMMN, _, _, labelGMM = self.kfold_GMM(5, DP_7.T, LTR, 1, 8, 0.1, 0.01)
         #minDCF_GMMN = compute_min_DCF(numpy.hstack(llrGMMN), numpy.hstack(labelGMM), pi, 1, 10)
-        self.PLT.ROC_curve(llrMVG, lrQ, lRBF, llrGMMN, labelMVG, labelLR, labelRBF, labelGMM)
+        self.PLT.ROC_curve(numpy.hstack(llrMVG), numpy.hstack(lrQ), numpy.hstack(lRBF), numpy.hstack(llrGMMN), labelMVG, labelLR, labelRBF, labelGMM)
