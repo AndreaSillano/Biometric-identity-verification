@@ -217,7 +217,7 @@ class Plotter:
 
         thresholds = numpy.array(firstModel)
         thresholds.sort()
-        thresholds = numpy.ravel(thresholds)
+        #thresholds = numpy.ravel(thresholds)
         thresholds = numpy.concatenate([numpy.array([-numpy.inf]), thresholds, numpy.array([numpy.inf])])
         FPR = numpy.zeros(thresholds.size)
         TPR = numpy.zeros(thresholds.size)
@@ -230,7 +230,7 @@ class Plotter:
 
         thresholds = numpy.array(secondModel)
         thresholds.sort()
-        thresholds = numpy.ravel(thresholds)
+        #thresholds = numpy.ravel(thresholds)
         thresholds = numpy.concatenate([numpy.array([-numpy.inf]), thresholds, numpy.array([numpy.inf])])
         FPR = numpy.zeros(thresholds.size)
         TPR = numpy.zeros(thresholds.size)
@@ -243,7 +243,7 @@ class Plotter:
 
         thresholds = numpy.array(thirdModel)
         thresholds.sort()
-        thresholds = numpy.ravel(thresholds)
+        #thresholds = numpy.ravel(thresholds)
         thresholds = numpy.concatenate([numpy.array([-numpy.inf]), thresholds, numpy.array([numpy.inf])])
         FPR = numpy.zeros(thresholds.size)
         TPR = numpy.zeros(thresholds.size)
@@ -256,19 +256,20 @@ class Plotter:
 
         thresholds = numpy.array(fourthModel)
         thresholds.sort()
-        thresholds = numpy.ravel(thresholds)
+        #thresholds = numpy.ravel(thresholds)
         thresholds = numpy.concatenate([numpy.array([-numpy.inf]), thresholds, numpy.array([numpy.inf])])
         FPR = numpy.zeros(thresholds.size)
         TPR = numpy.zeros(thresholds.size)
-        for t in enumerate(thresholds):
-            pred_label = numpy.int32(thirdModel > t)
+        for idx, t in enumerate(thresholds):
+            pred_label = numpy.int32(fourthModel > t)
             conf = confusion_matrix_binary(pred_label, LTR4)
             TPR[idx] = conf[1, 1] / (conf[1, 1] + conf[0, 1])
             FPR[idx] = conf[1, 0] / (conf[1, 0] + conf[0, 0])
-        plt.plot(FPR, TPR, label='GMM Naive 1-8', color='g')
+        plt.plot(FPR, TPR, label='GMM Naive 1-8 PCA 7', color='g')
 
         plt.xlabel('FPR')
         plt.ylabel('TPR')
-        plt.legend()
-        plt.savefig('images/comparison/' + 'ROC.png')
+        plt.legend(loc = 'lower right')
         plt.show()
+        plt.savefig('images/' + 'ROCeval.png')
+        

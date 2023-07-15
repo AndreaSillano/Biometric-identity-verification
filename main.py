@@ -54,6 +54,7 @@ def evaluation(DTE, LTE, DTR, LTR, EV,  dimRed):
     # #    DPA = dimRed.PCA(DTR, i)
     # #    DPE = dimRed.PCA_DTE(DTR, i,DTE)
     # #    EV.MVG_evaluation(DPE.T, LTE, DPA.T, LTR, 0.5, 1, 10)
+    EV.plot_ROC(DTR, LTR, DTE, LTE, 0.5)
 
     print("LOGISTIC EVALUATION")
 
@@ -115,7 +116,7 @@ if __name__ == "__main__":
     # plt.plot_correlations(DTE.T[:, LTE == 1], "heatmap_authentic_", cmap="Blues")
 
     validation(DTR,LTR,VA,dimRed)
-    evaluation(DTE, LTE, DTR, LTR, EV, dimRed)
+    #evaluation(DTE, LTE, DTR, LTR, EV, dimRed)
 
     #plt.plot_correlations(DTR.T,"heatmap")
     #plt.plot_correlations(DTR.T[:, LTR == 0], "heatmap_spoofed_", cmap="Reds")

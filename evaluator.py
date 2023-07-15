@@ -488,9 +488,11 @@ class Evaluator:
     
     def plot_ROC(self, DTR, LTR, DTE, LTE, pi):
         #MVG
-
-        DP_8 = self.dimRed.PCA(DTR, 8)
-        llrMVG = self.MVG.predict_MVG(DP_8, LTR, DTE)
+        DTR = DTR.T
+        DTE = DTE.T
+        DP_8 = self.dimRed.PCA(DTR.T, 8)
+        DPE_8 = self.dimRed.PCA_DTE(DTR.T, 8, DTE.T)
+        llrMVG = self.MVG.predict_MVG(DP_8, LTR, DPE_8)
         #minDCF_MVG = compute_min_DCF(numpy.hstack(llrMVG),numpy.hstack(LTE), pi, 1, 10)
         #qlog
         DP_7 = self.dimRed.PCA(DTR.T, 7)
@@ -509,4 +511,4 @@ class Evaluator:
         DPE_71 = self.dimRed.PCA_DTE(DTR.T, 7, DTE.T)
         llrGMMN = self.GMM.predict_GMM_naive(DP_71, LTR, DPE_71, 1, 16, 0.1, 0.01)
         #minDCF_GMMN = compute_min_DCF(numpy.hstack(llrGMMN), numpy.hstack(labelGMM), pi, 1, 10)
-        self.PLT.ROC_curve(llrMVG, lrQ, lRBF, llrGMMN, LTE, LTE, LTE, LTE)
+        self.PLT.ROC_curve(numpy.hstack(llrMVG), numpy.hstack(lrQ), numpy.hstack(lRBF), numpy.hstack(llrGMMN), LTE, LTE, LTE, LTE)
