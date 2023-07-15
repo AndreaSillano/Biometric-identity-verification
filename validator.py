@@ -758,6 +758,7 @@ class Validation:
             data["Non-target K = " + str(2 ** i)].append(round(scores_tot, 3))
 
         self.PLT.plot_bar_GMM(data)
+
     def plot_GMM_NAIVETIED(self, DTR, LTR,pi, a,p, Cfn,Cfp):
         data = {
             "Non-target K = 1": [],
@@ -796,35 +797,58 @@ class Validation:
         rettt = compute_act_DCF(llr, llr_GMM_labels, pi, Cfn, Cfp, None)
         print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
 
-        # print("##########GMM NAIVE##########")
-        # llrN = numpy.hstack(llr_GMM_Naive)
-        # scores_totN = compute_min_DCF(llrN, llr_GMM_labels, pi, Cfn, Cfp)
-        # print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_totN))
-        # rettt = compute_act_DCF(llrN, llr_GMM_labels, pi, Cfn, Cfp, None)
-        # print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
+        print("##########GMM NAIVE##########")
+        llrN = numpy.hstack(llr_GMM_Naive)
+        scores_totN = compute_min_DCF(llrN, llr_GMM_labels, pi, Cfn, Cfp)
+        print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_totN))
+        rettt = compute_act_DCF(llrN, llr_GMM_labels, pi, Cfn, Cfp, None)
+        print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
 
-        # print("##########GMM TIED##########")
-        # llrT = numpy.hstack(llr_GMM_Tied)
-        # scores_totT = compute_min_DCF(llrT, llr_GMM_labels, pi, Cfn, Cfp)
-        # print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_totT))
-        # rettt = compute_act_DCF(llrT, llr_GMM_labels, pi, Cfn, Cfp, None)
-        # print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
+        print("##########GMM TIED##########")
+        llrT = numpy.hstack(llr_GMM_Tied)
+        scores_totT = compute_min_DCF(llrT, llr_GMM_labels, pi, Cfn, Cfp)
+        print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_totT))
+        rettt = compute_act_DCF(llrT, llr_GMM_labels, pi, Cfn, Cfp, None)
+        print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
 
-        # print("##########GMM TIED NAIVE##########")
-        # llrTN = numpy.hstack(llr_GMM_TiedNaive)
-        # scores_totTN = compute_min_DCF(llrTN, llr_GMM_labels, pi, Cfn, Cfp)
-        # print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_totTN))
-        # rettt = compute_act_DCF(llrTN, llr_GMM_labels, pi, Cfn, Cfp, None)
-        # print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
+        print("##########GMM TIED NAIVE##########")
+        llrTN = numpy.hstack(llr_GMM_TiedNaive)
+        scores_totTN = compute_min_DCF(llrTN, llr_GMM_labels, pi, Cfn, Cfp)
+        print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_totTN))
+        rettt = compute_act_DCF(llrTN, llr_GMM_labels, pi, Cfn, Cfp, None)
+        print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
 
 
         if plot:
             print("Plotting it may take a while")
-            bayes_error_min_act_plot(numpy.hstack(llr_GMM_Full), llr_GMM_labels, 1)
+            bayes_error_min_act_plot(numpy.hstack(llr_GMM_Naive), llr_GMM_labels, 1)
             #self.plot_GMM_full(DTR,LTR,pi,a,p, Cfn,Cfp)
             #self.plot_GMM_NAIVE(DTR,LTR,pi,a,p,Cfn,Cfp)
             #self.plot_GMM_TIED(DTR,LTR,pi,a,p,Cfn,Cfp)
             #self.plot_GMM_NAIVETIED(DTR,LTR,pi,a,p, Cfn, Cfp)
+
+
+    def plot_minDCF_cal_score(self,DTR,LTR, pi):
+        #MVG
+        DP_8 = self.dimRed.PCA(DTR, 8)
+        llrMVG,_, _,_, labelMVG = self.k_fold_MVG(5, DP_8.T, LTR)
+        #qlog
+        DP_7 = self.dimRed.PCA(DTR,7)
+        _, lrQ, labelLr = self.k_fold_LR(5, DP_7.T, LTR, pi, 0.01, False)
+        _w, _b = self.LR.compute_scores_param(numpy.hstack(lrQ), labelLr, 0.01, 0.7)
+        # cal_score = numpy.dot(_w.T,numpy.hstack(lrQ).reshape(1, numpy.hstack(lrQ).shape[0])) #- numpy.log(pi/(1-pi))
+        cal_score_lr = _w * lrQ + _b - numpy.log(pi / (1 - pi))
+        #svm
+        _, _, scoresRBF_append, SVM_labels = self.kfold_SVM(DTR.T, LTR, 0.1, 10, False, pi, "rbf")
+        _w, _b = self.LR.compute_scores_param(numpy.hstack(scoresRBF_append), SVM_labels, 0.01, 0.7)
+        cal_score_RBF = _w * scoresRBF_append + _b - numpy.log(pi / (1 - pi))
+        #gmm
+        _, llr_GMM_Naive, _, _, llr_GMM_labels = self.kfold_GMM(5, DTR, LTR, 1, 8, 0.1, 0.01)
+
+        bayes_error_min_act_plot_compare(numpy.hstack(llrMVG), numpy.hstack(cal_score_lr), numpy.hstack(cal_score_RBF), numpy.hstack(llr_GMM_Naive), labelMVG, labelLr, SVM_labels, llr_GMM_labels, 1)
+
+
+
 
     def plot_ROC(self, DTR, LTR, pi):
         #MVG

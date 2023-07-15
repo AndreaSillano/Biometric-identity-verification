@@ -473,19 +473,95 @@ class Evaluator:
         DTE = DTE.T
         #labelGMM = numpy.append(labelGMM, Lte, axis=0)
         llr_GMM_Full = self.GMM.predict_GMM_full(DTR, LTR, DTE, comp, compNT, a, p)
+        llr_GMM_Naive = self.GMM.predict_GMM_naive(DTR, LTR, DTE, comp, compNT, a, p)
+        llr_GMM_Tied = self.GMM.predict_GMM_TiedCov(DTR, LTR, DTE, comp, compNT, a, p)
+        llr_GMM_TiedNaive = self.GMM.predict_GMM_TiedNaive(DTR, LTR, DTE, comp, compNT, a, p)
 
-        print("##########GMM FULL############")
-        llr = numpy.hstack(llr_GMM_Full)
-        scores_tot = compute_min_DCF(llr, LTE, pi, Cfn, Cfp)
-        print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_tot))
-        #rettt = compute_act_DCF(llr, llr_GMM_labels, pi, Cfn, Cfp, None)
-        #print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
+
+        # print("##########GMM FULL############")
+        # llr = numpy.hstack(llr_GMM_Full)
+        # scores_tot = compute_min_DCF(llr, LTE, pi, Cfn, Cfp)
+        # print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_tot))
+        # rettt = compute_act_DCF(llr, numpy.hstack(LTE), pi, Cfn, Cfp, None)
+        # print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
+
+        # print("##########GMM NAIVE##########")
+        # llrN = numpy.hstack(llr_GMM_Naive)
+        # scores_totN = compute_min_DCF(llrN, LTE, pi, Cfn, Cfp)
+        # print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_totN))
+        # rettt = compute_act_DCF(llrN, numpy.hstack(LTE), pi, Cfn, Cfp, None)
+        # print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
+
+        # print("##########GMM TIED##########")
+        # llrT = numpy.hstack(llr_GMM_Tied)
+        # scores_totT = compute_min_DCF(llrT, LTE, pi, Cfn, Cfp)
+        # print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_totT))
+        # rettt = compute_act_DCF(llrT, numpy.hstack(LTE), pi, Cfn, Cfp, None)
+        # print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
+
+        print("##########GMM TIED NAIVE##########")
+        llrTN = numpy.hstack(llr_GMM_TiedNaive)
+        scores_totTN = compute_min_DCF(llrTN, LTE, pi, Cfn, Cfp)
+        print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_totTN))
+        rettt = compute_act_DCF(llrTN, numpy.hstack(LTE), pi, Cfn, Cfp, None)
+        print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
 
         #self.plot_GMM_full(DTR,LTR,DTE,LTE, pi,a,p,Cfn,Cfp)
         #self.plot_GMM_naive(DTR,LTR,DTE,LTE, pi,a,p,Cfn,Cfp)
         #self.plot_GMM_tied(DTR,LTR,DTE,LTE, pi,a,p,Cfn,Cfp)
         #self.plot_GMM_tiedNaive(DTR,LTR,DTE,LTE, pi,a,p,Cfn,Cfp)
-    
+
+    def plot_minDCF_cal_score(self, DTR, LTR, DTE,LTE, pi):
+        # MVG
+        DTR = DTR.T
+        DTE = DTE.T
+        DP_8 = self.dimRed.PCA(DTR.T, 8)
+        DPE_8 = self.dimRed.PCA_DTE(DTR.T, 8, DTE.T)
+        llrMVG = self.MVG.predict_MVG(DP_8, LTR, DPE_8)
+        bayes_error_min_act_plot(numpy.hstack(llrMVG), LTE, 1)
+
+        # qlog
+
+        DP_7 = self.dimRed.PCA(DTR.T, 7)
+        DPE_7 = self.dimRed.PCA_DTE(DTR.T, 7,DTE.T)
+
+
+        expanded_DTR = numpy.apply_along_axis(self.vecxxT, 0, DP_7)
+        expanded_DTE = numpy.apply_along_axis(self.vecxxT, 0, DPE_7)
+        phi = numpy.vstack([expanded_DTR, DP_7])
+
+        phi_DTE = numpy.vstack([expanded_DTE, DPE_7])
+
+        lrQ = self.LR.predict_quad_Logistic_Regression(phi, LTR, phi_DTE, 1e-4, pi)
+
+        bayes_error_min_act_plot(numpy.hstack(lrQ), LTE, 1)
+        _w, _b = self.LR.compute_scores_param(numpy.hstack(lrQ), LTE, 0.001, 0.7)
+
+        # cal_score = numpy.dot(_w.T,numpy.hstack(lrQ).reshape(1, numpy.hstack(lrQ).shape[0])) #- numpy.log(pi/(1-pi))
+        cal_score_lr = _w * lrQ + _b - numpy.log(pi / (1 - pi))
+        bayes_error_min_act_plot(numpy.hstack(cal_score_lr), LTE, 1)
+        # svm
+
+        scoresRBF_append = self.svm.predict_SVM_RBF(DTR, LTR, 0.1, 10, DTE, 0.001, False, pi)
+
+        bayes_error_min_act_plot(numpy.hstack(scoresRBF_append), LTE, 1)
+        _w, _b = self.LR.compute_scores_param(numpy.hstack(scoresRBF_append), LTE, 0.001, 0.7)
+        cal_score_RBF = _w * scoresRBF_append + _b - numpy.log(pi / (1 - pi))
+        bayes_error_min_act_plot(numpy.hstack(cal_score_RBF), LTE, 1)
+        # gmm
+        # _, llr_GMM_Naive, _, _, llr_GMM_labels = self.kfold_GMM(5, DTR, LTR, 1, 8, 0.1, 0.01)
+        DP_71 = self.dimRed.PCA(DTR.T, 7)
+        DPE_71 = self.dimRed.PCA_DTE(DTR.T, 7, DTE.T)
+        llr_GMM_Naive = self.GMM.predict_GMM_naive(DP_71, LTR, DPE_71, 1, 16, 0.1, 0.01)
+
+
+        bayes_error_min_act_plot(numpy.hstack(llr_GMM_Naive), LTE, 1)
+
+        bayes_error_min_act_plot_compare(numpy.hstack(llrMVG), numpy.hstack(cal_score_lr), numpy.hstack(cal_score_RBF),
+                                         numpy.hstack(llr_GMM_Naive), LTE, LTE, LTE, LTE, 1)
+
+
+
     def plot_ROC(self, DTR, LTR, DTE, LTE, pi):
         #MVG
         DTR = DTR.T
