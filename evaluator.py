@@ -18,6 +18,7 @@ class Evaluator:
         self.PLT = Plotter()
         self.dimRed = DimensionalityReduction()
 
+    '''MVG EVALUATION'''
     def _getScoresMVG(self, Dte, D, L, llrMVG, llrNV,llrTCV, llrTNV):
         llrs = self.MVG.predict_MVG(D, L, Dte)
         llrsNV = self.MVG.predict_MVG_Naive_Bayes(D,L,Dte)
@@ -37,7 +38,6 @@ class Evaluator:
         llrTNV = []
         labelMVG = []
 
-
         self._getScoresMVG(DTE, DTR, LTR, llrMVG, llrNV, llrTCV, llrTNV)
         labelMVG = numpy.append(labelMVG, LTE, axis=0)
         minDCF_MVG = compute_min_DCF(numpy.hstack(llrMVG), numpy.hstack(labelMVG), pi, C_fn, C_fp)
@@ -45,44 +45,42 @@ class Evaluator:
         print("############MVG###############")
         print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_MVG)
         print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_MVG)
-        #bayes_error_min_act_plot(numpy.hstack(llrMVG), numpy.hstack(labelMVG), 1)
 
 
-        # minDCF_MVG = compute_min_DCF(numpy.hstack(llrMVG), numpy.hstack(labelMVG), pi, C_fn, C_fp)
-        # actDCF_MVG = compute_act_DCF(numpy.hstack(llrMVG), numpy.hstack(labelMVG), pi, C_fn, C_fp)
-        # print("############MVG###############")
-        # print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_MVG)
-        # print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_MVG)
+        minDCF_MVG = compute_min_DCF(numpy.hstack(llrMVG), numpy.hstack(labelMVG), pi, C_fn, C_fp)
+        actDCF_MVG = compute_act_DCF(numpy.hstack(llrMVG), numpy.hstack(labelMVG), pi, C_fn, C_fp)
+        print("############MVG###############")
+        print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_MVG)
+        print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_MVG)
 
-        # # bayes_error_min_act_plot(numpy.hstack(llrMVG),numpy.hstack(labelMVG), 1)
-        # 
-        # print("############NAIVE BAYES#############")
-        # minDCF_NV = compute_min_DCF(numpy.hstack(llrNV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
-        # actDCF_NV = compute_act_DCF(numpy.hstack(llrNV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
-        # print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_NV)
-        # print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_NV)
-        # bayes_error_min_act_plot(numpy.hstack(llrNV),LTR, 1)
-        # 
-        # print("############TIED COV#############")
-        # minDCF_TCV = compute_min_DCF(numpy.hstack(llrTCV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
-        # actDCF_TCV = compute_act_DCF(numpy.hstack(llrTCV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
-        # print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_TCV)
-        # print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_TCV)
-        # # bayes_error_min_act_plot(numpy.hstack(llrTCV), numpy.hstack(labelMVG), 1)
+
+        print("############NAIVE BAYES#############")
+        minDCF_NV = compute_min_DCF(numpy.hstack(llrNV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
+        actDCF_NV = compute_act_DCF(numpy.hstack(llrNV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
+        print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_NV)
+        print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_NV)
+
+
+        print("############TIED COV#############")
+        minDCF_TCV = compute_min_DCF(numpy.hstack(llrTCV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
+        actDCF_TCV = compute_act_DCF(numpy.hstack(llrTCV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
+        print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_TCV)
+        print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_TCV)
+
 
         print("############TIED COV BAYES#############")
         minDCF_TNV = compute_min_DCF(numpy.hstack(llrTNV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
         actDCF_TNV = compute_act_DCF(numpy.hstack(llrTNV), numpy.hstack(labelMVG), pi, C_fn, C_fp)
         print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_TNV)
         print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_TNV)
-        # #bayes_error_min_act_plot(numpy.hstack(llrMVG), numpy.hstack(labelMVG), 1)
+
+    '''LOGISTIC REGRESSION EVALUATION'''
     def vecxxT(self, x):
         x = x[:, None]
         xxT = x.dot(x.T).reshape(x.size ** 2, order='F')
         return xxT
     def plot_DCF_PCA(self,DTR, LTR,DTE,LTE ,pi, C_fn, C_fp):
         '''Plot PCA LOG'''
-        #lam = numpy.logspace(-5, 1, 30)
         lam =[1e-5,1e-4, 1e-3, 1e-2, 1e-1, 1, 10]
         minDCF_9 = []
         minDCF_8 = []
@@ -120,7 +118,6 @@ class Evaluator:
     def plot_DCF_lamda_prior(self, DTR, LTR, DTE, LTE, C_fn, C_fp, norm=False):
         '''Plot minDCF on different lambda and prior'''
         lam = numpy.logspace(-5, 1, 30)
-        # lam = [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 10]
         minDCF_LR_0_5 = []
         minDCF_LR_0_1 = []
         minDCF_LR_0_9 = []
@@ -147,7 +144,7 @@ class Evaluator:
 
     def plot_minDCF_Z(self, DTR, LTR,DTE,LTE, pi, C_fn, C_fp):
         '''Plot min DCF vs minDCF with z-norm'''
-        #lam = numpy.logspace(-5, 1, 30)
+
         lam = [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 10]
         minDCF_LR = []
         minDCF_LR_Z = []
@@ -167,7 +164,6 @@ class Evaluator:
 
     def plot_minDCF_Z_Q(self, DTR, LTR,DTE,LTE, pi, C_fn, C_fp):
         '''Plot min DCF vs minDCF with z-norm'''
-        #lam = numpy.logspace(-5, 1, 30)
         lam = [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 10]
         minDCF_LR = []
         minDCF_LR_Z = []
@@ -292,13 +288,14 @@ class Evaluator:
         print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_LRQ)
         print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_LRQ)
 
-        #self.plot_DCF_lamda_prior(DTR, LTR,DTE,LTE, C_fn,C_fp)
-        #self.plot_DCF_lamda_prior(DTR, LTR,DTE,LTE, C_fn,C_fp, True)
-        #self.plot_minDCF_Z(DTR,LTR,DTE,LTE,pi,C_fn,C_fp)
-        #self.plot_DCF_PCA(DTR,LTR,DTE,LTE,pi,C_fn,C_fp)
-        #self.plot_minDCF_Z_Q(DTR,LTR,DTE,LTE,pi,C_fn,C_fp)
-        #self.plot_DCF_PCA_Q(DTR, LTR, DTE, LTE, pi, C_fn, C_fp)
+        self.plot_DCF_lamda_prior(DTR, LTR,DTE,LTE, C_fn,C_fp)
+        self.plot_DCF_lamda_prior(DTR, LTR,DTE,LTE, C_fn,C_fp, True)
+        self.plot_minDCF_Z(DTR,LTR,DTE,LTE,pi,C_fn,C_fp)
+        self.plot_DCF_PCA(DTR,LTR,DTE,LTE,pi,C_fn,C_fp)
+        self.plot_minDCF_Z_Q(DTR,LTR,DTE,LTE,pi,C_fn,C_fp)
+        self.plot_DCF_PCA_Q(DTR, LTR, DTE, LTE, pi, C_fn, C_fp)
 
+    '''GMM EVALUATION'''
     def plot_GMM_full(self, DTR, LTR, DTE, LTE,pi, a, p, Cfn, Cfp):
         data = {
             "Non-target K = 1": [],
@@ -410,6 +407,7 @@ class Evaluator:
 
         self.PLT.plot_bar_GMM(data)
 
+    '''SVM EVALUATION'''
     def SVM_evaluation(self, DTE, LTE, DTR, LTR, pi, C_fn, C_fp):
         scores_Lin = []
         scores_Pol = []
@@ -421,46 +419,47 @@ class Evaluator:
         C_arr = numpy.logspace(-5, 1, 15)
         label = LTE
 
-        #scores_Lin = self.svm.predict_SVM_Linear(DTR, LTR, 10, 1, DTE, False, pi)
-        #scores_Pol = self.svm.predict_SVM_Pol(DTR, LTR, 0.1, 10, DTE, 0, 2, False, pi)
+        scores_Lin = self.svm.predict_SVM_Linear(DTR, LTR, 10, 1, DTE, False, pi)
+        scores_Pol = self.svm.predict_SVM_Pol(DTR, LTR, 0.1, 10, DTE, 0, 2, False, pi)
         scores_RBF = self.svm.predict_SVM_RBF(DTR, LTR, 10, 10, DTE, 1e-3, False, pi)
 
-        #minDCF_Lin=compute_min_DCF(numpy.hstack(scores_Lin), numpy.hstack(label), pi, C_fn, C_fp)
-        # actDCF_Lin = compute_act_DCF(numpy.hstack(scores_Lin), numpy.hstack(label), pi, C_fn, C_fp)
-        #print("############Lin###############")
-        #print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_Lin)
-        #minDCF_Pol = compute_min_DCF(numpy.hstack(scores_Pol), numpy.hstack(label), pi, C_fn, C_fp)
-        # actDCF_Pol = compute_act_DCF(numpy.hstack(scores_Pol), numpy.hstack(label), pi, C_fn, C_fp)
-        #print("############Pol###############")
-        #print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_Pol)
-        # minDCF_RBF = compute_min_DCF(numpy.hstack(scores_RBF), numpy.hstack(label), pi, C_fn, C_fp)
-        # actDCF_RBF = compute_act_DCF(numpy.hstack(scores_RBF), numpy.hstack(label), pi, C_fn, C_fp)
-        # print("############RBF###############")
-        # print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_RBF)
+        minDCF_Lin=compute_min_DCF(numpy.hstack(scores_Lin), numpy.hstack(label), pi, C_fn, C_fp)
+        actDCF_Lin = compute_act_DCF(numpy.hstack(scores_Lin), numpy.hstack(label), pi, C_fn, C_fp)
+        print("############Lin###############")
+        print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_Lin)
+        minDCF_Pol = compute_min_DCF(numpy.hstack(scores_Pol), numpy.hstack(label), pi, C_fn, C_fp)
+        actDCF_Pol = compute_act_DCF(numpy.hstack(scores_Pol), numpy.hstack(label), pi, C_fn, C_fp)
+        print("############Pol###############")
+        print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_Pol)
+        minDCF_RBF = compute_min_DCF(numpy.hstack(scores_RBF), numpy.hstack(label), pi, C_fn, C_fp)
+        actDCF_RBF = compute_act_DCF(numpy.hstack(scores_RBF), numpy.hstack(label), pi, C_fn, C_fp)
+        print("############RBF###############")
+        print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_RBF)
 
         for c in C_arr:
             scores_Lin = self.svm.predict_SVM_Pol(DTR, LTR, c, 10, DTE, 0, 2, False, pi)
 
             minDCF_Lin = numpy.hstack((minDCF_Lin,compute_min_DCF(numpy.hstack(scores_Lin), numpy.hstack(label), pi, C_fn, C_fp)))
-            # actDCF_Lin = compute_act_DCF(numpy.hstack(scores_Lin), numpy.hstack(label), pi, C_fn, C_fp)
-            #print("############Lin###############")
-            #print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_Lin)
-            # print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_Lin)
-            # #bayes_error_min_act_plot(numpy.hstack(llrMVG), numpy.hstack(labelMVG), 1)
+            actDCF_Lin = compute_act_DCF(numpy.hstack(scores_Lin), numpy.hstack(label), pi, C_fn, C_fp)
+            print("############Lin###############")
+            print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_Lin)
+            print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_Lin)
+            #bayes_error_min_act_plot(numpy.hstack(llrMVG), numpy.hstack(labelMVG), 1)
 
-            # minDCF_Pol = compute_min_DCF(numpy.hstack(scores_Pol), numpy.hstack(label), pi, C_fn, C_fp)
-            # actDCF_Pol = compute_act_DCF(numpy.hstack(scores_Pol), numpy.hstack(label), pi, C_fn, C_fp)
-            # print("############Pol###############")
-            # print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_Pol)
-            # print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_Pol)
-            # #bayes_error_min_act_plot(numpy.hstack(llrMVG), numpy.hstack(labelMVG), 1)
+            minDCF_Pol = compute_min_DCF(numpy.hstack(scores_Pol), numpy.hstack(label), pi, C_fn, C_fp)
+            actDCF_Pol = compute_act_DCF(numpy.hstack(scores_Pol), numpy.hstack(label), pi, C_fn, C_fp)
+            print("############Pol###############")
+            print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_Pol)
+            print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_Pol)
 
-            # minDCF_RBF = compute_min_DCF(numpy.hstack(scores_RBF), numpy.hstack(label), pi, C_fn, C_fp)
-            # actDCF_RBF = compute_act_DCF(numpy.hstack(scores_RBF), numpy.hstack(label), pi, C_fn, C_fp)
-            # print("############RBF###############")
-            # print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_RBF)
-            # print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_RBF)
-            # #bayes_error_min_act_plot(numpy.hstack(llrMVG), numpy.hstack(labelMVG), 1)
+
+            minDCF_RBF = compute_min_DCF(numpy.hstack(scores_RBF), numpy.hstack(label), pi, C_fn, C_fp)
+            actDCF_RBF = compute_act_DCF(numpy.hstack(scores_RBF), numpy.hstack(label), pi, C_fn, C_fp)
+            print("############RBF###############")
+            print(f'- with prior = {pi} -> minDCF = %.3f' % minDCF_RBF)
+            print(f'- with prior = {pi} -> actDCF = %.3f' % actDCF_RBF)
+
+
             scores_Pol = self.svm.predict_SVM_Pol(self.dimRed.PCA(DTR.T, 7), LTR, c, 10, self.dimRed.PCA_DTE(DTR.T, 7, DTE.T), 0, 2, False, pi)
             minDCF_Pol = numpy.hstack((minDCF_Pol,compute_min_DCF(numpy.hstack(scores_Pol), numpy.hstack(label), pi, C_fn, C_fp)))
             D, Dte = znorm(DTR, DTE)
@@ -471,33 +470,33 @@ class Evaluator:
     def GMM_evaluation(self, DTE, LTE, DTR, LTR, pi, Cfn, Cfp, comp, compNT, a, p):
         DTR = DTR.T
         DTE = DTE.T
-        #labelGMM = numpy.append(labelGMM, Lte, axis=0)
+
         llr_GMM_Full = self.GMM.predict_GMM_full(DTR, LTR, DTE, comp, compNT, a, p)
         llr_GMM_Naive = self.GMM.predict_GMM_naive(DTR, LTR, DTE, comp, compNT, a, p)
         llr_GMM_Tied = self.GMM.predict_GMM_TiedCov(DTR, LTR, DTE, comp, compNT, a, p)
         llr_GMM_TiedNaive = self.GMM.predict_GMM_TiedNaive(DTR, LTR, DTE, comp, compNT, a, p)
 
 
-        # print("##########GMM FULL############")
-        # llr = numpy.hstack(llr_GMM_Full)
-        # scores_tot = compute_min_DCF(llr, LTE, pi, Cfn, Cfp)
-        # print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_tot))
-        # rettt = compute_act_DCF(llr, numpy.hstack(LTE), pi, Cfn, Cfp, None)
-        # print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
+        print("##########GMM FULL############")
+        llr = numpy.hstack(llr_GMM_Full)
+        scores_tot = compute_min_DCF(llr, LTE, pi, Cfn, Cfp)
+        print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_tot))
+        rettt = compute_act_DCF(llr, numpy.hstack(LTE), pi, Cfn, Cfp, None)
+        print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
 
-        # print("##########GMM NAIVE##########")
-        # llrN = numpy.hstack(llr_GMM_Naive)
-        # scores_totN = compute_min_DCF(llrN, LTE, pi, Cfn, Cfp)
-        # print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_totN))
-        # rettt = compute_act_DCF(llrN, numpy.hstack(LTE), pi, Cfn, Cfp, None)
-        # print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
+        print("##########GMM NAIVE##########")
+        llrN = numpy.hstack(llr_GMM_Naive)
+        scores_totN = compute_min_DCF(llrN, LTE, pi, Cfn, Cfp)
+        print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_totN))
+        rettt = compute_act_DCF(llrN, numpy.hstack(LTE), pi, Cfn, Cfp, None)
+        print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
 
-        # print("##########GMM TIED##########")
-        # llrT = numpy.hstack(llr_GMM_Tied)
-        # scores_totT = compute_min_DCF(llrT, LTE, pi, Cfn, Cfp)
-        # print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_totT))
-        # rettt = compute_act_DCF(llrT, numpy.hstack(LTE), pi, Cfn, Cfp, None)
-        # print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
+        print("##########GMM TIED##########")
+        llrT = numpy.hstack(llr_GMM_Tied)
+        scores_totT = compute_min_DCF(llrT, LTE, pi, Cfn, Cfp)
+        print(f'- components  %1i | with prior = {pi} -> minDCF = %.3f ' % (comp, scores_totT))
+        rettt = compute_act_DCF(llrT, numpy.hstack(LTE), pi, Cfn, Cfp, None)
+        print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
 
         print("##########GMM TIED NAIVE##########")
         llrTN = numpy.hstack(llr_GMM_TiedNaive)
@@ -506,10 +505,10 @@ class Evaluator:
         rettt = compute_act_DCF(llrTN, numpy.hstack(LTE), pi, Cfn, Cfp, None)
         print(f'- with prior = {pi} -> actDCF = %.3f' % rettt)
 
-        #self.plot_GMM_full(DTR,LTR,DTE,LTE, pi,a,p,Cfn,Cfp)
-        #self.plot_GMM_naive(DTR,LTR,DTE,LTE, pi,a,p,Cfn,Cfp)
-        #self.plot_GMM_tied(DTR,LTR,DTE,LTE, pi,a,p,Cfn,Cfp)
-        #self.plot_GMM_tiedNaive(DTR,LTR,DTE,LTE, pi,a,p,Cfn,Cfp)
+        self.plot_GMM_full(DTR,LTR,DTE,LTE, pi,a,p,Cfn,Cfp)
+        self.plot_GMM_naive(DTR,LTR,DTE,LTE, pi,a,p,Cfn,Cfp)
+        self.plot_GMM_tied(DTR,LTR,DTE,LTE, pi,a,p,Cfn,Cfp)
+        self.plot_GMM_tiedNaive(DTR,LTR,DTE,LTE, pi,a,p,Cfn,Cfp)
 
     def plot_minDCF_cal_score(self, DTR, LTR, DTE,LTE, pi):
         # MVG
@@ -537,7 +536,7 @@ class Evaluator:
         bayes_error_min_act_plot(numpy.hstack(lrQ), LTE, 1)
         _w, _b = self.LR.compute_scores_param(numpy.hstack(lrQ), LTE, 0.001, 0.7)
 
-        # cal_score = numpy.dot(_w.T,numpy.hstack(lrQ).reshape(1, numpy.hstack(lrQ).shape[0])) #- numpy.log(pi/(1-pi))
+
         cal_score_lr = _w * lrQ + _b - numpy.log(pi / (1 - pi))
         bayes_error_min_act_plot(numpy.hstack(cal_score_lr), LTE, 1)
         # svm
@@ -549,7 +548,7 @@ class Evaluator:
         cal_score_RBF = _w * scoresRBF_append + _b - numpy.log(pi / (1 - pi))
         bayes_error_min_act_plot(numpy.hstack(cal_score_RBF), LTE, 1)
         # gmm
-        # _, llr_GMM_Naive, _, _, llr_GMM_labels = self.kfold_GMM(5, DTR, LTR, 1, 8, 0.1, 0.01)
+
         DP_71 = self.dimRed.PCA(DTR.T, 7)
         DPE_71 = self.dimRed.PCA_DTE(DTR.T, 7, DTE.T)
         llr_GMM_Naive = self.GMM.predict_GMM_naive(DP_71, LTR, DPE_71, 1, 16, 0.1, 0.01)
@@ -564,6 +563,10 @@ class Evaluator:
 
     def plot_ROC(self, DTR, LTR, DTE, LTE, pi):
         #MVG
+
+        DP_8 = self.dimRed.PCA(DTR, 8)
+        llrMVG = self.MVG.predict_MVG(DP_8, LTR, DTE)
+
         DTR = DTR.T
         DTE = DTE.T
         DP_8 = self.dimRed.PCA(DTR.T, 8)

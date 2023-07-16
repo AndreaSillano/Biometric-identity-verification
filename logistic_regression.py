@@ -25,25 +25,6 @@ class LogisticRegression:
         x, f, d = scipy.optimize.fmin_l_bfgs_b(self.logreg_obj, v, approx_grad=True, args=(D, L, l))
         w, b = x[0:-1], x[-1]
         s = numpy.dot(numpy.array(w).T, DTE) + b
-
-        # my_pred = []
-        # correct = 0
-        # for p in s:
-        #     if p > 0:
-        #         my_pred.append(1)
-        #     else:
-        #         my_pred.append(0)
-        #
-        # for i in range(0, len(LTE)):
-        #     if LTE[i] == my_pred[i]:
-        #         correct += 1
-        #
-        # accuracy = correct / len(LTE)
-        # err = (1 - accuracy)*100
-        # # print(my_pred)
-        # # print(LTE)
-        # print("ACCURACY: ", accuracy*100, "Lambda: ", l)
-        # print("ERROR: ", err, "%")
         return s
 
     def logreg_obj_weighted(self, v, DTR, LTR, l, pi):
@@ -81,10 +62,8 @@ class LogisticRegression:
 
 
     def compute_scores_param(self,scores, labels,l, pi):
-        #scores = vrow(scores)
-        scores_70 = numpy.array([scores[:int(len(scores) * 0.6)]])
-        scores_30 = numpy.array([scores[int(len(scores) * 0.6):]])
-        labels_70 = labels[:int(len(labels) * 0.6)]
-        #labels_30 = labels[int(len(labels) * 0.7):]
-        _, _w,_b = self.calibration_score_weighted_LR(scores_70, labels_70, scores_30, l, pi)
+        scores_60 = numpy.array([scores[:int(len(scores) * 0.6)]])
+        scores_40 = numpy.array([scores[int(len(scores) * 0.6):]])
+        labels_60 = labels[:int(len(labels) * 0.6)]
+        _, _w,_b = self.calibration_score_weighted_LR(scores_60, labels_60, scores_40, l, pi)
         return _w, _b

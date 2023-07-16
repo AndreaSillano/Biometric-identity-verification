@@ -17,7 +17,6 @@ def empirical_covariance(D, mu):
     n = numpy.shape(D)[1]
     DC = D - vcol(mu)
     C = 1 / n * numpy.dot(DC, numpy.transpose(DC))
-   # C = computeCovDiag(D,mu)
     return C
 def znorm(DTR, DTE):
     mu_DTR = vcol(DTR.mean(1))
@@ -57,11 +56,6 @@ def load(name):
 
 
     numpyArr = numpy.array(Dlist, dtype=float)
-    #DTR = numpy.hstack(numpy.array(dList, dtype=numpy.float32))
-    #DTR = numpy.hstack(numpy.array(dList, dtype=numpy.float32))
-    #numpyArr = numpyArr.reshape((len(Dlist),10))
-    #finalArray = numpyArr.transpose()
-    #print(numpyArr,"\n\n########\n\n")
     labelpy = numpy.array(listLabel, dtype=int)
     D, L = shuffle_dataset(numpyArr.T, labelpy)
     return D.T, L
@@ -75,8 +69,6 @@ def bayes_error_plot(pArray, scores, labels, minCost=False, th=None):
         else:
             y.append(compute_act_DCF(scores, labels, pi, 1, 1, th))
     return numpy.array(y)
-
-
 
 
 def bayes_error_min_act_plot(D, LTE,  ylim):

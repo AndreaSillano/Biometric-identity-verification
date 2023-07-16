@@ -5,7 +5,6 @@ class GMM:
         S = numpy.zeros((len(gmm), D.shape[1]))
 
         for g in range(len(gmm)):
-            # print (w,mu,C)
             (w, mu, C) = gmm[g]
             S[g, :] = self.logpdf_GAU_ND(D, mu, C) + numpy.log(w)
 
@@ -23,8 +22,8 @@ class GMM:
     def LBG_FULL(self,DTR, alpha,components, psi):
         U, s, _ = numpy.linalg.svd(empirical_covariance(DTR, empirical_mean(DTR)))
         s[s < psi] = psi
-        covNew = numpy.dot(U, vcol(s) * U.T)
-        GMM = [(1, empirical_mean(DTR), covNew)]
+        cov_new = numpy.dot(U, vcol(s) * U.T)
+        GMM = [(1, empirical_mean(DTR), cov_new)]
 
         while len(GMM) <= components:
             if len(GMM) != 1:
@@ -32,23 +31,22 @@ class GMM:
             if len(GMM) == components:
                 break
 
-            gmmNew = []
+            gmm_new = []
             for i in range(len(GMM)):
-                # nuove componenti
                 (w, mu, sigma) = GMM[i]
                 U, s, vh = numpy.linalg.svd(sigma)
                 d = U[:, 0:1] * s[0] ** 0.5 * alpha
-                gmmNew.append((w / 2, mu + d, sigma))
-                gmmNew.append((w / 2, mu - d, sigma))
-            GMM = gmmNew
+                gmm_new.append((w / 2, mu + d, sigma))
+                gmm_new.append((w / 2, mu - d, sigma))
+            GMM = gmm_new
 
         return GMM
 
     def LBG_NAIVE(self,DTR, alpha,components, psi):
         U, s, _ = numpy.linalg.svd(empirical_covariance(DTR, empirical_mean(DTR)))
         s[s < psi] = psi
-        covNew = numpy.dot(U, vcol(s) * U.T)
-        GMM = [(1, empirical_mean(DTR), covNew)]
+        cov_new = numpy.dot(U, vcol(s) * U.T)
+        GMM = [(1, empirical_mean(DTR), cov_new)]
 
         while len(GMM) <= components:
             if len(GMM) != 1:
@@ -56,23 +54,22 @@ class GMM:
             if len(GMM) == components:
                 break
 
-            gmmNew = []
+            gmm_new = []
             for i in range(len(GMM)):
-                # nuove componenti
                 (w, mu, sigma) = GMM[i]
                 U, s, vh = numpy.linalg.svd(sigma)
                 d = U[:, 0:1] * s[0] ** 0.5 * alpha
-                gmmNew.append((w / 2, mu + d, sigma))
-                gmmNew.append((w / 2, mu - d, sigma))
-            GMM = gmmNew
+                gmm_new.append((w / 2, mu + d, sigma))
+                gmm_new.append((w / 2, mu - d, sigma))
+            GMM = gmm_new
 
         return GMM
 
     def LBG_TIED(self,DTR, alpha,components, psi):
         U, s, _ = numpy.linalg.svd(empirical_covariance(DTR, empirical_mean(DTR)))
         s[s < psi] = psi
-        covNew = numpy.dot(U, vcol(s) * U.T)
-        GMM = [(1, empirical_mean(DTR), covNew)]
+        cov_new = numpy.dot(U, vcol(s) * U.T)
+        GMM = [(1, empirical_mean(DTR), cov_new)]
 
         while len(GMM) <= components:
             if len(GMM) != 1:
@@ -80,23 +77,22 @@ class GMM:
             if len(GMM) == components:
                 break
 
-            gmmNew = []
+            gmm_new = []
             for i in range(len(GMM)):
-                # nuove componenti
                 (w, mu, sigma) = GMM[i]
                 U, s, vh = numpy.linalg.svd(sigma)
                 d = U[:, 0:1] * s[0] ** 0.5 * alpha
-                gmmNew.append((w / 2, mu + d, sigma))
-                gmmNew.append((w / 2, mu - d, sigma))
-            GMM = gmmNew
+                gmm_new.append((w / 2, mu + d, sigma))
+                gmm_new.append((w / 2, mu - d, sigma))
+            GMM = gmm_new
 
         return GMM
 
     def LBG_TIEDNAIVE(self,DTR, alpha,components, psi):
         U, s, _ = numpy.linalg.svd(empirical_covariance(DTR, empirical_mean(DTR)))
         s[s < psi] = psi
-        covNew = numpy.dot(U, vcol(s) * U.T)
-        GMM = [(1, empirical_mean(DTR), covNew)]
+        cov_new = numpy.dot(U, vcol(s) * U.T)
+        GMM = [(1, empirical_mean(DTR), cov_new)]
 
         while len(GMM) <= components:
             if len(GMM) != 1:
@@ -104,15 +100,14 @@ class GMM:
             if len(GMM) == components:
                 break
 
-            gmmNew = []
+            gmm_new = []
             for i in range(len(GMM)):
-                # nuove componenti
                 (w, mu, sigma) = GMM[i]
                 U, s, vh = numpy.linalg.svd(sigma)
                 d = U[:, 0:1] * s[0] ** 0.5 * alpha
-                gmmNew.append((w / 2, mu + d, sigma))
-                gmmNew.append((w / 2, mu - d, sigma))
-            GMM = gmmNew
+                gmm_new.append((w / 2, mu + d, sigma))
+                gmm_new.append((w / 2, mu - d, sigma))
+            GMM = gmm_new
 
         return GMM
 
@@ -129,24 +124,17 @@ class GMM:
 
 
     def GMM_EM(self, D, gmm, psi=0.01):
-        '''
-        EM algorithm for GMM full covariance
-        It estimates the parameters of a GMM that maximize the ll for
-        a training set X
-        If psi is given it's used for constraining the eigenvalues of the
-        covariance matrices to be larger or equal to psi
-        '''
-        llNew = None
-        llOld = None
+        ll_new = None
+        ll_old = None
         G = len(gmm)
         N = D.shape[1]
 
-        while llOld is None or llNew - llOld > 1e-6:
-            llOld = llNew
+        while ll_old is None or ll_new - ll_old > 1e-6:
+            ll_old = ll_new
             SJ, SM = self.logpdf_GMM(D, gmm)
-            llNew = SM.sum() / N
+            ll_new = SM.sum() / N
             P = numpy.exp(SJ - SM)
-            gmmNew = []
+            gmm_new = []
             for g in range(G):
                 gamma = P[g, :]
                 Z = gamma.sum()
@@ -158,8 +146,8 @@ class GMM:
                 U, s, _ = numpy.linalg.svd(Sigma)
                 s[s < psi] = psi
                 Sigma = numpy.dot(U, vcol(s) * U.T)
-                gmmNew.append((w, mu, Sigma))
-            gmm = gmmNew
+                gmm_new.append((w, mu, Sigma))
+            gmm = gmm_new
         return gmm
 
     def predict_GMM_naive(self, DTR, LTR, Dte, componentsT, componentsNT, a, p):
@@ -174,26 +162,18 @@ class GMM:
         return llr1 - llr0
 
     def GMM_EM_NAIVE(self,D, gmm, psi=0.01):
-        '''
-            EM algorithm for GMM diagonal covariance
-            It estimates the parameters of a GMM that maximize the ll for
-            a training set X
-            If psi is given it's used for constraining the eigenvalues of the
-            covariance matrices to be larger or equal to psi
-            '''
-        llNew = None
-        llOld = None
+        ll_new = None
+        ll_old = None
         G = len(gmm)
         N = D.shape[1]
-        while llOld is None or llNew - llOld > 1e-6:
-            llOld = llNew
+        while ll_old is None or ll_new - ll_old > 1e-6:
+            ll_old = ll_new
             SJ, SM = self.logpdf_GMM(D, gmm)
-            llNew = SM.sum() / N
+            ll_new = SM.sum() / N
             P = numpy.exp(SJ - SM)
 
-            gmmNew = []
+            gmm_new = []
             for g in range(G):
-                # m step
                 gamma = P[g, :]
                 Z = gamma.sum()
                 F = (vrow(gamma) * D).sum(1)
@@ -205,8 +185,8 @@ class GMM:
                 U, s, _ = numpy.linalg.svd(Sigma)
                 s[s < psi] = psi
                 sigma = numpy.dot(U, vcol(s) * U.T)
-                gmmNew.append((w, mu, sigma))
-            gmm = gmmNew
+                gmm_new.append((w, mu, sigma))
+            gmm = gmm_new
         return gmm
 
     def predict_GMM_TiedCov(self, DTR, LTR, Dte, componentsT, componentsNT, a, p):
@@ -221,24 +201,18 @@ class GMM:
         return llr1 - llr0
 
     def GMM_EM_TIED(self, D, gmm, psi=0.01):
-        '''
-        EM algorithm for GMM tied full covariance
-        It estimates the parameters of a GMM that maximize the ll for
-        a training set X
-        If psi is given it's used for constraining the eigenvalues of the
-        covariance matrices to be larger or equal to psi
-        '''
-        llNew = None
-        llOld = None
+
+        ll_new = None
+        ll_old = None
         G = len(gmm)
         N = D.shape[1]
         sigma_array = []
-        while llOld is None or llNew - llOld > 1e-6:
-            llOld = llNew
+        while ll_old is None or ll_new - ll_old > 1e-6:
+            ll_old = ll_new
             SJ, SM = self.logpdf_GMM(D, gmm)
-            llNew = SM.sum() / N
+            ll_new = SM.sum() / N
             P = numpy.exp(SJ - SM)
-            gmmNew = []
+            gmm_new = []
 
             sigmaTied = numpy.zeros((D.shape[0], D.shape[0]))
             for g in range(G):
@@ -251,20 +225,18 @@ class GMM:
                 mu = vcol(F / Z)
                 Sigma = S / Z - numpy.dot(mu, mu.T)
                 sigmaTied += Z * Sigma
-                gmmNew.append((w, mu))
-
-            # calculate tied covariance
-            gmm = gmmNew
+                gmm_new.append((w, mu))
+            gmm = gmm_new
             sigmaTied /= N
             U, s, _ = numpy.linalg.svd(sigmaTied)
             s[s < psi] = psi
             sigmaTied = numpy.dot(U, vcol(s) * U.T)
 
-            gmmNew = []
+            gmm_new = []
             for g in range(G):
                 (w, mu) = gmm[g]
-                gmmNew.append((w, mu, sigmaTied))
-            gmm = gmmNew
+                gmm_new.append((w, mu, sigmaTied))
+            gmm = gmm_new
         return gmm
 
     def predict_GMM_TiedNaive(self, DTR, LTR, Dte, componentsT, componentsNT, a, p):
@@ -279,47 +251,34 @@ class GMM:
         return llr1 - llr0
 
     def GMM_EM_TIEDNAIVE(self,D, gmm, psi=0.01):  # X -> ev
-        '''
-        EM algorithm for GMM tied diagonal covariance
-        It estimates the parameters of a GMM that maximize the ll for
-        a training set X
-        If psi is given it's used for constraining the eigenvalues of the
-        covariance matrices to be larger or equal to psi
-        '''
-        llNew = None
-        llOld = None
+
+        ll_new = None
+        ll_old = None
         G = len(gmm)
         N = D.shape[1]
-        sigma_array = []
-        while llOld is None or llNew - llOld > 1e-6:
-            llOld = llNew
+        while ll_old is None or ll_new - ll_old > 1e-6:
+            ll_old = ll_new
             SJ = numpy.zeros((G, N))
             for g in range(G):
                 SJ[g, :] = self.logpdf_GAU_ND(
                     D, gmm[g][1], gmm[g][2]) + numpy.log(gmm[g][0])
             SM = scipy.special.logsumexp(SJ, axis=0)
-            llNew = SM.sum() / N
+            ll_new = SM.sum() / N
             P = numpy.exp(SJ - SM)
-            gmmNew = []
+            gmm_new = []
             sigmaTied = numpy.zeros((D.shape[0], D.shape[0]))
             for g in range(G):
-                # m step
                 gamma = P[g, :]
                 Z = gamma.sum()
                 F = (vrow(gamma) * D).sum(1)
                 S = numpy.dot(D, (vrow(gamma) * D).T)
                 w = Z / N
                 mu = vcol(F / Z)
-                # Sigma = S/Z - numpy.dot(mu, mu.T)
-                # Sigma = Sigma * numpy.eye(Sigma.shape[0])
-                # Sigma = Sigma * Z
-                # gmmNew.append((w, mu, Sigma))
                 sigma = S / Z - numpy.dot(mu, mu.T)
                 sigmaTied += Z * sigma
-                gmmNew.append((w, mu))
+                gmm_new.append((w, mu))
 
-                # calculate tied covariance
-            gmm = gmmNew
+            gmm = gmm_new
             sigmaTied /= N
             sigmaTied *= numpy.eye(sigma.shape[0])
             U, s, _ = numpy.linalg.svd(sigmaTied)
@@ -332,6 +291,5 @@ class GMM:
                 newGmm.append((w, mu, sigmaTied))
 
             gmm = newGmm
-            # print(llNew,'llnew') #increase - if decrease problem
-        # print(llNew-llOld,'llnew-llold')
+
         return gmm

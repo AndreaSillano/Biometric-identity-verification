@@ -6,8 +6,8 @@ class Plotter:
 
     def plot_bar_GMM(self, data):
         K_T = ["1","2", "4"]
-        x = numpy.arange(len(K_T))  # the label locations
-        width = 0.10  # the width of the bars
+        x = numpy.arange(len(K_T))
+        width = 0.10
         multiplier = 0
         print(data)
         for K, val in data.items():
@@ -15,8 +15,6 @@ class Plotter:
             rects = plt.bar(x + offset, val, width, label=K)
             plt.bar_label(rects, padding=3)
             multiplier += 1
-
-        # Add some text for labels, title and custom x-axis tick labels, etc.
         plt.ylabel('minDCF')
         plt.xlabel('K-Target')
         plt.xticks(x + width, K_T)
@@ -89,21 +87,17 @@ class Plotter:
 
         plt.rcParams['axes.linewidth'] = 0.2
 
-        # Creazione della heatmap
         fig, ax = plt.subplots()
         heatmap = ax.imshow(numpy.abs(corr), cmap=cmap, aspect='equal')
 
-        # Personalizzazioni dell'asse x e y
         ax.set_xticks(numpy.arange(corr.shape[1]))
         ax.set_yticks(numpy.arange(corr.shape[0]))
         ax.set_xticklabels(numpy.arange(corr.shape[1]))
         ax.set_yticklabels(numpy.arange(corr.shape[0]))
         ax.tick_params(axis='both', which='both', length=0)
 
-        # Aggiunta della barra dei colori
         cbar = plt.colorbar(heatmap)
 
-        # Mostra il grafico
         plt.show()
         fig = heatmap.get_figure()
         fig.savefig("./images/" + title + ".png")
