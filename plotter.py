@@ -252,7 +252,7 @@ class Plotter:
             conf = confusion_matrix_binary(pred_label, LTR3)
             TPR[idx] = conf[1, 1] / (conf[1, 1] + conf[0, 1])
             FPR[idx] = conf[1, 0] / (conf[1, 0] + conf[0, 0])
-        plt.plot(FPR, TPR, label='RBF SVM', color='y')
+        plt.plot(FPR, TPR, label='SVM RBF PCA 7', color='y')
 
         thresholds = numpy.array(fourthModel)
         thresholds.sort()

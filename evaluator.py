@@ -580,7 +580,7 @@ class Evaluator:
         lrQ = self.LR.predict_quad_Logistic_Regression(phi_7, LTR, phi_DTE_7, 1e-4, pi)
         #minDCF_LRQ = compute_min_DCF(numpy.hstack(lrQ), numpy.hstack(labelLR), pi, 1, 10)
         #svm rbf
-        lRBF = self.svm.predict_SVM_RBF(DTR, LTR, 0.1, 10, DTE, 1e-3, False, pi)
+        lRBF = self.svm.predict_SVM_RBF(DP_7, LTR, 0.1, 10, DPE_7, 1e-3, False, pi)
         #minDCF_RBF = compute_min_DCF(numpy.hstack(lRBF), numpy.hstack(labelRBF), pi, 1, 10)
         #gmm naive
         DP_71 = self.dimRed.PCA(DTR.T, 7)
