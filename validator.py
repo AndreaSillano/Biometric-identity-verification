@@ -464,7 +464,7 @@ class Validation:
         K_arr = [0.1, 1.0, 10.0]
         C_arr = [0.01, 0.1, 1.0, 10.0]
         C_arr = [0.1, 1.0, 10.0]
-        self.SVM_score_calibration(DTR, LTR, K_arr, C_arr, pi, Cfn, Cfp)
+        self.SVM_score_calibration(DTR, LTR, K_arr, C_arr, pi, C_fn, C_fp)
 
         self.plot_DCF_SVM(DTR, LTR, C_fn, C_fp, K, C, balanced)
 
